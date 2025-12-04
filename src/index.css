@@ -2,95 +2,120 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Nyay Saathi Design System */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Colors */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary Blue - #2563EB */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary Purple - #7C3AED */
+    --secondary: 263 70% 58%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive/Error - #EF4444 */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Success - #10B981 */
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
+    /* Warning - #F59E0B */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 0%;
 
-    --sidebar-background: 0 0% 98%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --radius: 0.75rem;
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Voice Button States */
+    --voice-idle: 217 91% 60%;
+    --voice-recording: 0 84% 60%;
+    --voice-processing: 38 92% 50%;
+    --voice-responding: 160 84% 39%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* Glassmorphism */
+    --glass-bg: 0 0% 100% / 0.7;
+    --glass-border: 0 0% 100% / 0.2;
+    --glass-blur: 12px;
 
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar */
+    --sidebar-background: 210 20% 98%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 217 91% 60%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222 47% 6%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 222 47% 9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222 47% 9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 263 70% 58%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 217 33% 17%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 0%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 217 91% 60%;
+
+    --glass-bg: 222 47% 9% / 0.8;
+    --glass-border: 0 0% 100% / 0.1;
+
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
@@ -100,6 +125,127 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Language-specific font families */
+  [lang="hi"], .font-hindi { font-family: 'Noto Sans Devanagari', sans-serif; }
+  [lang="bn"], .font-bengali { font-family: 'Noto Sans Bengali', sans-serif; }
+  [lang="ta"], .font-tamil { font-family: 'Noto Sans Tamil', sans-serif; }
+  [lang="te"], .font-telugu { font-family: 'Noto Sans Telugu', sans-serif; }
+  [lang="mr"], .font-marathi { font-family: 'Noto Sans Devanagari', sans-serif; }
+  [lang="gu"], .font-gujarati { font-family: 'Noto Sans Gujarati', sans-serif; }
+  [lang="kn"], .font-kannada { font-family: 'Noto Sans Kannada', sans-serif; }
+  [lang="ml"], .font-malayalam { font-family: 'Noto Sans Malayalam', sans-serif; }
+  [lang="pa"], .font-punjabi { font-family: 'Noto Sans Gurmukhi', sans-serif; }
+  [lang="or"], .font-odia { font-family: 'Noto Sans Oriya', sans-serif; }
+  [lang="ur"], .font-urdu { font-family: 'Noto Nastaliq Urdu', sans-serif; }
+}
+
+@layer components {
+  /* Glassmorphism Card */
+  .glass-card {
+    @apply bg-card/70 backdrop-blur-md border border-border/20 shadow-lg;
+  }
+
+  /* Voice Button Base */
+  .voice-button {
+    @apply relative rounded-full transition-all duration-300 ease-out;
+    @apply flex items-center justify-center;
+    @apply shadow-2xl hover:shadow-3xl;
+  }
+
+  .voice-button-idle {
+    @apply bg-primary text-primary-foreground;
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+  }
+
+  .voice-button-recording {
+    @apply bg-destructive text-destructive-foreground;
+    animation: pulse-recording 1.5s ease-in-out infinite;
+  }
+
+  .voice-button-processing {
+    @apply bg-warning text-warning-foreground;
+    animation: spin-slow 2s linear infinite;
+  }
+
+  .voice-button-responding {
+    @apply bg-success text-success-foreground;
+    animation: pulse-responding 1s ease-in-out infinite;
+  }
+
+  /* Emergency Banner */
+  .emergency-banner {
+    @apply bg-destructive/10 border border-destructive/30 text-destructive;
+    @apply px-4 py-2 rounded-lg flex items-center gap-2;
   }
 }
+
+@layer utilities {
+  /* RTL Support */
+  .rtl {
+    direction: rtl;
+    text-align: right;
+  }
+
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Smooth transitions */
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+}
+
+/* Animations */
+@keyframes pulse-recording {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--destructive) / 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 20px hsl(var(--destructive) / 0);
+  }
+}
+
+@keyframes pulse-responding {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--success) / 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 15px hsl(var(--success) / 0);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Waveform animation for recording */
+@keyframes waveform {
+  0%, 100% { height: 20%; }
+  50% { height: 100%; }
+}
+
+.waveform-bar {
+  @apply bg-current;
+  animation: waveform 0.5s ease-in-out infinite;
+}
+
+.waveform-bar:nth-child(1) { animation-delay: 0s; }
+.waveform-bar:nth-child(2) { animation-delay: 0.1s; }
+.waveform-bar:nth-child(3) { animation-delay: 0.2s; }
+.waveform-bar:nth-child(4) { animation-delay: 0.3s; }
+.waveform-bar:nth-child(5) { animation-delay: 0.4s; }
