@@ -9,6 +9,7 @@ import { ConsentProvider } from "@/contexts/ConsentContext";
 import Landing from "./pages/Landing";
 import Chat from "./pages/Chat";
 import About from "./pages/About";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
                 <Route path="/" element={<Landing />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/admin" element={<Admin />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
