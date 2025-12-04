@@ -7,6 +7,8 @@ import EmergencyModal from '@/components/modals/EmergencyModal';
 import AdminLoginModal from '@/components/modals/AdminLoginModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useConsent } from '@/contexts/ConsentContext';
+import { useConversation } from '@/hooks/useConversation';
+import { useToast } from '@/hooks/use-toast';
 
 export type VoiceState = 'idle' | 'recording' | 'processing' | 'responding';
 export type InputMode = 'voice' | 'text';
@@ -23,17 +25,23 @@ const Chat: React.FC = () => {
   const navigate = useNavigate();
   const { config } = useLanguage();
   const { allConsented } = useConsent();
+  const { toast } = useToast();
 
   // State
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [inputMode, setInputMode] = useState<InputMode>('voice');
-  const [messages, setMessages] = useState<Message[]>([]);
   const [transcription, setTranscription] = useState('');
   const [isConnected] = useState(true);
   
   // Modal states
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
+
+  // Use conversation hook for real API integration
+  const { messages, isLoading, error, sendMessage, clearConversation, setMessages } = useConversation({
+    language: config.code,
+    locationState: undefined // Could be enhanced with geolocation
+  });
 
   // Redirect if not consented
   useEffect(() => {
@@ -42,36 +50,35 @@ const Chat: React.FC = () => {
     }
   }, [allConsented, navigate]);
 
+  // Show error toast
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error,
+        variant: 'destructive'
+      });
+    }
+  }, [error, toast]);
+
   const handleStartFresh = () => {
-    setMessages([]);
+    clearConversation();
     setTranscription('');
     setVoiceState('idle');
   };
 
-  const handleSendMessage = (content: string) => {
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, userMessage]);
-    
-    // Simulate AI response
+  const handleSendMessage = async (content: string) => {
     setVoiceState('processing');
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: `${config.disclaimer}\n\nThank you for your question about "${content.slice(0, 50)}...". I'll help you understand the legal aspects. This is a demo response - the actual AI integration will provide relevant legal information based on Indian laws.`,
-        timestamp: new Date(),
-        citations: [
-          { act: 'Indian Penal Code', section: '420', text: 'Cheating and dishonestly inducing delivery of property' }
-        ],
-      };
-      setMessages(prev => [...prev, assistantMessage]);
+    
+    const response = await sendMessage(content);
+    
+    if (response) {
+      setVoiceState('responding');
+      // Reset to idle after a short delay
+      setTimeout(() => setVoiceState('idle'), 500);
+    } else {
       setVoiceState('idle');
-    }, 2000);
+    }
   };
 
   return (
@@ -92,6 +99,7 @@ const Chat: React.FC = () => {
           setTranscription={setTranscription}
           messages={messages}
           onSendMessage={handleSendMessage}
+          isLoading={isLoading}
         />
       </div>
 

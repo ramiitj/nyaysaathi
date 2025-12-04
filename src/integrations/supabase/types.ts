@@ -367,6 +367,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      search_documents: {
+        Args: { match_count?: number; query_text: string }
+        Returns: {
+          content: string
+          id: string
+          metadata: Json
+          similarity: number
+        }[]
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
