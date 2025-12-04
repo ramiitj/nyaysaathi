@@ -1,5 +1,20 @@
 export type LanguageCode = 'HI' | 'EN' | 'BN' | 'TA' | 'TE' | 'MR' | 'GU' | 'KN' | 'ML' | 'PA' | 'OR' | 'UR';
 
+export interface OnboardingTranslations {
+  talkToMe: string;
+  talkToMeDesc: string;
+  switchToText: string;
+  switchToTextDesc: string;
+  uploadDocs: string;
+  uploadDocsDesc: string;
+  listenResponses: string;
+  listenResponsesDesc: string;
+  skip: string;
+  next: string;
+  getStarted: string;
+  stepOf: string;
+}
+
 export interface LanguageConfig {
   code: LanguageCode;
   name: string;
@@ -35,6 +50,7 @@ export interface LanguageConfig {
     listen: string;
     stop: string;
     references: string;
+    onboarding: OnboardingTranslations;
   };
 }
 
@@ -74,6 +90,20 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'सुनें',
       stop: 'रोकें',
       references: 'संदर्भ',
+      onboarding: {
+        talkToMe: 'मुझसे बात करो',
+        talkToMeDesc: 'बस माइक को टैप करें और अपना सवाल पूछें। एक दोस्त की तरह स्वाभाविक रूप से बोलें!',
+        switchToText: 'टेक्स्ट पर स्विच करें',
+        switchToTextDesc: 'टाइप करना पसंद है? नीचे की बार में स्विच का उपयोग करके टेक्स्ट मोड पर जाएं।',
+        uploadDocs: 'दस्तावेज़ अपलोड करें',
+        uploadDocsDesc: 'AI विश्लेषण के लिए कानूनी दस्तावेज़ अपलोड करें। हम PDF, DOCX, XLSX, CSV और छवियों का समर्थन करते हैं।',
+        listenResponses: 'जवाब सुनें',
+        listenResponsesDesc: 'किसी भी जवाब पर स्पीकर आइकन पर क्लिक करें अपनी भाषा में सुनने के लिए।',
+        skip: 'छोड़ें',
+        next: 'अगला',
+        getStarted: 'शुरू करें',
+        stepOf: 'चरण {current} का {total}',
+      },
     },
   },
   EN: {
@@ -111,6 +141,20 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'Listen',
       stop: 'Stop',
       references: 'References',
+      onboarding: {
+        talkToMe: 'Talk to Me',
+        talkToMeDesc: 'Just tap the mic and ask your question. Speak naturally like you would to a friend!',
+        switchToText: 'Switch to Text',
+        switchToTextDesc: 'Prefer typing? Toggle to text mode using the switch in the bottom bar.',
+        uploadDocs: 'Upload Documents',
+        uploadDocsDesc: 'Upload legal documents for AI analysis. We support PDF, DOCX, XLSX, CSV, and images.',
+        listenResponses: 'Listen to Responses',
+        listenResponsesDesc: 'Click the speaker icon on any response to hear it in your language.',
+        skip: 'Skip',
+        next: 'Next',
+        getStarted: 'Get Started',
+        stepOf: 'Step {current} of {total}',
+      },
     },
   },
   BN: {
@@ -148,6 +192,20 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'শুনুন',
       stop: 'বন্ধ করুন',
       references: 'তথ্যসূত্র',
+      onboarding: {
+        talkToMe: 'আমার সাথে কথা বলুন',
+        talkToMeDesc: 'শুধু মাইক ট্যাপ করুন এবং আপনার প্রশ্ন জিজ্ঞাসা করুন। বন্ধুর মতো স্বাভাবিকভাবে কথা বলুন!',
+        switchToText: 'টেক্সটে স্যুইচ করুন',
+        switchToTextDesc: 'টাইপ করতে পছন্দ করেন? নিচের বারে সুইচ ব্যবহার করে টেক্সট মোডে যান।',
+        uploadDocs: 'নথি আপলোড করুন',
+        uploadDocsDesc: 'AI বিশ্লেষণের জন্য আইনি নথি আপলোড করুন। আমরা PDF, DOCX, XLSX, CSV এবং ছবি সমর্থন করি।',
+        listenResponses: 'উত্তর শুনুন',
+        listenResponsesDesc: 'আপনার ভাষায় শুনতে যেকোনো উত্তরে স্পিকার আইকনে ক্লিক করুন।',
+        skip: 'এড়িয়ে যান',
+        next: 'পরবর্তী',
+        getStarted: 'শুরু করুন',
+        stepOf: 'ধাপ {current} এর {total}',
+      },
     },
   },
   TA: {
@@ -185,6 +243,20 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'கேளுங்கள்',
       stop: 'நிறுத்து',
       references: 'குறிப்புகள்',
+      onboarding: {
+        talkToMe: 'என்னிடம் பேசுங்கள்',
+        talkToMeDesc: 'மைக்கை தட்டி உங்கள் கேள்வியை கேளுங்கள். நண்பரிடம் பேசுவது போல் இயல்பாக பேசுங்கள்!',
+        switchToText: 'உரைக்கு மாறவும்',
+        switchToTextDesc: 'டைப் செய்ய விரும்புகிறீர்களா? கீழே உள்ள பட்டியில் சுவிட்சைப் பயன்படுத்தி உரை பயன்முறைக்கு மாறவும்.',
+        uploadDocs: 'ஆவணங்களை பதிவேற்றவும்',
+        uploadDocsDesc: 'AI பகுப்பாய்வுக்கு சட்ட ஆவணங்களை பதிவேற்றவும். PDF, DOCX, XLSX, CSV மற்றும் படங்களை ஆதரிக்கிறோம்.',
+        listenResponses: 'பதில்களை கேளுங்கள்',
+        listenResponsesDesc: 'உங்கள் மொழியில் கேட்க எந்த பதிலிலும் ஸ்பீக்கர் ஐகானை கிளிக் செய்யவும்.',
+        skip: 'தவிர்',
+        next: 'அடுத்து',
+        getStarted: 'தொடங்கு',
+        stepOf: 'படி {current} இல் {total}',
+      },
     },
   },
   TE: {
@@ -222,6 +294,20 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'వినండి',
       stop: 'ఆపు',
       references: 'సూచనలు',
+      onboarding: {
+        talkToMe: 'నాతో మాట్లాడండి',
+        talkToMeDesc: 'మైక్ ను ట్యాప్ చేసి మీ ప్రశ్న అడగండి. స్నేహితుడితో మాట్లాడినట్లు సహజంగా మాట్లాడండి!',
+        switchToText: 'టెక్స్ట్ కు మారండి',
+        switchToTextDesc: 'టైప్ చేయడం ఇష్టపడతారా? దిగువ బార్‌లో స్విచ్ ఉపయోగించి టెక్స్ట్ మోడ్‌కు మారండి.',
+        uploadDocs: 'డాక్యుమెంట్లు అప్‌లోడ్ చేయండి',
+        uploadDocsDesc: 'AI విశ్లేషణ కోసం చట్టపరమైన డాక్యుమెంట్లను అప్‌లోడ్ చేయండి. మేము PDF, DOCX, XLSX, CSV మరియు చిత్రాలకు మద్దతు ఇస్తాము.',
+        listenResponses: 'స్పందనలు వినండి',
+        listenResponsesDesc: 'మీ భాషలో వినడానికి ఏదైనా స్పందనపై స్పీకర్ ఐకాన్ క్లిక్ చేయండి.',
+        skip: 'దాటవేయి',
+        next: 'తదుపరి',
+        getStarted: 'ప్రారంభించండి',
+        stepOf: 'దశ {current} లో {total}',
+      },
     },
   },
   MR: {
@@ -259,6 +345,20 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'ऐका',
       stop: 'थांबा',
       references: 'संदर्भ',
+      onboarding: {
+        talkToMe: 'माझ्याशी बोला',
+        talkToMeDesc: 'फक्त माइक टॅप करा आणि तुमचा प्रश्न विचारा. मित्राशी बोलता तसे नैसर्गिकपणे बोला!',
+        switchToText: 'टेक्स्टवर स्विच करा',
+        switchToTextDesc: 'टाइप करणे आवडते? खालच्या बारमध्ये स्विच वापरून टेक्स्ट मोडवर जा.',
+        uploadDocs: 'दस्तऐवज अपलोड करा',
+        uploadDocsDesc: 'AI विश्लेषणासाठी कायदेशीर दस्तऐवज अपलोड करा. आम्ही PDF, DOCX, XLSX, CSV आणि प्रतिमांना सपोर्ट करतो.',
+        listenResponses: 'उत्तरे ऐका',
+        listenResponsesDesc: 'तुमच्या भाषेत ऐकण्यासाठी कोणत्याही उत्तरावर स्पीकर आयकॉनवर क्लिक करा.',
+        skip: 'वगळा',
+        next: 'पुढे',
+        getStarted: 'सुरू करा',
+        stepOf: 'पाऊल {current} चे {total}',
+      },
     },
   },
   GU: {
@@ -296,6 +396,20 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'સાંભળો',
       stop: 'બંધ કરો',
       references: 'સંદર્ભો',
+      onboarding: {
+        talkToMe: 'મારી સાથે વાત કરો',
+        talkToMeDesc: 'બસ માઇક ટેપ કરો અને તમારો પ્રશ્ન પૂછો. મિત્ર સાથે વાત કરો તેમ કુદરતી રીતે બોલો!',
+        switchToText: 'ટેક્સ્ટ પર સ્વિચ કરો',
+        switchToTextDesc: 'ટાઇપ કરવાનું પસંદ છે? નીચેની બારમાં સ્વિચ વાપરીને ટેક્સ્ટ મોડ પર જાઓ.',
+        uploadDocs: 'દસ્તાવેજો અપલોડ કરો',
+        uploadDocsDesc: 'AI વિશ્લેષણ માટે કાનૂની દસ્તાવેજો અપલોડ કરો. અમે PDF, DOCX, XLSX, CSV અને છબીઓને સપોર્ટ કરીએ છીએ.',
+        listenResponses: 'જવાબો સાંભળો',
+        listenResponsesDesc: 'તમારી ભાષામાં સાંભળવા માટે કોઈપણ જવાબ પર સ્પીકર આયકન ક્લિક કરો.',
+        skip: 'છોડો',
+        next: 'આગળ',
+        getStarted: 'શરૂ કરો',
+        stepOf: 'પગલું {current} માંથી {total}',
+      },
     },
   },
   KN: {
@@ -333,6 +447,20 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'ಕೇಳಿ',
       stop: 'ನಿಲ್ಲಿಸಿ',
       references: 'ಉಲ್ಲೇಖಗಳು',
+      onboarding: {
+        talkToMe: 'ನನ್ನೊಂದಿಗೆ ಮಾತನಾಡಿ',
+        talkToMeDesc: 'ಮೈಕ್ ಟ್ಯಾಪ್ ಮಾಡಿ ಮತ್ತು ನಿಮ್ಮ ಪ್ರಶ್ನೆ ಕೇಳಿ. ಸ್ನೇಹಿತರೊಂದಿಗೆ ಮಾತನಾಡುವಂತೆ ಸಹಜವಾಗಿ ಮಾತನಾಡಿ!',
+        switchToText: 'ಟೆಕ್ಸ್ಟ್ ಗೆ ಬದಲಿಸಿ',
+        switchToTextDesc: 'ಟೈಪ್ ಮಾಡಲು ಇಷ್ಟಪಡುತ್ತೀರಾ? ಕೆಳಗಿನ ಬಾರ್‌ನಲ್ಲಿ ಸ್ವಿಚ್ ಬಳಸಿ ಟೆಕ್ಸ್ಟ್ ಮೋಡ್‌ಗೆ ಹೋಗಿ.',
+        uploadDocs: 'ದಾಖಲೆಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ',
+        uploadDocsDesc: 'AI ವಿಶ್ಲೇಷಣೆಗಾಗಿ ಕಾನೂನು ದಾಖಲೆಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ. ನಾವು PDF, DOCX, XLSX, CSV ಮತ್ತು ಚಿತ್ರಗಳನ್ನು ಬೆಂಬಲಿಸುತ್ತೇವೆ.',
+        listenResponses: 'ಉತ್ತರಗಳನ್ನು ಕೇಳಿ',
+        listenResponsesDesc: 'ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಕೇಳಲು ಯಾವುದೇ ಉತ್ತರದ ಮೇಲೆ ಸ್ಪೀಕರ್ ಐಕಾನ್ ಕ್ಲಿಕ್ ಮಾಡಿ.',
+        skip: 'ಬಿಟ್ಟುಬಿಡಿ',
+        next: 'ಮುಂದೆ',
+        getStarted: 'ಪ್ರಾರಂಭಿಸಿ',
+        stepOf: 'ಹಂತ {current} ರಲ್ಲಿ {total}',
+      },
     },
   },
   ML: {
@@ -370,6 +498,20 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'കേൾക്കുക',
       stop: 'നിർത്തുക',
       references: 'റഫറൻസുകൾ',
+      onboarding: {
+        talkToMe: 'എന്നോട് സംസാരിക്കൂ',
+        talkToMeDesc: 'മൈക്ക് ടാപ്പ് ചെയ്ത് നിങ്ങളുടെ ചോദ്യം ചോദിക്കൂ. ഒരു സുഹൃത്തിനോട് സംസാരിക്കുന്നത് പോലെ സ്വാഭാവികമായി സംസാരിക്കൂ!',
+        switchToText: 'ടെക്സ്റ്റിലേക്ക് മാറുക',
+        switchToTextDesc: 'ടൈപ്പ് ചെയ്യാൻ ഇഷ്ടപ്പെടുന്നോ? താഴെയുള്ള ബാറിലെ സ്വിച്ച് ഉപയോഗിച്ച് ടെക്സ്റ്റ് മോഡിലേക്ക് മാറുക.',
+        uploadDocs: 'ഡോക്യുമെന്റുകൾ അപ്‌ലോഡ് ചെയ്യുക',
+        uploadDocsDesc: 'AI വിശകലനത്തിനായി നിയമ ഡോക്യുമെന്റുകൾ അപ്‌ലോഡ് ചെയ്യുക. ഞങ്ങൾ PDF, DOCX, XLSX, CSV, ചിത്രങ്ങൾ എന്നിവ പിന്തുണയ്ക്കുന്നു.',
+        listenResponses: 'മറുപടികൾ കേൾക്കുക',
+        listenResponsesDesc: 'നിങ്ങളുടെ ഭാഷയിൽ കേൾക്കാൻ ഏതെങ്കിലും മറുപടിയിൽ സ്പീക്കർ ഐക്കണിൽ ക്ലിക്ക് ചെയ്യുക.',
+        skip: 'ഒഴിവാക്കുക',
+        next: 'അടുത്തത്',
+        getStarted: 'ആരംഭിക്കുക',
+        stepOf: 'ഘട്ടം {current} ൽ {total}',
+      },
     },
   },
   PA: {
@@ -407,6 +549,20 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'ਸੁਣੋ',
       stop: 'ਰੋਕੋ',
       references: 'ਹਵਾਲੇ',
+      onboarding: {
+        talkToMe: 'ਮੇਰੇ ਨਾਲ ਗੱਲ ਕਰੋ',
+        talkToMeDesc: 'ਬੱਸ ਮਾਈਕ ਟੈਪ ਕਰੋ ਅਤੇ ਆਪਣਾ ਸਵਾਲ ਪੁੱਛੋ। ਦੋਸਤ ਨਾਲ ਗੱਲ ਕਰਦੇ ਹੋ ਜਿਵੇਂ ਕੁਦਰਤੀ ਤੌਰ ਤੇ ਬੋਲੋ!',
+        switchToText: 'ਟੈਕਸਟ ਤੇ ਜਾਓ',
+        switchToTextDesc: 'ਟਾਈਪ ਕਰਨਾ ਪਸੰਦ ਹੈ? ਹੇਠਲੀ ਬਾਰ ਵਿੱਚ ਸਵਿੱਚ ਵਰਤ ਕੇ ਟੈਕਸਟ ਮੋਡ ਤੇ ਜਾਓ।',
+        uploadDocs: 'ਦਸਤਾਵੇਜ਼ ਅੱਪਲੋਡ ਕਰੋ',
+        uploadDocsDesc: 'AI ਵਿਸ਼ਲੇਸ਼ਣ ਲਈ ਕਾਨੂੰਨੀ ਦਸਤਾਵੇਜ਼ ਅੱਪਲੋਡ ਕਰੋ। ਅਸੀਂ PDF, DOCX, XLSX, CSV ਅਤੇ ਤਸਵੀਰਾਂ ਦਾ ਸਮਰਥਨ ਕਰਦੇ ਹਾਂ।',
+        listenResponses: 'ਜਵਾਬ ਸੁਣੋ',
+        listenResponsesDesc: 'ਆਪਣੀ ਭਾਸ਼ਾ ਵਿੱਚ ਸੁਣਨ ਲਈ ਕਿਸੇ ਵੀ ਜਵਾਬ ਤੇ ਸਪੀਕਰ ਆਈਕਨ ਕਲਿੱਕ ਕਰੋ।',
+        skip: 'ਛੱਡੋ',
+        next: 'ਅਗਲਾ',
+        getStarted: 'ਸ਼ੁਰੂ ਕਰੋ',
+        stepOf: 'ਕਦਮ {current} ਵਿੱਚੋਂ {total}',
+      },
     },
   },
   OR: {
@@ -444,6 +600,20 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'ଶୁଣନ୍ତୁ',
       stop: 'ବନ୍ଦ କରନ୍ତୁ',
       references: 'ସନ୍ଦର୍ଭ',
+      onboarding: {
+        talkToMe: 'ମୋ ସହ କଥା ହୁଅନ୍ତୁ',
+        talkToMeDesc: 'ବସ୍ ମାଇକ୍ ଟ୍ୟାପ୍ କରନ୍ତୁ ଏବଂ ଆପଣଙ୍କ ପ୍ରଶ୍ନ ପଚାରନ୍ତୁ। ବନ୍ଧୁଙ୍କ ସହ କଥା ହେଉଥିବା ପରି ସ୍ୱାଭାବିକ ଭାବରେ କୁହନ୍ତୁ!',
+        switchToText: 'ଟେକ୍ସଟ୍ କୁ ବଦଳାନ୍ତୁ',
+        switchToTextDesc: 'ଟାଇପ୍ କରିବାକୁ ପସନ୍ଦ କରନ୍ତି? ତଳ ବାର୍‌ରେ ସ୍ୱିଚ୍ ବ୍ୟବହାର କରି ଟେକ୍ସଟ୍ ମୋଡ୍‌କୁ ଯାଆନ୍ତୁ।',
+        uploadDocs: 'ଡକ୍ୟୁମେଣ୍ଟ ଅପଲୋଡ୍ କରନ୍ତୁ',
+        uploadDocsDesc: 'AI ବିଶ୍ଲେଷଣ ପାଇଁ ଆଇନଗତ ଡକ୍ୟୁମେଣ୍ଟ ଅପଲୋଡ୍ କରନ୍ତୁ। ଆମେ PDF, DOCX, XLSX, CSV ଏବଂ ଚିତ୍ର ସମର୍ଥନ କରୁ।',
+        listenResponses: 'ଉତ୍ତର ଶୁଣନ୍ତୁ',
+        listenResponsesDesc: 'ଆପଣଙ୍କ ଭାଷାରେ ଶୁଣିବାକୁ ଯେକୌଣସି ଉତ୍ତରରେ ସ୍ପିକର୍ ଆଇକନ୍ କ୍ଲିକ୍ କରନ୍ତୁ।',
+        skip: 'ଛାଡ଼ନ୍ତୁ',
+        next: 'ପରବର୍ତ୍ତୀ',
+        getStarted: 'ଆରମ୍ଭ କରନ୍ତୁ',
+        stepOf: 'ପାଦ {current} ର {total}',
+      },
     },
   },
   UR: {
@@ -481,6 +651,20 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'سنیں',
       stop: 'روکیں',
       references: 'حوالہ جات',
+      onboarding: {
+        talkToMe: 'مجھ سے بات کریں',
+        talkToMeDesc: 'بس مائیک ٹیپ کریں اور اپنا سوال پوچھیں۔ دوست سے بات کرتے ہیں جیسے قدرتی طور پر بولیں!',
+        switchToText: 'ٹیکسٹ پر جائیں',
+        switchToTextDesc: 'ٹائپ کرنا پسند ہے؟ نیچے کی بار میں سوئچ استعمال کرکے ٹیکسٹ موڈ پر جائیں۔',
+        uploadDocs: 'دستاویزات اپلوڈ کریں',
+        uploadDocsDesc: 'AI تجزیے کے لیے قانونی دستاویزات اپلوڈ کریں۔ ہم PDF، DOCX، XLSX، CSV اور تصاویر کی حمایت کرتے ہیں۔',
+        listenResponses: 'جوابات سنیں',
+        listenResponsesDesc: 'اپنی زبان میں سننے کے لیے کسی بھی جواب پر اسپیکر آئیکن پر کلک کریں۔',
+        skip: 'چھوڑیں',
+        next: 'اگلا',
+        getStarted: 'شروع کریں',
+        stepOf: 'قدم {current} میں سے {total}',
+      },
     },
   },
 };
