@@ -61,7 +61,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, conversationId, language, conversationHistory, locationState } = await req.json();
+    const { message, conversationId, language, conversationHistory, locationState, fileContext } = await req.json();
 
     if (!message) {
       throw new Error('Message is required');
@@ -103,11 +103,17 @@ serve(async (req) => {
       console.log('RAG search not available or failed:', e);
     }
 
+    // Add file context if provided
+    let fileContextStr = '';
+    if (fileContext && fileContext.trim()) {
+      fileContextStr = `\n\nUSER UPLOADED DOCUMENTS:\n${fileContext}\n\nPlease consider these documents when answering the user's question.`;
+    }
+
     // Build conversation messages for Gemini
     const messages = [
       {
         role: 'user',
-        parts: [{ text: `${systemPrompt}${ragContext}\n\nUser language: ${language || 'English'}\nUser location: ${locationState || 'India'}\n\nIMPORTANT: Respond in ${language || 'English'} without using any asterisks or markdown formatting. Write in natural, conversational sentences.` }]
+        parts: [{ text: `${systemPrompt}${ragContext}${fileContextStr}\n\nUser language: ${language || 'English'}\nUser location: ${locationState || 'India'}\n\nIMPORTANT: Respond in ${language || 'English'} without using any asterisks or markdown formatting. Write in natural, conversational sentences.` }]
       },
       {
         role: 'model',

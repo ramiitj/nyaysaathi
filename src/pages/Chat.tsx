@@ -10,6 +10,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useConsent } from '@/contexts/ConsentContext';
 import { useConversation } from '@/hooks/useConversation';
 import { useUserFingerprint } from '@/hooks/useUserFingerprint';
+import { useFileUpload } from '@/hooks/useFileUpload';
 import { useToast } from '@/hooks/use-toast';
 
 export type VoiceState = 'idle' | 'recording' | 'processing' | 'responding';
@@ -49,9 +50,25 @@ const Chat: React.FC = () => {
   } = useUserFingerprint();
 
   // Use conversation hook for real API integration
-  const { messages, isLoading, error, sendMessage, clearConversation, setMessages } = useConversation({
+  const { messages, isLoading, error, sendMessage, clearConversation, conversationId } = useConversation({
     language: config.code,
     locationState: undefined // Could be enhanced with geolocation
+  });
+
+  // File upload hook
+  const {
+    uploadedFiles,
+    storageUsed,
+    maxStorage,
+    isUploading,
+    uploadFiles,
+    removeFile,
+    clearAllFiles,
+    getFileContext,
+  } = useFileUpload({
+    visitorId: visitorId || undefined,
+    conversationId,
+    language: config.code,
   });
 
   // Redirect if not consented
@@ -81,6 +98,7 @@ const Chat: React.FC = () => {
 
   const handleStartFresh = () => {
     clearConversation();
+    clearAllFiles();
     setTranscription('');
     setVoiceState('idle');
   };
@@ -88,7 +106,9 @@ const Chat: React.FC = () => {
   const handleSendMessage = async (content: string) => {
     setVoiceState('processing');
     
-    const response = await sendMessage(content);
+    // Get file context if any files are uploaded
+    const fileContext = getFileContext();
+    const response = await sendMessage(content, fileContext);
     
     if (response) {
       setVoiceState('responding');
@@ -97,6 +117,10 @@ const Chat: React.FC = () => {
     } else {
       setVoiceState('idle');
     }
+  };
+
+  const handleFilesSelected = async (files: File[]) => {
+    await uploadFiles(files);
   };
 
   const handleOnboardingComplete = () => {
@@ -123,6 +147,12 @@ const Chat: React.FC = () => {
           messages={messages}
           onSendMessage={handleSendMessage}
           isLoading={isLoading}
+          uploadedFiles={uploadedFiles}
+          storageUsed={storageUsed}
+          maxStorage={maxStorage}
+          isUploading={isUploading}
+          onFilesSelected={handleFilesSelected}
+          onRemoveFile={removeFile}
         />
       </div>
 
