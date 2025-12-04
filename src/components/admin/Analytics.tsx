@@ -1,14 +1,91 @@
-import { Download, MessageSquare, Users, Clock, TrendingUp, MapPin } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Download, MessageSquare, Users, Clock, TrendingUp, MapPin, UserPlus, RefreshCw, Globe, Monitor } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
+import { supabase } from "@/integrations/supabase/client";
 
 const Analytics = () => {
+  const [visitorStats, setVisitorStats] = useState({
+    totalVisitors: 0,
+    newVisitors: 0,
+    returningVisitors: 0,
+    avgVisits: 0,
+  });
+  const [deviceBreakdown, setDeviceBreakdown] = useState<{ name: string; value: number; color: string }[]>([]);
+  const [browserBreakdown, setBrowserBreakdown] = useState<{ name: string; value: number }[]>([]);
+  const [isLoadingVisitors, setIsLoadingVisitors] = useState(true);
+
+  useEffect(() => {
+    fetchVisitorData();
+  }, []);
+
+  const fetchVisitorData = async () => {
+    setIsLoadingVisitors(true);
+    try {
+      // Fetch visitor statistics
+      const { data: visitors, error } = await supabase
+        .from('user_visitors')
+        .select('*');
+      
+      if (error) throw error;
+
+      if (visitors) {
+        const total = visitors.length;
+        const newUsers = visitors.filter(v => v.visit_count === 1).length;
+        const returning = total - newUsers;
+        const avgVisits = total > 0 
+          ? visitors.reduce((sum, v) => sum + (v.visit_count || 0), 0) / total 
+          : 0;
+
+        setVisitorStats({
+          totalVisitors: total,
+          newVisitors: newUsers,
+          returningVisitors: returning,
+          avgVisits: Math.round(avgVisits * 10) / 10,
+        });
+
+        // Calculate device breakdown
+        const deviceCounts: Record<string, number> = {};
+        const browserCounts: Record<string, number> = {};
+        
+        visitors.forEach(v => {
+          const deviceInfo = v.device_info as { os?: string; browser?: string } | null;
+          if (deviceInfo) {
+            const os = deviceInfo.os || 'Unknown';
+            const browser = deviceInfo.browser || 'Unknown';
+            deviceCounts[os] = (deviceCounts[os] || 0) + 1;
+            browserCounts[browser] = (browserCounts[browser] || 0) + 1;
+          }
+        });
+
+        const colors = ['#2563EB', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6B7280'];
+        setDeviceBreakdown(
+          Object.entries(deviceCounts)
+            .map(([name, value], i) => ({ name, value, color: colors[i % colors.length] }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 6)
+        );
+
+        setBrowserBreakdown(
+          Object.entries(browserCounts)
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 5)
+        );
+      }
+    } catch (err) {
+      console.error('Error fetching visitor data:', err);
+    } finally {
+      setIsLoadingVisitors(false);
+    }
+  };
+
   const stats = [
     { label: "Total Consultations", value: "1,247", icon: MessageSquare, change: "+12%" },
-    { label: "Unique Users", value: "856", icon: Users, change: "+8%" },
-    { label: "Avg Session Duration", value: "4m 32s", icon: Clock, change: "+5%" },
-    { label: "Returning Users", value: "34%", icon: TrendingUp, change: "+3%" },
+    { label: "Unique Visitors", value: visitorStats.totalVisitors.toString(), icon: Users, change: "+8%" },
+    { label: "New Visitors", value: visitorStats.newVisitors.toString(), icon: UserPlus, change: "+15%" },
+    { label: "Returning Visitors", value: `${visitorStats.returningVisitors}`, icon: RefreshCw, change: "+3%" },
   ];
 
   const languageData = [
@@ -75,6 +152,94 @@ const Analytics = () => {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Visitor Insights Row */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Device Distribution */}
+        <Card className="bg-white">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Monitor className="h-4 w-4" />
+              Device Distribution
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoadingVisitors ? (
+              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                Loading...
+              </div>
+            ) : deviceBreakdown.length > 0 ? (
+              <>
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={deviceBreakdown}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={80}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {deviceBreakdown.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex flex-wrap justify-center gap-3 mt-2">
+                  {deviceBreakdown.map((item) => (
+                    <div key={item.name} className="flex items-center gap-1 text-xs">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                      {item.name} ({item.value})
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                No visitor data yet
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Browser Distribution */}
+        <Card className="bg-white">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              Browser Distribution
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoadingVisitors ? (
+              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                Loading...
+              </div>
+            ) : browserBreakdown.length > 0 ? (
+              <div className="h-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={browserBreakdown} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                    <XAxis type="number" />
+                    <YAxis dataKey="name" type="category" width={80} />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#2563EB" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                No browser data yet
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Charts Row 1 */}

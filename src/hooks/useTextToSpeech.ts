@@ -1,22 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import type { LanguageCode } from '@/config/languages';
-
-// Browser TTS language code mapping (fallback)
-const TTS_LANG_MAP: Record<LanguageCode, string> = {
-  'HI': 'hi-IN',
-  'EN': 'en-IN',
-  'BN': 'bn-IN',
-  'TA': 'ta-IN',
-  'TE': 'te-IN',
-  'MR': 'mr-IN',
-  'GU': 'gu-IN',
-  'KN': 'kn-IN',
-  'ML': 'ml-IN',
-  'PA': 'pa-IN',
-  'OR': 'or-IN',
-  'UR': 'ur-IN'
-};
 
 interface UseTextToSpeechOptions {
   language: LanguageCode;
@@ -26,6 +11,7 @@ export const useTextToSpeech = ({ language }: UseTextToSpeechOptions) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { toast } = useToast();
 
   const speak = useCallback(async (text: string) => {
     if (!text) return;
@@ -77,6 +63,11 @@ export const useTextToSpeech = ({ language }: UseTextToSpeechOptions) => {
         setIsSpeaking(false);
         setIsLoading(false);
         audioRef.current = null;
+        toast({
+          title: 'Audio Error',
+          description: 'Failed to play audio. Please try again.',
+          variant: 'destructive'
+        });
       };
 
       await audio.play();
@@ -84,24 +75,14 @@ export const useTextToSpeech = ({ language }: UseTextToSpeechOptions) => {
     } catch (err) {
       console.error('TTS error:', err);
       setIsLoading(false);
-      
-      // Fallback to browser TTS
-      try {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = TTS_LANG_MAP[language] || 'en-IN';
-        utterance.rate = 0.9;
-        
-        utterance.onstart = () => setIsSpeaking(true);
-        utterance.onend = () => setIsSpeaking(false);
-        utterance.onerror = () => setIsSpeaking(false);
-        
-        window.speechSynthesis.speak(utterance);
-      } catch (fallbackErr) {
-        console.error('Browser TTS fallback also failed:', fallbackErr);
-      }
+      setIsSpeaking(false);
+      toast({
+        title: 'Speech Error',
+        description: 'Unable to generate speech. Please try again later.',
+        variant: 'destructive'
+      });
     }
-  }, [language]);
+  }, [language, toast]);
 
   const stop = useCallback(() => {
     // Stop HTML5 Audio
@@ -109,9 +90,6 @@ export const useTextToSpeech = ({ language }: UseTextToSpeechOptions) => {
       audioRef.current.pause();
       audioRef.current = null;
     }
-    
-    // Also stop browser TTS in case fallback was used
-    window.speechSynthesis.cancel();
     
     setIsSpeaking(false);
     setIsLoading(false);
