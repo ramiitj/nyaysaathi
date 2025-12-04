@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Volume2, Send, Loader2, VolumeX } from 'lucide-react';
+import { Volume2, Send, Loader2, VolumeX, Square } from 'lucide-react';
 import VoiceButton from './VoiceButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,6 +35,7 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
   const { toast } = useToast();
   const [inputValue, setInputValue] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const lastMessageIdRef = useRef<string | null>(null);
 
   // Voice recording hook
   const { isRecording, isProcessing, toggleRecording } = useVoiceRecording({
@@ -67,21 +68,47 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
     } else if (isSpeaking) {
       setVoiceState('responding');
     } else if (voiceState !== 'idle') {
-      // Only set to idle if we're not in a loading state
       if (!isLoading) {
         setVoiceState('idle');
       }
     }
   }, [isRecording, isProcessing, isSpeaking, isLoading, setVoiceState, voiceState]);
 
+  // Auto-scroll to bottom
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
+  // Auto-speak new assistant messages in voice mode (concurrent playback)
+  useEffect(() => {
+    if (messages.length === 0) return;
+    
+    const lastMessage = messages[messages.length - 1];
+    
+    // Only auto-speak if:
+    // 1. It's an assistant message
+    // 2. We're in voice mode
+    // 3. It's a new message (not already spoken)
+    // 4. Not already speaking
+    if (
+      lastMessage.role === 'assistant' &&
+      inputMode === 'voice' &&
+      lastMessage.id !== lastMessageIdRef.current &&
+      !isSpeaking
+    ) {
+      lastMessageIdRef.current = lastMessage.id;
+      // Start speaking immediately (concurrent with text display)
+      speak(lastMessage.content);
+    }
+  }, [messages, inputMode, speak, isSpeaking]);
+
   const handleVoiceClick = () => {
-    if (voiceState === 'idle' || voiceState === 'recording') {
+    if (voiceState === 'responding') {
+      // Stop TTS if responding
+      stop();
+    } else if (voiceState === 'idle' || voiceState === 'recording') {
       toggleRecording();
       if (voiceState === 'idle') {
         setTranscription('');
@@ -131,7 +158,7 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="gap-1 text-xs text-muted-foreground"
+                  className="gap-1 text-xs text-muted-foreground listen-button"
                   onClick={() => handleListen("Hey there! I'm Nyay Saathi, your legal buddy. What's on your mind today? I'm here to help you understand your legal rights and guide you through any legal questions you might have.")}
                 >
                   {isSpeaking ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
@@ -155,11 +182,33 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
                 }`}
               >
                 {message.role === 'assistant' && (
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-success" />
-                    <span className="text-xs font-medium text-success uppercase tracking-wide">
-                      Nyay Saathi
-                    </span>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-success" />
+                      <span className="text-xs font-medium text-success uppercase tracking-wide">
+                        Nyay Saathi
+                      </span>
+                    </div>
+                    {/* Speaker icon for assistant messages */}
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="gap-1 text-xs text-muted-foreground h-6 px-2 listen-button"
+                      onClick={() => handleListen(message.content)}
+                      disabled={ttsLoading}
+                    >
+                      {isSpeaking ? (
+                        <>
+                          <Square className="w-3 h-3 fill-current" />
+                          Stop
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 className="w-3 h-3" />
+                          Listen
+                        </>
+                      )}
+                    </Button>
                   </div>
                 )}
                 <p className={`text-sm whitespace-pre-wrap ${config.fontClass}`}>
@@ -184,18 +233,6 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
                   }`}>
                     {formatTime(message.timestamp)}
                   </span>
-                  {message.role === 'assistant' && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="gap-1 text-xs text-muted-foreground"
-                      onClick={() => handleListen(message.content)}
-                      disabled={ttsLoading}
-                    >
-                      {isSpeaking ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
-                      {isSpeaking ? 'Stop' : 'Listen'}
-                    </Button>
-                  )}
                 </div>
               </div>
             </div>
@@ -213,12 +250,15 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
             </div>
           )}
 
-          {/* Transcription Card */}
+          {/* Transcription Card - Money Saathi Style */}
           {transcription && voiceState !== 'idle' && !isLoading && (
-            <div className="bg-muted/50 rounded-2xl p-4 border border-border/50 animate-fade-in">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                You Said
-              </p>
+            <div className="bg-card rounded-2xl p-4 border border-[#F97316]/30 shadow-sm animate-fade-in">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full bg-[#F97316] animate-pulse" />
+                <span className="text-xs font-medium text-[#F97316] uppercase tracking-wide">
+                  Transcribing...
+                </span>
+              </div>
               <p className={`text-foreground ${config.fontClass}`}>{transcription}</p>
             </div>
           )}
@@ -229,11 +269,8 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
       {inputMode === 'voice' && (
         <div className="flex flex-col items-center py-8 px-4">
           <VoiceButton state={voiceState} onClick={handleVoiceClick} />
-          <p className="text-sm text-muted-foreground mt-4">
+          <p className="text-sm text-muted-foreground mt-4 text-center">
             {voiceState === 'idle' && config.ui.tapToSpeak}
-            {voiceState === 'recording' && config.ui.listening}
-            {voiceState === 'processing' && config.ui.analyzing}
-            {voiceState === 'responding' && config.ui.speaking}
           </p>
         </div>
       )}

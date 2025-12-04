@@ -5,9 +5,11 @@ import BottomBar from '@/components/chat/BottomBar';
 import CenterPanel from '@/components/chat/CenterPanel';
 import EmergencyModal from '@/components/modals/EmergencyModal';
 import AdminLoginModal from '@/components/modals/AdminLoginModal';
+import OnboardingTooltips from '@/components/chat/OnboardingTooltips';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useConsent } from '@/contexts/ConsentContext';
 import { useConversation } from '@/hooks/useConversation';
+import { useUserFingerprint } from '@/hooks/useUserFingerprint';
 import { useToast } from '@/hooks/use-toast';
 
 export type VoiceState = 'idle' | 'recording' | 'processing' | 'responding';
@@ -37,6 +39,15 @@ const Chat: React.FC = () => {
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
 
+  // User fingerprinting for tracking and onboarding
+  const { 
+    visitorId, 
+    isFirstTimeUser, 
+    isLoading: visitorLoading,
+    requestLocation,
+    markOnboardingComplete 
+  } = useUserFingerprint();
+
   // Use conversation hook for real API integration
   const { messages, isLoading, error, sendMessage, clearConversation, setMessages } = useConversation({
     language: config.code,
@@ -49,6 +60,13 @@ const Chat: React.FC = () => {
       navigate('/');
     }
   }, [allConsented, navigate]);
+
+  // Request location on mount (after consent)
+  useEffect(() => {
+    if (allConsented && visitorId) {
+      requestLocation();
+    }
+  }, [allConsented, visitorId, requestLocation]);
 
   // Show error toast
   useEffect(() => {
@@ -79,6 +97,10 @@ const Chat: React.FC = () => {
     } else {
       setVoiceState('idle');
     }
+  };
+
+  const handleOnboardingComplete = () => {
+    markOnboardingComplete();
   };
 
   return (
@@ -112,6 +134,11 @@ const Chat: React.FC = () => {
       {/* Modals */}
       <EmergencyModal open={showEmergencyModal} onOpenChange={setShowEmergencyModal} />
       <AdminLoginModal open={showAdminModal} onOpenChange={setShowAdminModal} />
+
+      {/* First-time user onboarding tooltips */}
+      {!visitorLoading && isFirstTimeUser && (
+        <OnboardingTooltips onComplete={handleOnboardingComplete} />
+      )}
     </div>
   );
 };

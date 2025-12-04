@@ -72,6 +72,7 @@ export type Database = {
           status: Database["public"]["Enums"]["conversation_status"] | null
           updated_at: string | null
           use_for_training: boolean | null
+          visitor_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -89,6 +90,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["conversation_status"] | null
           updated_at?: string | null
           use_for_training?: boolean | null
+          visitor_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -106,8 +108,17 @@ export type Database = {
           status?: Database["public"]["Enums"]["conversation_status"] | null
           updated_at?: string | null
           use_for_training?: boolean | null
+          visitor_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "conversations_visitor_id_fkey"
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "user_visitors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       document_embeddings: {
         Row: {
@@ -350,6 +361,48 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_visitors: {
+        Row: {
+          created_at: string | null
+          device_info: Json | null
+          fingerprint_hash: string
+          first_visit_at: string | null
+          id: string
+          ip_hash: string | null
+          last_visit_at: string | null
+          location_data: Json | null
+          onboarding_complete: boolean | null
+          updated_at: string | null
+          visit_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          device_info?: Json | null
+          fingerprint_hash: string
+          first_visit_at?: string | null
+          id?: string
+          ip_hash?: string | null
+          last_visit_at?: string | null
+          location_data?: Json | null
+          onboarding_complete?: boolean | null
+          updated_at?: string | null
+          visit_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          device_info?: Json | null
+          fingerprint_hash?: string
+          first_visit_at?: string | null
+          id?: string
+          ip_hash?: string | null
+          last_visit_at?: string | null
+          location_data?: Json | null
+          onboarding_complete?: boolean | null
+          updated_at?: string | null
+          visit_count?: number | null
         }
         Relationships: []
       }
