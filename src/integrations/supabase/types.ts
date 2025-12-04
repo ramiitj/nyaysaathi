@@ -14,16 +14,367 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analytics_events: {
+        Row: {
+          conversation_id: string | null
+          created_at: string | null
+          event_type: string
+          id: string
+          language: string | null
+          legal_domain: string | null
+          location_state: string | null
+          metadata: Json | null
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string | null
+          event_type: string
+          id?: string
+          language?: string | null
+          legal_domain?: string | null
+          location_state?: string | null
+          metadata?: Json | null
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          language?: string | null
+          legal_domain?: string | null
+          location_state?: string | null
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string | null
+          ended_at: string | null
+          id: string
+          ip_hash: string | null
+          language: string
+          legal_domain: string | null
+          location_city: string | null
+          location_state: string | null
+          message_count: number | null
+          rating: number | null
+          session_id: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["conversation_status"] | null
+          updated_at: string | null
+          use_for_training: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          ip_hash?: string | null
+          language?: string
+          legal_domain?: string | null
+          location_city?: string | null
+          location_state?: string | null
+          message_count?: number | null
+          rating?: number | null
+          session_id: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["conversation_status"] | null
+          updated_at?: string | null
+          use_for_training?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          ip_hash?: string | null
+          language?: string
+          legal_domain?: string | null
+          location_city?: string | null
+          location_state?: string | null
+          message_count?: number | null
+          rating?: number | null
+          session_id?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["conversation_status"] | null
+          updated_at?: string | null
+          use_for_training?: boolean | null
+        }
+        Relationships: []
+      }
+      document_embeddings: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string | null
+          document_id: string
+          embedding: string | null
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          created_at?: string | null
+          document_id: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string | null
+          document_id?: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_embeddings_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          chunk_count: number | null
+          created_at: string | null
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          name: string
+          processed_at: string | null
+          rules_extracted: Json | null
+          status: Database["public"]["Enums"]["document_status"] | null
+          topics_extracted: Json | null
+          updated_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          chunk_count?: number | null
+          created_at?: string | null
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          name: string
+          processed_at?: string | null
+          rules_extracted?: Json | null
+          status?: Database["public"]["Enums"]["document_status"] | null
+          topics_extracted?: Json | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          chunk_count?: number | null
+          created_at?: string | null
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          name?: string
+          processed_at?: string | null
+          rules_extracted?: Json | null
+          status?: Database["public"]["Enums"]["document_status"] | null
+          topics_extracted?: Json | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      legal_acts: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          sections: Json | null
+          short_name: string | null
+          updated_at: string | null
+          year: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          sections?: Json | null
+          short_name?: string | null
+          updated_at?: string | null
+          year?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          sections?: Json | null
+          short_name?: string | null
+          updated_at?: string | null
+          year?: number | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          audio_url: string | null
+          citations: Json | null
+          confidence_score: number | null
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          role: string
+        }
+        Insert: {
+          audio_url?: string | null
+          citations?: Json | null
+          confidence_score?: number | null
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          role: string
+        }
+        Update: {
+          audio_url?: string | null
+          citations?: Json | null
+          confidence_score?: number | null
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_hash: string | null
+          level: Database["public"]["Enums"]["log_level"] | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_hash?: string | null
+          level?: Database["public"]["Enums"]["log_level"] | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_hash?: string | null
+          level?: Database["public"]["Enums"]["log_level"] | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          key: string
+          updated_at: string | null
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_analytics_data: { Args: { days_back?: number }; Returns: Json }
+      get_dashboard_stats: { Args: never; Returns: Json }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      conversation_status: "open" | "resolved"
+      document_status: "pending" | "processing" | "processed" | "failed"
+      log_level: "info" | "warning" | "error"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +501,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      conversation_status: ["open", "resolved"],
+      document_status: ["pending", "processing", "processed", "failed"],
+      log_level: ["info", "warning", "error"],
+    },
   },
 } as const
