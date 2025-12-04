@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { LanguageCode } from '@/config/languages';
 
-// Browser TTS language code mapping
+// Browser TTS language code mapping (fallback)
 const TTS_LANG_MAP: Record<LanguageCode, string> = {
   'HI': 'hi-IN',
   'EN': 'en-IN',
@@ -25,7 +25,7 @@ interface UseTextToSpeechOptions {
 export const useTextToSpeech = ({ language }: UseTextToSpeechOptions) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const speak = useCallback(async (text: string) => {
     if (!text) return;
@@ -33,64 +33,86 @@ export const useTextToSpeech = ({ language }: UseTextToSpeechOptions) => {
     setIsLoading(true);
 
     try {
-      // Get cleaned text from backend
+      // Call Google Cloud TTS via edge function
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: { text, language }
       });
 
       if (error) throw error;
 
-      const cleanText = data.text || text;
-
-      // Cancel any ongoing speech
-      window.speechSynthesis.cancel();
-
-      // Use browser's built-in TTS
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.lang = TTS_LANG_MAP[language] || 'en-IN';
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-
-      // Find a suitable voice
-      const voices = window.speechSynthesis.getVoices();
-      const preferredVoice = voices.find(v => 
-        v.lang.startsWith(TTS_LANG_MAP[language]?.split('-')[0] || 'en')
-      );
-      if (preferredVoice) {
-        utterance.voice = preferredVoice;
+      if (!data.audioContent) {
+        throw new Error('No audio content received');
       }
 
-      utterance.onstart = () => {
+      // Stop any existing audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+
+      // Create audio from base64
+      const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
+      audioRef.current = audio;
+
+      audio.onloadstart = () => {
+        setIsLoading(true);
+      };
+
+      audio.oncanplay = () => {
+        setIsLoading(false);
+      };
+
+      audio.onplay = () => {
         setIsSpeaking(true);
         setIsLoading(false);
       };
 
-      utterance.onend = () => {
+      audio.onended = () => {
         setIsSpeaking(false);
+        audioRef.current = null;
       };
 
-      utterance.onerror = () => {
+      audio.onerror = (e) => {
+        console.error('Audio playback error:', e);
         setIsSpeaking(false);
         setIsLoading(false);
+        audioRef.current = null;
       };
 
-      utteranceRef.current = utterance;
-      window.speechSynthesis.speak(utterance);
+      await audio.play();
+
     } catch (err) {
       console.error('TTS error:', err);
       setIsLoading(false);
       
-      // Fallback to basic browser TTS
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = TTS_LANG_MAP[language] || 'en-IN';
-      utterance.onend = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-      setIsSpeaking(true);
+      // Fallback to browser TTS
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = TTS_LANG_MAP[language] || 'en-IN';
+        utterance.rate = 0.9;
+        
+        utterance.onstart = () => setIsSpeaking(true);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+        
+        window.speechSynthesis.speak(utterance);
+      } catch (fallbackErr) {
+        console.error('Browser TTS fallback also failed:', fallbackErr);
+      }
     }
   }, [language]);
 
   const stop = useCallback(() => {
+    // Stop HTML5 Audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    
+    // Also stop browser TTS in case fallback was used
     window.speechSynthesis.cancel();
+    
     setIsSpeaking(false);
     setIsLoading(false);
   }, []);
