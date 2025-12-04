@@ -343,6 +343,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_files: {
+        Row: {
+          analysis_result: Json | null
+          conversation_id: string | null
+          created_at: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          id: string
+          mime_type: string
+          processed_at: string | null
+          status: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          analysis_result?: Json | null
+          conversation_id?: string | null
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          id?: string
+          mime_type: string
+          processed_at?: string | null
+          status?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          analysis_result?: Json | null
+          conversation_id?: string | null
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          mime_type?: string
+          processed_at?: string | null
+          status?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_files_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_files_visitor_id_fkey"
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "user_visitors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null

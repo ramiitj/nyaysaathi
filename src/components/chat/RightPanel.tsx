@@ -5,12 +5,15 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import DocumentUpload from './DocumentUpload';
 import TextChat from './TextChat';
 import type { Message } from '@/pages/Chat';
+import type { UploadedFile } from '@/hooks/useFileUpload';
 
 interface RightPanelProps {
-  uploadedFiles: File[];
+  uploadedFiles: UploadedFile[];
   storageUsed: number;
-  onFilesUploaded: (files: File[]) => void;
-  onRemoveFile: (index: number) => void;
+  maxStorage: number;
+  isUploading: boolean;
+  onFilesSelected: (files: File[]) => void;
+  onRemoveFile: (fileId: string) => void;
   messages: Message[];
   onSendMessage: (content: string) => void;
 }
@@ -18,7 +21,9 @@ interface RightPanelProps {
 const RightPanel: React.FC<RightPanelProps> = ({
   uploadedFiles,
   storageUsed,
-  onFilesUploaded,
+  maxStorage,
+  isUploading,
+  onFilesSelected,
   onRemoveFile,
   messages,
   onSendMessage,
@@ -32,7 +37,9 @@ const RightPanel: React.FC<RightPanelProps> = ({
         <DocumentUpload
           uploadedFiles={uploadedFiles}
           storageUsed={storageUsed}
-          onFilesUploaded={onFilesUploaded}
+          maxStorage={maxStorage}
+          isUploading={isUploading}
+          onFilesSelected={onFilesSelected}
           onRemoveFile={onRemoveFile}
         />
       </div>

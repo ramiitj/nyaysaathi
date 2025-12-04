@@ -31,7 +31,7 @@ export const useConversation = ({ language, locationState }: UseConversationOpti
     }
   }, [language, locationState]);
 
-  const sendMessage = useCallback(async (content: string): Promise<Message | null> => {
+  const sendMessage = useCallback(async (content: string, fileContext?: string): Promise<Message | null> => {
     setIsLoading(true);
     setError(null);
 
@@ -52,14 +52,15 @@ export const useConversation = ({ language, locationState }: UseConversationOpti
       };
       setMessages(prev => [...prev, userMessage]);
 
-      // Send to AI
+      // Send to AI with optional file context
       const { data, error } = await supabase.functions.invoke('legal-chat', {
         body: {
           message: content,
           conversationId: convId,
           language,
           conversationHistory: messages.map(m => ({ role: m.role, content: m.content })),
-          locationState
+          locationState,
+          fileContext // Include file analysis context
         }
       });
 
