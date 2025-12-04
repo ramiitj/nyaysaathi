@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import {
   Dialog,
@@ -17,6 +18,7 @@ interface AdminLoginModalProps {
 }
 
 const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ open, onOpenChange }) => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -29,8 +31,8 @@ const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ open, onOpenChange })
     // TODO: Implement actual admin authentication
     setTimeout(() => {
       setIsLoading(false);
-      // For now, just close the modal
       onOpenChange(false);
+      navigate('/admin');
     }, 1000);
   };
 
