@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Map language codes to Google Cloud TTS Neural2 voice names
+// Map language codes to Google Cloud TTS Neural2 voice names (Indian voices)
 const VOICE_MAP: Record<string, { languageCode: string; name: string }> = {
   'HI': { languageCode: 'hi-IN', name: 'hi-IN-Neural2-A' },
   'EN': { languageCode: 'en-IN', name: 'en-IN-Neural2-A' },
@@ -97,7 +97,7 @@ serve(async (req) => {
 
     const voiceConfig = VOICE_MAP[language] || VOICE_MAP['EN'];
 
-    // Clean text for speech
+    // Clean text for speech - remove markdown formatting
     const cleanText = text
       .replace(/\*\*/g, '')
       .replace(/\*/g, '')
@@ -113,6 +113,7 @@ serve(async (req) => {
     const accessToken = await getAccessToken();
 
     // Call Google Cloud TTS API with OAuth2 token
+    // Using slower speaking rate (0.80) for natural conversational pace
     const response = await fetch(
       'https://texttospeech.googleapis.com/v1/text:synthesize',
       {
@@ -129,9 +130,9 @@ serve(async (req) => {
           },
           audioConfig: {
             audioEncoding: 'MP3',
-            speakingRate: 0.95,
+            speakingRate: 0.80,  // Slower for natural conversational pace
             pitch: 0,
-            volumeGainDb: 0,
+            volumeGainDb: 2,    // Slightly louder for clarity
           },
         }),
       }

@@ -2,13 +2,15 @@ import React from 'react';
 import { Mic, Loader2, Volume2, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { VoiceState } from '@/pages/Chat';
+import type { LanguageConfig } from '@/config/languages';
 
 interface VoiceButtonProps {
   state: VoiceState;
   onClick: () => void;
+  config: LanguageConfig;
 }
 
-const VoiceButton: React.FC<VoiceButtonProps> = ({ state, onClick }) => {
+const VoiceButton: React.FC<VoiceButtonProps> = ({ state, onClick, config }) => {
   const getButtonClasses = () => {
     const base = 'w-[150px] h-[150px] rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl';
     
@@ -40,11 +42,11 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({ state, onClick }) => {
   const getStateLabel = () => {
     switch (state) {
       case 'recording':
-        return 'Listening';
+        return config.ui.listening;
       case 'processing':
-        return 'Processing';
+        return config.ui.processing;
       case 'responding':
-        return 'Speaking';
+        return config.ui.speaking;
       default:
         return null;
     }
@@ -67,6 +69,7 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({ state, onClick }) => {
       {stateLabel && (
         <div className={cn(
           "px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 animate-fade-in",
+          config.fontClass,
           state === 'recording' && "bg-[#F97316] text-white",
           state === 'processing' && "bg-warning text-warning-foreground",
           state === 'responding' && "bg-success text-success-foreground"

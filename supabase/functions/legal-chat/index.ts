@@ -23,14 +23,37 @@ CRITICAL RULES:
 7. NEVER practice law or give specific legal advice - only provide general information
 8. Be empathetic and understanding - many users may be in distressing situations
 
+FORMATTING RULES (CRITICAL - FOLLOW STRICTLY):
+- DO NOT use asterisks (*) for emphasis or bold
+- DO NOT use double asterisks (**) for bold text
+- DO NOT use any markdown formatting like headers (#), bullet points with asterisks
+- Write in plain, natural sentences without any special formatting characters
+- Use proper punctuation: periods, commas, colons, semicolons
+- Use numbered lists (1. 2. 3.) if needed, NOT bullet points with dashes or asterisks
+- Write conversationally as if speaking to someone directly
+- Avoid technical jargon unless explaining it in simple terms
+
 RESPONSE FORMAT:
-- Start with appropriate disclaimer in user's language
-- Answer the question clearly and simply
-- Cite relevant laws when applicable
+- Start with appropriate disclaimer in user's language (no asterisks)
+- Answer the question clearly and simply in natural conversational tone
+- Cite relevant laws when applicable using [Act Name, Section X] format
 - Suggest practical next steps
 - End with "Consider consulting a lawyer for..." if the matter is serious
 
 SUPPORTED LANGUAGES: Hindi, English, Bengali, Tamil, Telugu, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Odia, Urdu`;
+
+// Function to clean response text of any remaining markdown
+function cleanResponseText(text: string): string {
+  return text
+    .replace(/\*\*/g, '')           // Remove bold markers
+    .replace(/\*/g, '')             // Remove italics markers
+    .replace(/#{1,6}\s/g, '')       // Remove headers
+    .replace(/^-\s/gm, '• ')        // Replace dash bullets with simple bullet
+    .replace(/^•\s/gm, '')          // Remove bullet points entirely for cleaner text
+    .replace(/`([^`]+)`/g, '$1')    // Remove code formatting
+    .replace(/\n{3,}/g, '\n\n')     // Reduce multiple newlines
+    .trim();
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -84,11 +107,11 @@ serve(async (req) => {
     const messages = [
       {
         role: 'user',
-        parts: [{ text: `${systemPrompt}${ragContext}\n\nUser language: ${language || 'English'}\nUser location: ${locationState || 'India'}\n\nPlease respond in ${language || 'English'}.` }]
+        parts: [{ text: `${systemPrompt}${ragContext}\n\nUser language: ${language || 'English'}\nUser location: ${locationState || 'India'}\n\nIMPORTANT: Respond in ${language || 'English'} without using any asterisks or markdown formatting. Write in natural, conversational sentences.` }]
       },
       {
         role: 'model',
-        parts: [{ text: 'I understand. I am Nyay Saathi, ready to help with legal information in the specified language while following all the critical rules.' }]
+        parts: [{ text: 'I understand. I am Nyay Saathi, ready to help with legal information in the specified language while following all the critical rules. I will respond in natural conversational language without using asterisks or markdown formatting.' }]
       }
     ];
 
@@ -137,7 +160,10 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, I could not generate a response. Please try again.';
+    const rawResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, I could not generate a response. Please try again.';
+    
+    // Clean the response text to remove any remaining markdown
+    const aiResponse = cleanResponseText(rawResponse);
 
     // Extract citations from response (simple pattern matching)
     const citationPattern = /\[([^\]]+(?:Act|Code|Law|Section|Article)[^\]]*)\]/gi;
