@@ -2,61 +2,48 @@ import React, { useState, useEffect } from 'react';
 import { X, ChevronRight, Mic, MessageSquare, Paperclip, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-interface OnboardingStep {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  targetSelector: string;
-  position: 'top' | 'bottom' | 'left' | 'right';
-}
-
-const ONBOARDING_STEPS: OnboardingStep[] = [
-  {
-    id: 'voice-button',
-    title: 'Tap to Speak',
-    description: 'Press the microphone to ask your legal questions using voice. Speak in any of our 12 supported Indian languages.',
-    icon: <Mic className="w-5 h-5" />,
-    targetSelector: '[aria-label*="Voice input"]',
-    position: 'top',
-  },
-  {
-    id: 'text-toggle',
-    title: 'Switch to Text',
-    description: 'Prefer typing? Toggle to text mode using the switch in the bottom bar.',
-    icon: <MessageSquare className="w-5 h-5" />,
-    targetSelector: '[aria-label*="Toggle"]',
-    position: 'top',
-  },
-  {
-    id: 'attach-button',
-    title: 'Upload Documents',
-    description: 'Upload legal documents, contracts, or images for AI analysis. We support PDFs, images, and more.',
-    icon: <Paperclip className="w-5 h-5" />,
-    targetSelector: '[aria-label*="Attach"]',
-    position: 'top',
-  },
-  {
-    id: 'listen-button',
-    title: 'Listen to Responses',
-    description: 'Click "Listen" on any response to hear it spoken in your selected language.',
-    icon: <Volume2 className="w-5 h-5" />,
-    targetSelector: '.listen-button',
-    position: 'left',
-  },
-];
+import type { LanguageConfig } from '@/config/languages';
 
 interface OnboardingTooltipsProps {
   onComplete: () => void;
+  config: LanguageConfig;
 }
 
-const OnboardingTooltips: React.FC<OnboardingTooltipsProps> = ({ onComplete }) => {
+const OnboardingTooltips: React.FC<OnboardingTooltipsProps> = ({ onComplete, config }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
+  const onboarding = config.ui.onboarding;
+
+  // Define steps with localized content
+  const steps = [
+    {
+      id: 'voice-button',
+      title: onboarding?.talkToMe || 'Talk to Me',
+      description: onboarding?.talkToMeDesc || 'Just tap the mic and ask your question. Speak naturally like you would to a friend!',
+      icon: <Mic className="w-6 h-6" />,
+    },
+    {
+      id: 'text-toggle',
+      title: onboarding?.switchToText || 'Switch to Text',
+      description: onboarding?.switchToTextDesc || 'Prefer typing? Toggle to text mode using the switch in the bottom bar.',
+      icon: <MessageSquare className="w-6 h-6" />,
+    },
+    {
+      id: 'attach-button',
+      title: onboarding?.uploadDocs || 'Upload Documents',
+      description: onboarding?.uploadDocsDesc || 'Upload legal documents for AI analysis. We support PDF, DOCX, XLSX, CSV, and images.',
+      icon: <Paperclip className="w-6 h-6" />,
+    },
+    {
+      id: 'listen-button',
+      title: onboarding?.listenResponses || 'Listen to Responses',
+      description: onboarding?.listenResponsesDesc || 'Click the speaker icon on any response to hear it in your language.',
+      icon: <Volume2 className="w-6 h-6" />,
+    },
+  ];
+
   useEffect(() => {
-    // Add backdrop blur effect
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = '';
@@ -64,7 +51,7 @@ const OnboardingTooltips: React.FC<OnboardingTooltipsProps> = ({ onComplete }) =
   }, []);
 
   const handleNext = () => {
-    if (currentStep < ONBOARDING_STEPS.length - 1) {
+    if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       handleComplete();
@@ -84,7 +71,13 @@ const OnboardingTooltips: React.FC<OnboardingTooltipsProps> = ({ onComplete }) =
 
   if (!isVisible) return null;
 
-  const step = ONBOARDING_STEPS[currentStep];
+  const step = steps[currentStep];
+  const isLastStep = currentStep === steps.length - 1;
+
+  // Format step counter
+  const stepText = (onboarding?.stepOf || 'Step {current} of {total}')
+    .replace('{current}', String(currentStep + 1))
+    .replace('{total}', String(steps.length));
 
   return (
     <div className={cn(
@@ -94,79 +87,85 @@ const OnboardingTooltips: React.FC<OnboardingTooltipsProps> = ({ onComplete }) =
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       
-      {/* Center modal for onboarding */}
+      {/* Center modal */}
       <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="bg-card rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in border border-border">
+        <div className={cn(
+          "bg-card rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-scale-in border border-border relative",
+          config.fontClass
+        )}>
           {/* Close button */}
           <button
             onClick={handleSkip}
-            className="absolute top-4 right-4 p-1 rounded-full hover:bg-muted transition-colors"
-            aria-label="Skip onboarding"
+            className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-muted transition-colors"
+            aria-label="Close"
           >
             <X className="w-5 h-5 text-muted-foreground" />
           </button>
           
-          {/* Progress dots */}
-          <div className="flex justify-center gap-2 mb-6">
-            {ONBOARDING_STEPS.map((_, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "w-2 h-2 rounded-full transition-all duration-300",
-                  index === currentStep 
-                    ? "bg-primary w-6" 
-                    : index < currentStep 
-                      ? "bg-primary/50" 
-                      : "bg-muted"
-                )}
-              />
-            ))}
-          </div>
-          
-          {/* Icon */}
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+          {/* Icon + Title row */}
+          <div className="flex items-center gap-3 mb-4 pr-8">
+            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground shrink-0">
               {step.icon}
             </div>
-          </div>
-          
-          {/* Content */}
-          <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-foreground mb-2">
+            <h3 className="text-lg font-semibold text-foreground">
               {step.title}
             </h3>
-            <p className="text-muted-foreground text-sm">
-              {step.description}
-            </p>
           </div>
           
-          {/* Actions */}
-          <div className="flex gap-3">
+          {/* Description */}
+          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+            {step.description}
+          </p>
+          
+          {/* Bottom row: Skip, Progress, Next */}
+          <div className="flex items-center justify-between">
+            {/* Skip button */}
             <Button
-              variant="outline"
-              className="flex-1"
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
               onClick={handleSkip}
             >
-              Skip
+              {onboarding?.skip || 'Skip'}
             </Button>
+            
+            {/* Progress dots */}
+            <div className="flex gap-1.5">
+              {steps.map((_, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "w-2 h-2 rounded-full transition-all duration-300",
+                    index === currentStep 
+                      ? "bg-primary w-4" 
+                      : index < currentStep 
+                        ? "bg-primary/60" 
+                        : "bg-muted-foreground/30"
+                  )}
+                />
+              ))}
+            </div>
+            
+            {/* Next/Get Started button */}
             <Button
-              className="flex-1 gap-2"
+              size="sm"
+              className="gap-1"
               onClick={handleNext}
             >
-              {currentStep < ONBOARDING_STEPS.length - 1 ? (
+              {isLastStep ? (
+                onboarding?.getStarted || 'Get Started'
+              ) : (
                 <>
-                  Next
+                  {onboarding?.next || 'Next'}
                   <ChevronRight className="w-4 h-4" />
                 </>
-              ) : (
-                "Get Started"
               )}
             </Button>
           </div>
           
           {/* Step counter */}
           <p className="text-center text-xs text-muted-foreground mt-4">
-            Step {currentStep + 1} of {ONBOARDING_STEPS.length}
+            {stepText}
           </p>
         </div>
       </div>

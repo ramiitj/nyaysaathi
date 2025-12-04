@@ -52,6 +52,7 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
   const [inputValue, setInputValue] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastMessageIdRef = useRef<string | null>(null);
+  const welcomeSpokenRef = useRef(false);
 
   // Voice recording hook
   const { isRecording, isProcessing, toggleRecording } = useVoiceRecording({
@@ -96,6 +97,24 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Auto-speak welcome message on mount in voice mode
+  useEffect(() => {
+    if (
+      inputMode === 'voice' &&
+      messages.length === 0 &&
+      !welcomeSpokenRef.current &&
+      !isSpeaking &&
+      !ttsLoading
+    ) {
+      welcomeSpokenRef.current = true;
+      // Small delay to ensure audio context is ready
+      const timer = setTimeout(() => {
+        speak(config.ui.welcomeMessage);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [inputMode, messages.length, speak, config.ui.welcomeMessage, isSpeaking, ttsLoading]);
 
   // Auto-speak new assistant messages in voice mode (concurrent playback - immediate)
   useEffect(() => {

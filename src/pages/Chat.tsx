@@ -110,13 +110,8 @@ const Chat: React.FC = () => {
     const fileContext = getFileContext();
     const response = await sendMessage(content, fileContext);
     
-    if (response) {
-      setVoiceState('responding');
-      // Reset to idle after a short delay
-      setTimeout(() => setVoiceState('idle'), 500);
-    } else {
-      setVoiceState('idle');
-    }
+    // Immediate state transition - no artificial delay
+    setVoiceState('idle');
   };
 
   const handleFilesSelected = async (files: File[]) => {
@@ -169,7 +164,7 @@ const Chat: React.FC = () => {
 
       {/* First-time user onboarding tooltips */}
       {!visitorLoading && isFirstTimeUser && (
-        <OnboardingTooltips onComplete={handleOnboardingComplete} />
+        <OnboardingTooltips onComplete={handleOnboardingComplete} config={config} />
       )}
     </div>
   );
