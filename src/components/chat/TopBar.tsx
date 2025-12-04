@@ -1,12 +1,14 @@
 import React from 'react';
 import { Scale, RotateCcw, Info, AlertTriangle, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import type { LanguageConfig } from '@/config/languages';
 
 interface TopBarProps {
   onStartFresh: () => void;
   onInfoClick: () => void;
   onEmergencyClick: () => void;
   onAdminClick: () => void;
+  config: LanguageConfig;
 }
 
 const TopBar: React.FC<TopBarProps> = ({
@@ -14,6 +16,7 @@ const TopBar: React.FC<TopBarProps> = ({
   onInfoClick,
   onEmergencyClick,
   onAdminClick,
+  config,
 }) => {
   return (
     <header className="h-14 bg-card/80 backdrop-blur-sm px-4 flex items-center justify-between border-b border-border/50">
@@ -34,7 +37,7 @@ const TopBar: React.FC<TopBarProps> = ({
           className="gap-1.5 text-muted-foreground hover:text-foreground"
         >
           <RotateCcw className="w-4 h-4" />
-          <span className="hidden sm:inline">Start Fresh</span>
+          <span className={`hidden sm:inline ${config.fontClass}`}>{config.ui.startFresh}</span>
         </Button>
 
         <Button
@@ -53,7 +56,7 @@ const TopBar: React.FC<TopBarProps> = ({
           className="gap-1.5 bg-helpline hover:bg-helpline/90 text-white"
         >
           <AlertTriangle className="w-4 h-4" />
-          <span className="hidden sm:inline">Helpline</span>
+          <span className={`hidden sm:inline ${config.fontClass}`}>{config.ui.helpline}</span>
         </Button>
 
         <Button

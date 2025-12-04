@@ -81,7 +81,7 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
     }
   }, [messages]);
 
-  // Auto-speak new assistant messages in voice mode (concurrent playback)
+  // Auto-speak new assistant messages in voice mode (concurrent playback - immediate)
   useEffect(() => {
     if (messages.length === 0) return;
     
@@ -91,18 +91,16 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
     // 1. It's an assistant message
     // 2. We're in voice mode
     // 3. It's a new message (not already spoken)
-    // 4. Not already speaking
     if (
       lastMessage.role === 'assistant' &&
       inputMode === 'voice' &&
-      lastMessage.id !== lastMessageIdRef.current &&
-      !isSpeaking
+      lastMessage.id !== lastMessageIdRef.current
     ) {
       lastMessageIdRef.current = lastMessage.id;
       // Start speaking immediately (concurrent with text display)
       speak(lastMessage.content);
     }
-  }, [messages, inputMode, speak, isSpeaking]);
+  }, [messages, inputMode, speak]);
 
   const handleVoiceClick = () => {
     if (voiceState === 'responding') {
@@ -136,6 +134,9 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Get the last user message for "YOU SAID" card
+  const lastUserMessage = messages.filter(m => m.role === 'user').pop();
+
   return (
     <div className="h-full flex flex-col">
       {/* Messages Area */}
@@ -151,18 +152,18 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
                 </span>
               </div>
               <p className={`text-foreground ${config.fontClass}`}>
-                Hey there! I'm Nyay Saathi, your legal buddy. What's on your mind today? I'm here to help you understand your legal rights and guide you through any legal questions you might have.
+                {config.ui.welcomeMessage}
               </p>
               <div className="flex items-center justify-between mt-3">
                 <span className="text-xs text-muted-foreground">Just now</span>
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="gap-1 text-xs text-muted-foreground listen-button"
-                  onClick={() => handleListen("Hey there! I'm Nyay Saathi, your legal buddy. What's on your mind today? I'm here to help you understand your legal rights and guide you through any legal questions you might have.")}
+                  className={`gap-1 text-xs text-muted-foreground listen-button ${config.fontClass}`}
+                  onClick={() => handleListen(config.ui.welcomeMessage)}
                 >
                   {isSpeaking ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
-                  {isSpeaking ? 'Stop' : 'Listen'}
+                  {isSpeaking ? config.ui.stop : config.ui.listen}
                 </Button>
               </div>
             </div>
@@ -193,19 +194,19 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="gap-1 text-xs text-muted-foreground h-6 px-2 listen-button"
+                      className={`gap-1 text-xs text-muted-foreground h-6 px-2 listen-button ${config.fontClass}`}
                       onClick={() => handleListen(message.content)}
                       disabled={ttsLoading}
                     >
                       {isSpeaking ? (
                         <>
                           <Square className="w-3 h-3 fill-current" />
-                          Stop
+                          {config.ui.stop}
                         </>
                       ) : (
                         <>
                           <Volume2 className="w-3 h-3" />
-                          Listen
+                          {config.ui.listen}
                         </>
                       )}
                     </Button>
@@ -217,7 +218,7 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
                 {/* Citations */}
                 {message.citations && message.citations.length > 0 && (
                   <div className="mt-2 pt-2 border-t border-border/50">
-                    <p className="text-xs text-muted-foreground mb-1">References:</p>
+                    <p className={`text-xs text-muted-foreground mb-1 ${config.fontClass}`}>{config.ui.references}:</p>
                     {message.citations.map((citation, idx) => (
                       <span key={idx} className="inline-block text-xs bg-muted px-2 py-0.5 rounded mr-1 mb-1">
                         {citation.text}
@@ -244,7 +245,7 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
               <div className="bg-card rounded-2xl p-4 shadow-sm border border-border/50">
                 <div className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                  <span className="text-sm text-muted-foreground">Thinking...</span>
+                  <span className={`text-sm text-muted-foreground ${config.fontClass}`}>{config.ui.thinking}</span>
                 </div>
               </div>
             </div>
@@ -255,8 +256,8 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
             <div className="bg-card rounded-2xl p-4 border border-[#F97316]/30 shadow-sm animate-fade-in">
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-2 h-2 rounded-full bg-[#F97316] animate-pulse" />
-                <span className="text-xs font-medium text-[#F97316] uppercase tracking-wide">
-                  Transcribing...
+                <span className={`text-xs font-medium text-[#F97316] uppercase tracking-wide ${config.fontClass}`}>
+                  {config.ui.analyzing}...
                 </span>
               </div>
               <p className={`text-foreground ${config.fontClass}`}>{transcription}</p>
@@ -268,10 +269,23 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
       {/* Voice Mode Input */}
       {inputMode === 'voice' && (
         <div className="flex flex-col items-center py-8 px-4">
-          <VoiceButton state={voiceState} onClick={handleVoiceClick} />
-          <p className="text-sm text-muted-foreground mt-4 text-center">
+          <VoiceButton state={voiceState} onClick={handleVoiceClick} config={config} />
+          <p className={`text-sm text-muted-foreground mt-4 text-center ${config.fontClass}`}>
             {voiceState === 'idle' && config.ui.tapToSpeak}
           </p>
+          
+          {/* YOU SAID Card - Below Voice Button */}
+          {lastUserMessage && voiceState === 'idle' && (
+            <div className="bg-card rounded-2xl p-4 border shadow-sm max-w-md mt-6 w-full">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full bg-muted-foreground" />
+                <span className={`text-xs font-medium uppercase tracking-wide text-muted-foreground ${config.fontClass}`}>
+                  {config.ui.youSaid}
+                </span>
+              </div>
+              <p className={`text-foreground ${config.fontClass}`}>{lastUserMessage.content}</p>
+            </div>
+          )}
         </div>
       )}
 

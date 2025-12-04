@@ -110,6 +110,7 @@ const Chat: React.FC = () => {
         onInfoClick={() => navigate('/about')}
         onEmergencyClick={() => setShowEmergencyModal(true)}
         onAdminClick={() => setShowAdminModal(true)}
+        config={config}
       />
 
       <div className="flex-1 overflow-hidden">
@@ -129,6 +130,7 @@ const Chat: React.FC = () => {
         inputMode={inputMode}
         setInputMode={setInputMode}
         isConnected={isConnected}
+        config={config}
       />
 
       {/* Modals */}
