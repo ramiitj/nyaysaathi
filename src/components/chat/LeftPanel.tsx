@@ -3,7 +3,13 @@ import { Scale, MapPin, FileText, Tag, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import type { LegalContext } from '@/pages/Chat';
+
+interface LegalContext {
+  domain: string;
+  jurisdiction: string;
+  relevantActs: string[];
+  caseType: string;
+}
 
 interface LeftPanelProps {
   legalContext: LegalContext;

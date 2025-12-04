@@ -10,22 +10,22 @@ interface VoiceButtonProps {
 
 const VoiceButton: React.FC<VoiceButtonProps> = ({ state, onClick }) => {
   const getButtonClasses = () => {
-    const base = 'voice-button w-40 h-40 md:w-48 md:h-48';
+    const base = 'w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg';
     
     switch (state) {
       case 'recording':
-        return cn(base, 'voice-button-recording');
+        return cn(base, 'bg-destructive text-destructive-foreground animate-pulse-recording');
       case 'processing':
-        return cn(base, 'voice-button-processing');
+        return cn(base, 'bg-warning text-warning-foreground');
       case 'responding':
-        return cn(base, 'voice-button-responding');
+        return cn(base, 'bg-success text-success-foreground animate-pulse-responding');
       default:
-        return cn(base, 'voice-button-idle hover:scale-105 active:scale-95');
+        return cn(base, 'bg-primary text-primary-foreground hover:scale-110 active:scale-95');
     }
   };
 
   const renderIcon = () => {
-    const iconClass = 'w-16 h-16 md:w-20 md:h-20';
+    const iconClass = 'w-8 h-8';
     
     switch (state) {
       case 'recording':
@@ -54,11 +54,11 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({ state, onClick }) => {
 // Waveform animation component
 const Waveform: React.FC = () => {
   return (
-    <div className="flex items-center justify-center gap-1 h-16 md:h-20">
-      {[...Array(5)].map((_, i) => (
+    <div className="flex items-center justify-center gap-1 h-8">
+      {[...Array(4)].map((_, i) => (
         <div
           key={i}
-          className="waveform-bar w-2 md:w-3 rounded-full"
+          className="waveform-bar w-1 rounded-full bg-current"
           style={{ animationDelay: `${i * 0.1}s` }}
         />
       ))}
