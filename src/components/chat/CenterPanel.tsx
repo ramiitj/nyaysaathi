@@ -140,14 +140,18 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
   }, [messages, inputMode, speak]);
 
   const handleVoiceClick = () => {
-    if (voiceState === 'responding') {
-      // Stop TTS if responding
+    // ALWAYS stop TTS first when user wants to speak (voice interruption)
+    if (isSpeaking || ttsLoading) {
       stop();
-    } else if (voiceState === 'idle' || voiceState === 'recording') {
+    }
+    
+    if (voiceState === 'recording') {
+      // Stop recording
       toggleRecording();
-      if (voiceState === 'idle') {
-        setTranscription('');
-      }
+    } else if (voiceState === 'idle' || voiceState === 'responding') {
+      // Start recording (TTS already stopped above if it was playing)
+      setTranscription('');
+      toggleRecording();
     }
   };
 

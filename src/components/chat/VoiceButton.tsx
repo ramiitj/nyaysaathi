@@ -80,8 +80,12 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({ state, onClick, config }) => 
       <button
         onClick={onClick}
         disabled={state === 'transcribing' || state === 'processing'}
-        className={getButtonClasses()}
-        aria-label={`Voice input - ${state}`}
+        className={cn(
+          getButtonClasses(),
+          // Show cursor pointer during responding to indicate interruptible
+          state === 'responding' && 'cursor-pointer hover:scale-105'
+        )}
+        aria-label={state === 'responding' ? 'Click to interrupt and speak' : `Voice input - ${state}`}
       >
         {renderIcon()}
       </button>

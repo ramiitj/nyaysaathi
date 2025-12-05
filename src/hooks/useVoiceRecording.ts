@@ -10,8 +10,9 @@ interface UseVoiceRecordingOptions {
 }
 
 const MIN_RECORDING_DURATION = 500; // Minimum 500ms to prevent accidental taps
-const SILENCE_THRESHOLD = 0.01; // Audio level threshold for speech detection
-const MIN_SPEECH_FRAMES = 5; // Minimum frames with speech before considering valid
+const SILENCE_THRESHOLD = 0.02; // More lenient threshold for speech detection
+const MIN_SPEECH_FRAMES = 3; // Reduced frames required for valid speech
+const MIN_DURATION_FOR_BACKEND = 800; // Send to backend if recording > 800ms regardless
 
 export const useVoiceRecording = ({ 
   language, 
@@ -51,24 +52,28 @@ export const useVoiceRecording = ({
     return cleanup;
   }, [cleanup]);
 
-  // Monitor audio levels for visual feedback
+  // Monitor audio levels using time-domain analysis for better speech detection
   const monitorAudioLevel = useCallback(() => {
     if (!analyserRef.current || !isRecording) return;
 
     const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-    analyserRef.current.getByteFrequencyData(dataArray);
+    // Use time-domain data for amplitude-based detection (more reliable)
+    analyserRef.current.getByteTimeDomainData(dataArray);
 
-    // Calculate average audio level (0-1)
-    const average = dataArray.reduce((sum, val) => sum + val, 0) / dataArray.length;
-    const normalizedLevel = average / 255;
+    // Calculate max amplitude deviation from center (128 is silence)
+    let maxAmplitude = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+      const amplitude = Math.abs(dataArray[i] - 128) / 128;
+      maxAmplitude = Math.max(maxAmplitude, amplitude);
+    }
 
-    // Track speech frames
-    if (normalizedLevel > SILENCE_THRESHOLD) {
+    // Track speech frames when amplitude exceeds threshold
+    if (maxAmplitude > SILENCE_THRESHOLD) {
       speechFramesRef.current++;
     }
 
     // Callback for visual feedback
-    onAudioLevel?.(normalizedLevel);
+    onAudioLevel?.(maxAmplitude);
 
     animationFrameRef.current = requestAnimationFrame(monitorAudioLevel);
   }, [isRecording, onAudioLevel]);
@@ -124,10 +129,13 @@ export const useVoiceRecording = ({
           return;
         }
 
-        // Check for actual speech
-        if (!hasSpeech) {
+        // Be lenient: if duration is reasonable (>800ms), send to backend regardless
+        // Let Gemini decide if there's valid speech
+        const shouldSendToBackend = recordingDuration >= MIN_DURATION_FOR_BACKEND || hasSpeech;
+        
+        if (!shouldSendToBackend) {
           cleanup();
-          onError?.('No speech detected. Please speak clearly.');
+          onError?.('No speech detected. Please try again.');
           return;
         }
 
