@@ -47,6 +47,7 @@ export interface LanguageConfig {
     welcomeMessage: string;
     thinking: string;
     processing: string;
+    transcribing: string;
     listen: string;
     stop: string;
     references: string;
@@ -87,6 +88,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       welcomeMessage: 'नमस्ते! मैं न्याय साथी हूँ, आपका कानूनी मित्र। आज आपके मन में क्या है? मैं आपके कानूनी अधिकारों को समझने और किसी भी कानूनी प्रश्न में मार्गदर्शन करने के लिए यहाँ हूँ।',
       thinking: 'सोच रहा हूँ...',
       processing: 'प्रोसेसिंग',
+      transcribing: 'लिख रहा हूँ',
       listen: 'सुनें',
       stop: 'रोकें',
       references: 'संदर्भ',
@@ -138,6 +140,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       welcomeMessage: "Hey there! I'm Nyay Saathi, your legal buddy. What's on your mind today? I'm here to help you understand your legal rights and guide you through any legal questions you might have.",
       thinking: 'Thinking...',
       processing: 'Processing',
+      transcribing: 'Transcribing',
       listen: 'Listen',
       stop: 'Stop',
       references: 'References',
@@ -189,6 +192,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       welcomeMessage: 'হ্যালো! আমি ন্যায় সাথী, আপনার আইনি বন্ধু। আজ আপনার মনে কী আছে? আমি আপনার আইনি অধিকার বুঝতে এবং আপনার আইনি প্রশ্নে সাহায্য করতে এখানে আছি।',
       thinking: 'ভাবছি...',
       processing: 'প্রক্রিয়াকরণ',
+      transcribing: 'লিখছি',
       listen: 'শুনুন',
       stop: 'বন্ধ করুন',
       references: 'তথ্যসূত্র',
@@ -240,6 +244,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       welcomeMessage: 'வணக்கம்! நான் நியாய சாதி, உங்கள் சட்ட நண்பன். இன்று உங்கள் மனதில் என்ன இருக்கிறது? உங்கள் சட்ட உரிமைகளை புரிந்துகொள்ள உதவ நான் இங்கே இருக்கிறேன்.',
       thinking: 'யோசிக்கிறேன்...',
       processing: 'செயலாக்கம்',
+      transcribing: 'எழுதுகிறேன்',
       listen: 'கேளுங்கள்',
       stop: 'நிறுத்து',
       references: 'குறிப்புகள்',
@@ -291,6 +296,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       welcomeMessage: 'హలో! నేను న్యాయ సాథి, మీ చట్టపరమైన మిత్రుడు. ఈరోజు మీ మనసులో ఏముంది? మీ చట్టపరమైన హక్కులను అర్థం చేసుకోవడంలో సహాయం చేయడానికి నేను ఇక్కడ ఉన్నాను.',
       thinking: 'ఆలోచిస్తున్నాను...',
       processing: 'ప్రాసెసింగ్',
+      transcribing: 'రాస్తున్నాను',
       listen: 'వినండి',
       stop: 'ఆపు',
       references: 'సూచనలు',
@@ -342,6 +348,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       welcomeMessage: 'नमस्कार! मी न्याय साथी, तुमचा कायदेशीर मित्र. आज तुमच्या मनात काय आहे? तुमचे कायदेशीर हक्क समजून घेण्यास मदत करण्यासाठी मी इथे आहे.',
       thinking: 'विचार करत आहे...',
       processing: 'प्रक्रिया',
+      transcribing: 'लिहित आहे',
       listen: 'ऐका',
       stop: 'थांबा',
       references: 'संदर्भ',
@@ -393,6 +400,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       welcomeMessage: 'નમસ્તે! હું ન્યાય સાથી, તમારો કાનૂની મિત્ર. આજે તમારા મનમાં શું છે? તમારા કાનૂની અધિકારો સમજવામાં મદદ કરવા હું અહીં છું.',
       thinking: 'વિચારી રહ્યો છું...',
       processing: 'પ્રોસેસિંગ',
+      transcribing: 'લખી રહ્યો છું',
       listen: 'સાંભળો',
       stop: 'બંધ કરો',
       references: 'સંદર્ભો',
@@ -444,6 +452,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       welcomeMessage: 'ನಮಸ್ಕಾರ! ನಾನು ನ್ಯಾಯ ಸಾಥಿ, ನಿಮ್ಮ ಕಾನೂನು ಸ್ನೇಹಿತ. ಇಂದು ನಿಮ್ಮ ಮನಸ್ಸಿನಲ್ಲಿ ಏನಿದೆ? ನಿಮ್ಮ ಕಾನೂನು ಹಕ್ಕುಗಳನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಸಹಾಯ ಮಾಡಲು ನಾನು ಇಲ್ಲಿದ್ದೇನೆ.',
       thinking: 'ಯೋಚಿಸುತ್ತಿದ್ದೇನೆ...',
       processing: 'ಪ್ರಕ್ರಿಯೆ',
+      transcribing: 'ಬರೆಯುತ್ತಿದ್ದೇನೆ',
       listen: 'ಕೇಳಿ',
       stop: 'ನಿಲ್ಲಿಸಿ',
       references: 'ಉಲ್ಲೇಖಗಳು',
@@ -495,6 +504,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       welcomeMessage: 'ഹലോ! ഞാൻ ന്യായ സാഥി, നിങ്ങളുടെ നിയമ സുഹൃത്ത്. ഇന്ന് നിങ്ങളുടെ മനസ്സിൽ എന്താണ്? നിങ്ങളുടെ നിയമ അവകാശങ്ങൾ മനസ്സിലാക്കാൻ സഹായിക്കാൻ ഞാൻ ഇവിടെയുണ്ട്.',
       thinking: 'ചിന്തിക്കുന്നു...',
       processing: 'പ്രോസസ്സിംഗ്',
+      transcribing: 'എഴുതുന്നു',
       listen: 'കേൾക്കുക',
       stop: 'നിർത്തുക',
       references: 'റഫറൻസുകൾ',
@@ -546,6 +556,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       welcomeMessage: 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਨਿਆਂ ਸਾਥੀ ਹਾਂ, ਤੁਹਾਡਾ ਕਾਨੂੰਨੀ ਦੋਸਤ। ਅੱਜ ਤੁਹਾਡੇ ਮਨ ਵਿੱਚ ਕੀ ਹੈ? ਮੈਂ ਤੁਹਾਡੇ ਕਾਨੂੰਨੀ ਹੱਕਾਂ ਨੂੰ ਸਮਝਣ ਵਿੱਚ ਮਦਦ ਕਰਨ ਲਈ ਇੱਥੇ ਹਾਂ।',
       thinking: 'ਸੋਚ ਰਿਹਾ ਹਾਂ...',
       processing: 'ਪ੍ਰੋਸੈਸਿੰਗ',
+      transcribing: 'ਲਿਖ ਰਿਹਾ ਹਾਂ',
       listen: 'ਸੁਣੋ',
       stop: 'ਰੋਕੋ',
       references: 'ਹਵਾਲੇ',
@@ -597,6 +608,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       welcomeMessage: 'ନମସ୍କାର! ମୁଁ ନ୍ୟାୟ ସାଥୀ, ଆପଣଙ୍କ ଆଇନଗତ ସାଙ୍ଗ। ଆଜି ଆପଣଙ୍କ ମନରେ କଣ ଅଛି? ଆପଣଙ୍କ ଆଇନଗତ ଅଧିକାର ବୁଝିବାରେ ସାହାଯ୍ୟ କରିବାକୁ ମୁଁ ଏଠାରେ ଅଛି।',
       thinking: 'ଭାବୁଛି...',
       processing: 'ପ୍ରକ୍ରିୟାକରଣ',
+      transcribing: 'ଲେଖୁଛି',
       listen: 'ଶୁଣନ୍ତୁ',
       stop: 'ବନ୍ଦ କରନ୍ତୁ',
       references: 'ସନ୍ଦର୍ଭ',
@@ -648,6 +660,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       welcomeMessage: 'السلام علیکم! میں نیائے ساتھی ہوں، آپ کا قانونی دوست۔ آج آپ کے ذہن میں کیا ہے؟ میں آپ کے قانونی حقوق سمجھنے میں مدد کرنے کے لیے یہاں ہوں۔',
       thinking: 'سوچ رہا ہوں...',
       processing: 'پروسیسنگ',
+      transcribing: 'لکھ رہا ہوں',
       listen: 'سنیں',
       stop: 'روکیں',
       references: 'حوالہ جات',

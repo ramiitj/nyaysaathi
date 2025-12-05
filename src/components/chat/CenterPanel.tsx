@@ -76,18 +76,20 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
     language: config.code
   });
 
-  // Sync voice state with recording state
+  // Sync voice state with recording state - clearer state transitions
   useEffect(() => {
     if (isRecording) {
       setVoiceState('recording');
-    } else if (isProcessing || isLoading) {
+    } else if (isProcessing) {
+      // Transcribing state - converting speech to text
+      setVoiceState('transcribing');
+    } else if (isLoading) {
+      // Processing state - AI is thinking
       setVoiceState('processing');
     } else if (isSpeaking) {
       setVoiceState('responding');
     } else if (voiceState !== 'idle') {
-      if (!isLoading) {
-        setVoiceState('idle');
-      }
+      setVoiceState('idle');
     }
   }, [isRecording, isProcessing, isSpeaking, isLoading, setVoiceState, voiceState]);
 
@@ -286,13 +288,34 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
             </div>
           )}
 
-          {/* Transcription Card - Money Saathi Style */}
-          {transcription && voiceState !== 'idle' && !isLoading && (
-            <div className="bg-card rounded-2xl p-4 border border-[#F97316]/30 shadow-sm animate-fade-in">
+          {/* Transcription Card - Shows during transcribing state */}
+          {voiceState === 'transcribing' && (
+            <div className="bg-card rounded-2xl p-4 border border-amber-500/30 shadow-sm animate-fade-in">
               <div className="flex items-center gap-2 mb-2">
-                <span className="w-2 h-2 rounded-full bg-[#F97316] animate-pulse" />
-                <span className={`text-xs font-medium text-[#F97316] uppercase tracking-wide ${config.fontClass}`}>
-                  {config.ui.analyzing}...
+                <Loader2 className="w-3 h-3 text-amber-500 animate-spin" />
+                <span className={`text-xs font-medium text-amber-500 uppercase tracking-wide ${config.fontClass}`}>
+                  {config.ui.transcribing}
+                </span>
+              </div>
+              <div className="flex gap-1">
+                {[...Array(3)].map((_, i) => (
+                  <div 
+                    key={i} 
+                    className="w-2 h-2 rounded-full bg-amber-500 animate-bounce"
+                    style={{ animationDelay: `${i * 0.15}s` }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* You Said Card - Shows transcription result */}
+          {transcription && (voiceState === 'processing' || voiceState === 'responding') && (
+            <div className="bg-card rounded-2xl p-4 border shadow-sm animate-fade-in">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full bg-muted-foreground" />
+                <span className={`text-xs font-medium uppercase tracking-wide text-muted-foreground ${config.fontClass}`}>
+                  {config.ui.youSaid}
                 </span>
               </div>
               <p className={`text-foreground ${config.fontClass}`}>{transcription}</p>
