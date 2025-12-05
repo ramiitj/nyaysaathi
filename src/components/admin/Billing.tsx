@@ -1,58 +1,114 @@
-import { CreditCard, Check, Zap, MessageSquare, FileText, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CreditCard, Check, Zap, MessageSquare, FileText, Clock, Loader2, Database } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { supabase } from "@/integrations/supabase/client";
+
+interface UsageMetrics {
+  conversations: number;
+  documents: number;
+  embeddings: number;
+  visitors: number;
+}
 
 const Billing = () => {
+  const [usage, setUsage] = useState<UsageMetrics>({
+    conversations: 0,
+    documents: 0,
+    embeddings: 0,
+    visitors: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUsage();
+  }, []);
+
+  const fetchUsage = async () => {
+    try {
+      // Get conversation count
+      const { count: convCount } = await supabase
+        .from('conversations')
+        .select('id', { count: 'exact' });
+
+      // Get document count
+      const { count: docCount } = await supabase
+        .from('documents')
+        .select('id', { count: 'exact' });
+
+      // Get embeddings count
+      const { count: embCount } = await supabase
+        .from('document_embeddings')
+        .select('id', { count: 'exact' });
+
+      // Get visitor count
+      const { count: visitorCount } = await supabase
+        .from('user_visitors')
+        .select('id', { count: 'exact' });
+
+      setUsage({
+        conversations: convCount || 0,
+        documents: docCount || 0,
+        embeddings: embCount || 0,
+        visitors: visitorCount || 0,
+      });
+    } catch (err) {
+      console.error('Error fetching usage:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const currentPlan = {
-    name: "Professional",
-    price: "₹2,999",
+    name: "Free Tier",
+    price: "₹0",
     period: "month",
     features: [
       "Unlimited consultations",
       "All 12 languages",
-      "Priority support",
-      "Custom branding",
-      "Advanced analytics",
+      "Knowledge Base (5 documents)",
+      "Basic analytics",
+      "Community support",
     ],
   };
 
-  const usage = [
-    { name: "API Calls", used: 8547, limit: 10000, icon: Zap },
-    { name: "Conversations", used: 1247, limit: 2000, icon: MessageSquare },
-    { name: "Documents", used: 156, limit: 500, icon: FileText },
-    { name: "Storage", used: 2.4, limit: 5, unit: "GB", icon: FileText },
+  const usageMetrics = [
+    { name: "Conversations", used: usage.conversations, limit: "Unlimited", icon: MessageSquare, percentage: null },
+    { name: "Documents", used: usage.documents, limit: 5, icon: FileText, percentage: (usage.documents / 5) * 100 },
+    { name: "Embeddings", used: usage.embeddings, limit: 1000, icon: Database, percentage: (usage.embeddings / 1000) * 100 },
+    { name: "Visitors", used: usage.visitors, limit: "Unlimited", icon: Zap, percentage: null },
   ];
 
   const plans = [
     {
-      name: "Starter",
-      price: "₹999",
-      features: ["500 consultations/month", "3 languages", "Email support", "Basic analytics"],
-      current: false,
+      name: "Free",
+      price: "₹0",
+      features: ["Unlimited conversations", "5 KB documents", "1K embeddings", "Basic analytics"],
+      current: true,
     },
     {
       name: "Professional",
       price: "₹2,999",
-      features: ["Unlimited consultations", "All 12 languages", "Priority support", "Custom branding", "Advanced analytics"],
-      current: true,
+      features: ["Everything in Free", "50 KB documents", "50K embeddings", "Advanced analytics", "Priority support"],
+      current: false,
     },
     {
       name: "Enterprise",
       price: "Custom",
-      features: ["Everything in Pro", "Dedicated support", "Custom integrations", "SLA guarantee", "On-premise option"],
+      features: ["Everything in Pro", "Unlimited documents", "Custom integrations", "SLA guarantee", "Dedicated support"],
       current: false,
     },
   ];
 
-  const paymentHistory = [
-    { date: "1 Dec 2024", amount: "₹2,999", status: "Paid", invoice: "INV-2024-012" },
-    { date: "1 Nov 2024", amount: "₹2,999", status: "Paid", invoice: "INV-2024-011" },
-    { date: "1 Oct 2024", amount: "₹2,999", status: "Paid", invoice: "INV-2024-010" },
-    { date: "1 Sep 2024", amount: "₹2,999", status: "Paid", invoice: "INV-2024-009" },
-  ];
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -75,10 +131,6 @@ const Billing = () => {
             <span className="text-3xl font-bold">{currentPlan.price}</span>
             <span className="text-muted-foreground">/{currentPlan.period}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-            <Clock className="h-4 w-4" />
-            Next billing: 1 Jan 2025
-          </div>
           <ul className="space-y-2">
             {currentPlan.features.map((feature) => (
               <li key={feature} className="flex items-center gap-2 text-sm">
@@ -93,27 +145,26 @@ const Billing = () => {
       {/* Usage Metrics */}
       <Card className="bg-white">
         <CardHeader>
-          <CardTitle>Usage This Month</CardTitle>
+          <CardTitle>Current Usage</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {usage.map((item) => {
-              const percentage = (item.used / item.limit) * 100;
-              return (
-                <div key={item.name} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">{item.name}</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      {item.used}{item.unit || ""} / {item.limit}{item.unit || ""}
-                    </span>
+            {usageMetrics.map((item) => (
+              <div key={item.name} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <item.icon className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">{item.name}</span>
                   </div>
-                  <Progress value={percentage} className="h-2" />
+                  <span className="text-sm text-muted-foreground">
+                    {item.used.toLocaleString()} / {typeof item.limit === 'number' ? item.limit.toLocaleString() : item.limit}
+                  </span>
                 </div>
-              );
-            })}
+                {item.percentage !== null && (
+                  <Progress value={Math.min(item.percentage, 100)} className="h-2" />
+                )}
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -157,40 +208,13 @@ const Billing = () => {
         </CardContent>
       </Card>
 
-      {/* Payment History */}
-      <Card className="bg-white">
-        <CardHeader>
-          <CardTitle>Payment History</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Invoice</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paymentHistory.map((payment) => (
-                <TableRow key={payment.invoice}>
-                  <TableCell>{payment.date}</TableCell>
-                  <TableCell className="font-medium">{payment.amount}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="bg-green-100 text-green-700">
-                      {payment.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="link" className="p-0 h-auto text-primary">
-                      {payment.invoice}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {/* Info Note */}
+      <Card className="bg-muted/50">
+        <CardContent className="p-4">
+          <p className="text-sm text-muted-foreground">
+            <strong>Note:</strong> This is a development instance running on Lovable Cloud. 
+            For production deployments with higher limits, please contact the Nyay Saathi team.
+          </p>
         </CardContent>
       </Card>
     </div>

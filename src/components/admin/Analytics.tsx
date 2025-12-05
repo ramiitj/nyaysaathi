@@ -1,34 +1,61 @@
 import { useEffect, useState } from "react";
-import { Download, MessageSquare, Users, Clock, TrendingUp, MapPin, UserPlus, RefreshCw, Globe, Monitor } from "lucide-react";
+import { Download, MessageSquare, Users, Clock, TrendingUp, MapPin, UserPlus, RefreshCw, Globe, Monitor, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface AnalyticsData {
+  language_distribution: { name: string; value: number }[];
+  domain_distribution: { name: string; value: number }[];
+  daily_consultations: { day: string; consultations: number }[];
+  state_distribution: { state: string; users: number }[];
+}
 
 const Analytics = () => {
-  const [visitorStats, setVisitorStats] = useState({
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalConsultations: 0,
     totalVisitors: 0,
     newVisitors: 0,
     returningVisitors: 0,
     avgVisits: 0,
   });
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
+    language_distribution: [],
+    domain_distribution: [],
+    daily_consultations: [],
+    state_distribution: [],
+  });
   const [deviceBreakdown, setDeviceBreakdown] = useState<{ name: string; value: number; color: string }[]>([]);
   const [browserBreakdown, setBrowserBreakdown] = useState<{ name: string; value: number }[]>([]);
-  const [isLoadingVisitors, setIsLoadingVisitors] = useState(true);
 
   useEffect(() => {
-    fetchVisitorData();
+    fetchAllData();
   }, []);
 
-  const fetchVisitorData = async () => {
-    setIsLoadingVisitors(true);
+  const fetchAllData = async () => {
+    setIsLoading(true);
+    await Promise.all([
+      fetchStats(),
+      fetchAnalyticsData(),
+      fetchVisitorData(),
+    ]);
+    setIsLoading(false);
+  };
+
+  const fetchStats = async () => {
     try {
-      // Fetch visitor statistics
-      const { data: visitors, error } = await supabase
+      // Get conversation count
+      const { count: convCount } = await supabase
+        .from('conversations')
+        .select('id', { count: 'exact' });
+
+      // Get visitor stats
+      const { data: visitors } = await supabase
         .from('user_visitors')
-        .select('*');
-      
-      if (error) throw error;
+        .select('visit_count');
 
       if (visitors) {
         const total = visitors.length;
@@ -38,14 +65,48 @@ const Analytics = () => {
           ? visitors.reduce((sum, v) => sum + (v.visit_count || 0), 0) / total 
           : 0;
 
-        setVisitorStats({
+        setStats({
+          totalConsultations: convCount || 0,
           totalVisitors: total,
           newVisitors: newUsers,
           returningVisitors: returning,
           avgVisits: Math.round(avgVisits * 10) / 10,
         });
+      }
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    }
+  };
 
-        // Calculate device breakdown
+  const fetchAnalyticsData = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_analytics_data', { days_back: 30 });
+
+      if (error) throw error;
+
+      if (data) {
+        const parsed = data as unknown as AnalyticsData;
+        setAnalyticsData({
+          language_distribution: parsed.language_distribution || [],
+          domain_distribution: parsed.domain_distribution || [],
+          daily_consultations: parsed.daily_consultations || [],
+          state_distribution: parsed.state_distribution || [],
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching analytics data:', err);
+    }
+  };
+
+  const fetchVisitorData = async () => {
+    try {
+      const { data: visitors, error } = await supabase
+        .from('user_visitors')
+        .select('device_info');
+      
+      if (error) throw error;
+
+      if (visitors) {
         const deviceCounts: Record<string, number> = {};
         const browserCounts: Record<string, number> = {};
         
@@ -76,59 +137,62 @@ const Analytics = () => {
       }
     } catch (err) {
       console.error('Error fetching visitor data:', err);
-    } finally {
-      setIsLoadingVisitors(false);
     }
   };
 
-  const stats = [
-    { label: "Total Consultations", value: "1,247", icon: MessageSquare, change: "+12%" },
-    { label: "Unique Visitors", value: visitorStats.totalVisitors.toString(), icon: Users, change: "+8%" },
-    { label: "New Visitors", value: visitorStats.newVisitors.toString(), icon: UserPlus, change: "+15%" },
-    { label: "Returning Visitors", value: `${visitorStats.returningVisitors}`, icon: RefreshCw, change: "+3%" },
+  const exportCSV = () => {
+    const csvData = [
+      ['Metric', 'Value'],
+      ['Total Consultations', stats.totalConsultations],
+      ['Total Visitors', stats.totalVisitors],
+      ['New Visitors', stats.newVisitors],
+      ['Returning Visitors', stats.returningVisitors],
+      ['Avg Visits per User', stats.avgVisits],
+      [''],
+      ['Language Distribution'],
+      ...analyticsData.language_distribution.map(l => [l.name, l.value]),
+      [''],
+      ['Legal Domain Distribution'],
+      ...analyticsData.domain_distribution.map(d => [d.name, d.value]),
+      [''],
+      ['Geographic Distribution'],
+      ...analyticsData.state_distribution.map(s => [s.state, s.users]),
+    ];
+
+    const csv = csvData.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analytics_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    toast.success('Analytics exported');
+  };
+
+  const languageColors = ['#2563EB', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6B7280'];
+
+  const statsDisplay = [
+    { label: "Total Consultations", value: stats.totalConsultations.toLocaleString(), icon: MessageSquare },
+    { label: "Unique Visitors", value: stats.totalVisitors.toString(), icon: Users },
+    { label: "New Visitors", value: stats.newVisitors.toString(), icon: UserPlus },
+    { label: "Returning Visitors", value: stats.returningVisitors.toString(), icon: RefreshCw },
   ];
 
-  const languageData = [
-    { name: "Hindi", value: 35, color: "#2563EB" },
-    { name: "English", value: 25, color: "#10B981" },
-    { name: "Tamil", value: 15, color: "#F59E0B" },
-    { name: "Telugu", value: 10, color: "#8B5CF6" },
-    { name: "Bengali", value: 8, color: "#EC4899" },
-    { name: "Others", value: 7, color: "#6B7280" },
-  ];
-
-  const domainData = [
-    { name: "Criminal", value: 320 },
-    { name: "Family", value: 280 },
-    { name: "Property", value: 220 },
-    { name: "Consumer", value: 180 },
-    { name: "Labor", value: 150 },
-    { name: "Cyber", value: 97 },
-  ];
-
-  const dailyData = [
-    { day: "Mon", consultations: 145 },
-    { day: "Tue", consultations: 189 },
-    { day: "Wed", consultations: 167 },
-    { day: "Thu", consultations: 212 },
-    { day: "Fri", consultations: 198 },
-    { day: "Sat", consultations: 156 },
-    { day: "Sun", consultations: 180 },
-  ];
-
-  const geoData = [
-    { state: "Maharashtra", users: 234, percentage: "27%" },
-    { state: "Delhi NCR", users: 189, percentage: "22%" },
-    { state: "Karnataka", users: 145, percentage: "17%" },
-    { state: "Tamil Nadu", users: 123, percentage: "14%" },
-    { state: "West Bengal", users: 98, percentage: "11%" },
-  ];
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Export Button */}
       <div className="flex justify-end">
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2" onClick={exportCSV}>
           <Download className="h-4 w-4" />
           Export CSV
         </Button>
@@ -136,7 +200,7 @@ const Analytics = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map((stat) => (
+        {statsDisplay.map((stat) => (
           <Card key={stat.label} className="bg-white">
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
@@ -144,10 +208,7 @@ const Analytics = () => {
                   <p className="text-2xl font-bold text-foreground">{stat.value}</p>
                   <p className="text-xs text-muted-foreground">{stat.label}</p>
                 </div>
-                <div className="flex flex-col items-end">
-                  <stat.icon className="h-5 w-5 text-muted-foreground mb-1" />
-                  <span className="text-xs text-green-600">{stat.change}</span>
-                </div>
+                <stat.icon className="h-5 w-5 text-muted-foreground" />
               </div>
             </CardContent>
           </Card>
@@ -165,11 +226,7 @@ const Analytics = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoadingVisitors ? (
-              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                Loading...
-              </div>
-            ) : deviceBreakdown.length > 0 ? (
+            {deviceBreakdown.length > 0 ? (
               <>
                 <div className="h-[200px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -217,11 +274,7 @@ const Analytics = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoadingVisitors ? (
-              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                Loading...
-              </div>
-            ) : browserBreakdown.length > 0 ? (
+            {browserBreakdown.length > 0 ? (
               <div className="h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={browserBreakdown} layout="vertical">
@@ -250,34 +303,42 @@ const Analytics = () => {
             <CardTitle className="text-base">Language Usage</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={languageData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {languageData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex flex-wrap justify-center gap-3 mt-4">
-              {languageData.map((lang) => (
-                <div key={lang.name} className="flex items-center gap-1 text-xs">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: lang.color }} />
-                  {lang.name} ({lang.value}%)
+            {analyticsData.language_distribution.length > 0 ? (
+              <>
+                <div className="h-[250px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={analyticsData.language_distribution}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={90}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {analyticsData.language_distribution.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={languageColors[index % languageColors.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
-              ))}
-            </div>
+                <div className="flex flex-wrap justify-center gap-3 mt-4">
+                  {analyticsData.language_distribution.map((lang, idx) => (
+                    <div key={lang.name} className="flex items-center gap-1 text-xs">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: languageColors[idx % languageColors.length] }} />
+                      {lang.name} ({lang.value})
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                No language data yet
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -287,17 +348,23 @@ const Analytics = () => {
             <CardTitle className="text-base">Legal Domain Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[280px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={domainData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" />
-                  <YAxis dataKey="name" type="category" width={80} />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#2563EB" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {analyticsData.domain_distribution.length > 0 ? (
+              <div className="h-[280px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={analyticsData.domain_distribution} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                    <XAxis type="number" />
+                    <YAxis dataKey="name" type="category" width={80} />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#2563EB" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[280px] flex items-center justify-center text-muted-foreground">
+                No domain data yet
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -307,26 +374,32 @@ const Analytics = () => {
         {/* Daily Consultations Line Chart */}
         <Card className="bg-white">
           <CardHeader>
-            <CardTitle className="text-base">Daily Consultations</CardTitle>
+            <CardTitle className="text-base">Daily Consultations (Last 30 Days)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={dailyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line 
-                    type="monotone" 
-                    dataKey="consultations" 
-                    stroke="#2563EB" 
-                    strokeWidth={2}
-                    dot={{ fill: "#2563EB" }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            {analyticsData.daily_consultations.length > 0 ? (
+              <div className="h-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={analyticsData.daily_consultations}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="day" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line 
+                      type="monotone" 
+                      dataKey="consultations" 
+                      stroke="#2563EB" 
+                      strokeWidth={2}
+                      dot={{ fill: "#2563EB" }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                No daily data yet
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -335,24 +408,27 @@ const Analytics = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <MapPin className="h-4 w-4" />
-              Geographic Distribution (Top 5 States)
+              Geographic Distribution (Top States)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {geoData.map((item, index) => (
-                <div key={item.state} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-muted-foreground w-5">#{index + 1}</span>
-                    <span className="text-sm font-medium">{item.state}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
+            {analyticsData.state_distribution.length > 0 ? (
+              <div className="space-y-3">
+                {analyticsData.state_distribution.map((item, index) => (
+                  <div key={item.state} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-muted-foreground w-5">#{index + 1}</span>
+                      <span className="text-sm font-medium">{item.state}</span>
+                    </div>
                     <span className="text-sm text-muted-foreground">{item.users} users</span>
-                    <span className="text-sm font-medium text-primary">{item.percentage}</span>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                No geographic data yet
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
