@@ -58,7 +58,17 @@ serve(async (req) => {
                 }
               },
               {
-                text: `Transcribe the audio above accurately. The speaker is likely speaking in ${languageHint} (Indian context). Return ONLY the transcribed text, nothing else. If you cannot understand the audio, return an empty string.`
+                text: `Transcribe the audio above accurately. The speaker is likely speaking in ${languageHint} (Indian context).
+
+IMPORTANT RULES:
+1. Return ONLY the spoken words, nothing else
+2. If there is no clear speech (just noise, silence, breathing, or unintelligible sounds), return exactly: ""
+3. Do NOT return dots, dashes, periods, or placeholder text
+4. Do NOT describe what you hear, only transcribe actual spoken words
+5. Do NOT add punctuation unless clearly spoken
+6. Minimum valid transcription should be at least 2 actual words
+
+If you cannot understand clear speech, return an empty string "".`
               }
             ]
           }],
@@ -77,7 +87,24 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const transcription = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+    let transcription = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+    
+    // Validate transcription - reject garbage patterns
+    const isGarbage = (text: string) => {
+      if (!text) return true;
+      // Check for repeated dots, dashes, or single characters
+      if (/^[.\-\s]+$/.test(text)) return true;
+      // Check for very short or single word responses that are just filler
+      if (text.length < 3) return true;
+      // Check if it's mostly punctuation
+      const alphaCount = (text.match(/[a-zA-Z\u0900-\u097F\u0980-\u09FF\u0A00-\u0A7F\u0A80-\u0AFF\u0B00-\u0B7F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F\u0600-\u06FF]/g) || []).length;
+      if (alphaCount < text.length * 0.3) return true;
+      return false;
+    };
+    
+    if (isGarbage(transcription)) {
+      transcription = '';
+    }
 
     console.log('Transcription result:', transcription);
 

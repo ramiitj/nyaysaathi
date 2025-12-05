@@ -13,7 +13,7 @@ import { useUserFingerprint } from '@/hooks/useUserFingerprint';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { useToast } from '@/hooks/use-toast';
 
-export type VoiceState = 'idle' | 'recording' | 'processing' | 'responding';
+export type VoiceState = 'idle' | 'recording' | 'transcribing' | 'processing' | 'responding';
 export type InputMode = 'voice' | 'text';
 
 export interface Message {

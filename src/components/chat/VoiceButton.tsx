@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mic, Loader2, Volume2, Square } from 'lucide-react';
+import { Mic, Loader2, Volume2, Square, AudioLines } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { VoiceState } from '@/pages/Chat';
 import type { LanguageConfig } from '@/config/languages';
@@ -17,8 +17,10 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({ state, onClick, config }) => 
     switch (state) {
       case 'recording':
         return cn(base, 'bg-[#F97316] text-white scale-110 shadow-[0_0_60px_rgba(249,115,22,0.5)]');
+      case 'transcribing':
+        return cn(base, 'bg-amber-500 text-white shadow-[0_0_40px_rgba(245,158,11,0.5)]');
       case 'processing':
-        return cn(base, 'bg-warning text-warning-foreground shadow-[0_0_40px_rgba(245,158,11,0.4)]');
+        return cn(base, 'bg-primary text-primary-foreground shadow-[0_0_40px_rgba(37,99,235,0.4)]');
       case 'responding':
         return cn(base, 'bg-success text-success-foreground shadow-[0_0_40px_rgba(16,185,129,0.4)]');
       default:
@@ -30,6 +32,8 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({ state, onClick, config }) => 
     switch (state) {
       case 'recording':
         return <Waveform />;
+      case 'transcribing':
+        return <AudioLines className="w-12 h-12 animate-pulse" />;
       case 'processing':
         return <Loader2 className="w-12 h-12 animate-spin" />;
       case 'responding':
@@ -43,12 +47,29 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({ state, onClick, config }) => 
     switch (state) {
       case 'recording':
         return config.ui.listening;
+      case 'transcribing':
+        return config.ui.transcribing;
       case 'processing':
-        return config.ui.processing;
+        return config.ui.thinking;
       case 'responding':
         return config.ui.speaking;
       default:
         return null;
+    }
+  };
+
+  const getStateBadgeClasses = () => {
+    switch (state) {
+      case 'recording':
+        return "bg-[#F97316] text-white";
+      case 'transcribing':
+        return "bg-amber-500 text-white";
+      case 'processing':
+        return "bg-primary text-primary-foreground";
+      case 'responding':
+        return "bg-success text-success-foreground";
+      default:
+        return "";
     }
   };
 
@@ -58,7 +79,7 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({ state, onClick, config }) => 
     <div className="flex flex-col items-center gap-4">
       <button
         onClick={onClick}
-        disabled={state === 'processing'}
+        disabled={state === 'transcribing' || state === 'processing'}
         className={getButtonClasses()}
         aria-label={`Voice input - ${state}`}
       >
@@ -70,14 +91,15 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({ state, onClick, config }) => 
         <div className={cn(
           "px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 animate-fade-in",
           config.fontClass,
-          state === 'recording' && "bg-[#F97316] text-white",
-          state === 'processing' && "bg-warning text-warning-foreground",
-          state === 'responding' && "bg-success text-success-foreground"
+          getStateBadgeClasses()
         )}>
           {state === 'recording' && (
             <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
           )}
-          {stateLabel}...
+          {state === 'transcribing' && (
+            <Loader2 className="w-3 h-3 animate-spin" />
+          )}
+          {stateLabel}
         </div>
       )}
     </div>
