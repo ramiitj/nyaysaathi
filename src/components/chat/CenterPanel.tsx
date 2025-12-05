@@ -313,18 +313,6 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
             </div>
           )}
 
-          {/* You Said Card - Shows transcription result */}
-          {transcription && (voiceState === 'processing' || voiceState === 'responding') && (
-            <div className="bg-card rounded-2xl p-4 border shadow-sm animate-fade-in">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="w-2 h-2 rounded-full bg-muted-foreground" />
-                <span className={`text-xs font-medium uppercase tracking-wide text-muted-foreground ${config.fontClass}`}>
-                  {config.ui.youSaid}
-                </span>
-              </div>
-              <p className={`text-foreground ${config.fontClass}`}>{transcription}</p>
-            </div>
-          )}
         </div>
       </ScrollArea>
 
@@ -336,16 +324,18 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
             {voiceState === 'idle' && config.ui.tapToSpeak}
           </p>
           
-          {/* YOU SAID Card - Below Voice Button */}
-          {lastUserMessage && voiceState === 'idle' && (
-            <div className="bg-card rounded-2xl p-4 border shadow-sm max-w-md mt-6 w-full">
+          {/* YOU SAID Card - Always Below Voice Button */}
+          {(transcription || lastUserMessage) && (
+            <div className="bg-card rounded-2xl p-4 border shadow-sm max-w-md mt-6 w-full animate-fade-in">
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-2 h-2 rounded-full bg-muted-foreground" />
                 <span className={`text-xs font-medium uppercase tracking-wide text-muted-foreground ${config.fontClass}`}>
                   {config.ui.youSaid}
                 </span>
               </div>
-              <p className={`text-foreground ${config.fontClass}`}>{lastUserMessage.content}</p>
+              <p className={`text-foreground ${config.fontClass}`}>
+                {transcription || lastUserMessage?.content}
+              </p>
             </div>
           )}
         </div>

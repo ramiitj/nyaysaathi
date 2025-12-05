@@ -13,6 +13,7 @@ const MIN_RECORDING_DURATION = 500; // Minimum 500ms to prevent accidental taps
 const SILENCE_THRESHOLD = 0.02; // More lenient threshold for speech detection
 const MIN_SPEECH_FRAMES = 3; // Reduced frames required for valid speech
 const MIN_DURATION_FOR_BACKEND = 800; // Send to backend if recording > 800ms regardless
+const SILENCE_DURATION_MS = 5000; // Auto-stop after 5 seconds of silence
 
 export const useVoiceRecording = ({ 
   language, 
@@ -30,6 +31,8 @@ export const useVoiceRecording = ({
   const analyserRef = useRef<AnalyserNode | null>(null);
   const speechFramesRef = useRef<number>(0);
   const animationFrameRef = useRef<number | null>(null);
+  const silenceStartRef = useRef<number | null>(null);
+  const stopRecordingRef = useRef<(() => void) | null>(null);
 
   // Cleanup function
   const cleanup = useCallback(() => {
@@ -67,9 +70,24 @@ export const useVoiceRecording = ({
       maxAmplitude = Math.max(maxAmplitude, amplitude);
     }
 
-    // Track speech frames when amplitude exceeds threshold
+    // Track speech frames and silence duration
     if (maxAmplitude > SILENCE_THRESHOLD) {
       speechFramesRef.current++;
+      // Reset silence tracking when speech detected
+      silenceStartRef.current = null;
+    } else {
+      // Start tracking silence if not already
+      if (silenceStartRef.current === null) {
+        silenceStartRef.current = Date.now();
+      } else {
+        // Check if 5 seconds of silence has passed
+        const silenceDuration = Date.now() - silenceStartRef.current;
+        if (silenceDuration >= SILENCE_DURATION_MS && stopRecordingRef.current) {
+          // Auto-stop recording after 5 seconds of silence
+          stopRecordingRef.current();
+          return;
+        }
+      }
     }
 
     // Callback for visual feedback
@@ -94,6 +112,7 @@ export const useVoiceRecording = ({
       streamRef.current = stream;
       startTimeRef.current = Date.now();
       speechFramesRef.current = 0;
+      silenceStartRef.current = null;
 
       // Set up audio analysis for level monitoring
       audioContextRef.current = new AudioContext({ sampleRate: 16000 });
@@ -200,8 +219,16 @@ export const useVoiceRecording = ({
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
+      
+      // Clear silence tracking
+      silenceStartRef.current = null;
     }
   }, [isRecording]);
+
+  // Store stopRecording ref for auto-stop functionality
+  useEffect(() => {
+    stopRecordingRef.current = stopRecording;
+  }, [stopRecording]);
 
   const toggleRecording = useCallback(() => {
     if (isRecording) {
