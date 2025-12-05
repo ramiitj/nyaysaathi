@@ -22,6 +22,15 @@ interface LocationData {
   accuracy?: number;
 }
 
+interface VisitorRecord {
+  id: string;
+  fingerprint_hash: string;
+  visit_count: number;
+  first_visit_at: string;
+  last_visit_at: string;
+  onboarding_complete: boolean;
+}
+
 const VISITOR_STORAGE_KEY = 'nyay_saathi_visitor_id';
 
 // Generate a simple browser fingerprint
@@ -114,6 +123,7 @@ function getDeviceInfo(): DeviceInfo {
 
 export function useUserFingerprint() {
   const [visitorId, setVisitorId] = useState<string | null>(null);
+  const [fingerprint, setFingerprint] = useState<string | null>(null);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [locationData, setLocationData] = useState<LocationData>({});
@@ -130,12 +140,12 @@ export function useUserFingerprint() {
           };
           setLocationData(newLocationData);
           
-          // Update visitor record with location if we have visitorId
-          if (visitorId) {
-            await supabase
-              .from('user_visitors')
-              .update({ location_data: newLocationData as Json })
-              .eq('id', visitorId);
+          // Update visitor record with location using secure RPC function
+          if (fingerprint) {
+            await supabase.rpc('update_visitor_by_fingerprint', {
+              fingerprint: fingerprint,
+              new_location_data: newLocationData as unknown as Json,
+            });
           }
         },
         (error) => {
@@ -144,7 +154,7 @@ export function useUserFingerprint() {
         { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
       );
     }
-  }, [visitorId]);
+  }, [fingerprint]);
   
   // Initialize visitor tracking
   useEffect(() => {
@@ -152,75 +162,44 @@ export function useUserFingerprint() {
       try {
         setIsLoading(true);
         
-        // Check localStorage for existing visitor ID
-        const storedVisitorId = localStorage.getItem(VISITOR_STORAGE_KEY);
-        
         // Generate fingerprint
-        const fingerprint = await generateFingerprint();
+        const fp = await generateFingerprint();
+        setFingerprint(fp);
         const deviceInfo = getDeviceInfo();
         
-        if (storedVisitorId) {
-          // Existing visitor - update last visit
-          const { data: existingVisitor, error } = await supabase
-            .from('user_visitors')
-            .select('*')
-            .eq('id', storedVisitorId)
-            .single();
-          
-          if (existingVisitor && !error) {
-            // Update visit count and last visit
-            await supabase
-              .from('user_visitors')
-              .update({
-                last_visit_at: new Date().toISOString(),
-                visit_count: (existingVisitor.visit_count || 0) + 1,
-                device_info: JSON.parse(JSON.stringify(deviceInfo)),
-              })
-              .eq('id', storedVisitorId);
-            
-            setVisitorId(storedVisitorId);
-            setIsFirstTimeUser(false);
-            setLocationData((existingVisitor.location_data as unknown as LocationData) || {});
-            setIsLoading(false);
-            return;
-          }
-        }
+        // Check localStorage for existing visitor ID (for caching)
+        const storedVisitorId = localStorage.getItem(VISITOR_STORAGE_KEY);
         
-        // Check if fingerprint exists in database
-        const { data: existingByFingerprint } = await supabase
-          .from('user_visitors')
-          .select('*')
-          .eq('fingerprint_hash', fingerprint)
-          .single();
+        // Use secure RPC function to look up visitor by fingerprint
+        const { data: existingVisitor, error } = await supabase
+          .rpc('get_visitor_by_fingerprint', { fingerprint: fp });
         
-        if (existingByFingerprint) {
-          // Found by fingerprint - update and store ID
-          await supabase
-            .from('user_visitors')
-            .update({
-              last_visit_at: new Date().toISOString(),
-              visit_count: (existingByFingerprint.visit_count || 0) + 1,
-              device_info: JSON.parse(JSON.stringify(deviceInfo)),
-            })
-            .eq('id', existingByFingerprint.id);
+        if (existingVisitor && existingVisitor.length > 0 && !error) {
+          const visitor = existingVisitor[0] as VisitorRecord;
           
-          localStorage.setItem(VISITOR_STORAGE_KEY, existingByFingerprint.id);
-          setVisitorId(existingByFingerprint.id);
-          setIsFirstTimeUser(!existingByFingerprint.onboarding_complete);
-          setLocationData((existingByFingerprint.location_data as unknown as LocationData) || {});
+          // Update visit count using secure RPC function
+          await supabase.rpc('update_visitor_by_fingerprint', {
+            fingerprint: fp,
+            new_visit_count: (visitor.visit_count || 0) + 1,
+            new_device_info: JSON.parse(JSON.stringify(deviceInfo)) as unknown as Json,
+          });
+          
+          localStorage.setItem(VISITOR_STORAGE_KEY, visitor.id);
+          setVisitorId(visitor.id);
+          setIsFirstTimeUser(!visitor.onboarding_complete);
         } else {
-          // New visitor - create record
-          const { data: newVisitor, error } = await supabase
+          // New visitor - create record (INSERT is still allowed)
+          const { data: newVisitor, error: insertError } = await supabase
             .from('user_visitors')
             .insert([{
-              fingerprint_hash: fingerprint,
+              fingerprint_hash: fp,
               device_info: JSON.parse(JSON.stringify(deviceInfo)),
               location_data: {},
             }])
-            .select()
+            .select('id')
             .single();
           
-          if (newVisitor && !error) {
+          if (newVisitor && !insertError) {
             localStorage.setItem(VISITOR_STORAGE_KEY, newVisitor.id);
             setVisitorId(newVisitor.id);
             setIsFirstTimeUser(true);
@@ -238,19 +217,19 @@ export function useUserFingerprint() {
   
   // Mark onboarding as complete
   const markOnboardingComplete = useCallback(async () => {
-    if (!visitorId) return;
+    if (!fingerprint) return;
     
     try {
-      await supabase
-        .from('user_visitors')
-        .update({ onboarding_complete: true })
-        .eq('id', visitorId);
+      await supabase.rpc('update_visitor_by_fingerprint', {
+        fingerprint: fingerprint,
+        new_onboarding_complete: true,
+      });
       
       setIsFirstTimeUser(false);
     } catch (error) {
       console.error('Error marking onboarding complete:', error);
     }
-  }, [visitorId]);
+  }, [fingerprint]);
   
   return {
     visitorId,
