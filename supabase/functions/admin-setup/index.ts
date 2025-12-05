@@ -18,10 +18,18 @@ serve(async (req) => {
     const { email, password, setupKey } = await req.json();
 
     // Security check - require a setup key to prevent unauthorized admin creation
-    const expectedSetupKey = Deno.env.get('ADMIN_SETUP_KEY') || 'nyaysaathi-admin-setup-2024';
+    const expectedSetupKey = Deno.env.get('ADMIN_SETUP_KEY');
     
-    if (setupKey !== expectedSetupKey) {
-      console.error('Invalid setup key provided');
+    if (!expectedSetupKey) {
+      console.error('ADMIN_SETUP_KEY environment variable is not configured');
+      return new Response(
+        JSON.stringify({ error: 'Admin setup is not configured. Please set ADMIN_SETUP_KEY secret.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (!setupKey || setupKey !== expectedSetupKey) {
+      console.error('Invalid or missing setup key provided');
       return new Response(
         JSON.stringify({ error: 'Invalid setup key' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

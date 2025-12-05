@@ -481,6 +481,10 @@ export type Database = {
           visit_count: number
         }[]
       }
+      get_visitor_id_by_fingerprint: {
+        Args: { fingerprint: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
