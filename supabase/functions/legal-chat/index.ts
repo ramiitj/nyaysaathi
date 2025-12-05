@@ -55,6 +55,44 @@ function cleanResponseText(text: string): string {
     .trim();
 }
 
+// Generate embedding for semantic search using Gemini text-embedding-004
+async function generateQueryEmbedding(query: string): Promise<number[] | null> {
+  try {
+    console.log('Generating embedding for query:', query.substring(0, 100) + '...');
+    
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'models/text-embedding-004',
+          content: { parts: [{ text: query }] },
+          taskType: 'RETRIEVAL_QUERY'
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Embedding generation failed:', response.status, errorText);
+      return null;
+    }
+
+    const data = await response.json();
+    const embedding = data.embedding?.values;
+    
+    if (embedding) {
+      console.log(`Generated ${embedding.length}-dimensional embedding`);
+    }
+    
+    return embedding || null;
+  } catch (error) {
+    console.error('Error generating embedding:', error);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -62,6 +100,15 @@ serve(async (req) => {
 
   try {
     const { message, conversationId, language, conversationHistory, locationState, fileContext } = await req.json();
+
+    console.log('Processing legal-chat request:', {
+      messageLength: message?.length,
+      language,
+      locationState,
+      hasFileContext: !!fileContext,
+      historyLength: conversationHistory?.length || 0,
+      conversationId
+    });
 
     if (!message) {
       throw new Error('Message is required');
@@ -87,20 +134,57 @@ serve(async (req) => {
     const systemPrompt = settingsMap.system_prompt || DEFAULT_SYSTEM_PROMPT;
     const temperature = parseFloat(settingsMap.temperature) || 0.4;
 
-    // Perform RAG search if we have embeddings
+    // Perform semantic RAG search with vector embeddings
     let ragContext = '';
     try {
-      const { data: ragResults } = await supabase.rpc('search_documents', {
-        query_text: message,
-        match_count: 5
-      });
+      // First try semantic search with embeddings
+      const queryEmbedding = await generateQueryEmbedding(message);
+      
+      if (queryEmbedding) {
+        console.log('Attempting semantic search with embedding...');
+        
+        // Format embedding as a string for the RPC call
+        const embeddingStr = `[${queryEmbedding.join(',')}]`;
+        
+        const { data: ragResults, error: semanticError } = await supabase.rpc('search_documents_semantic', {
+          query_embedding: embeddingStr,
+          match_count: 5
+        });
 
-      if (ragResults && ragResults.length > 0) {
-        ragContext = '\n\nRELEVANT KNOWLEDGE BASE CONTEXT:\n' + 
-          ragResults.map((r: any) => r.content).join('\n---\n');
+        if (semanticError) {
+          console.error('Semantic search error:', semanticError);
+          // Fall through to text search
+        } else if (ragResults && ragResults.length > 0) {
+          console.log(`Found ${ragResults.length} relevant documents via semantic search`);
+          ragContext = '\n\nRELEVANT KNOWLEDGE BASE CONTEXT:\n' + 
+            ragResults.map((r: any) => {
+              const similarityPercent = (r.similarity * 100).toFixed(1);
+              console.log(`- Document chunk (${similarityPercent}% similar): ${r.content.substring(0, 50)}...`);
+              return `[Relevance: ${similarityPercent}%]\n${r.content}`;
+            }).join('\n---\n');
+        } else {
+          console.log('Semantic search returned no results');
+        }
+      }
+      
+      // Fallback to text search if semantic search didn't return results
+      if (!ragContext) {
+        console.log('Falling back to text-based search...');
+        const { data: ragResults } = await supabase.rpc('search_documents', {
+          query_text: message,
+          match_count: 5
+        });
+
+        if (ragResults && ragResults.length > 0) {
+          console.log(`Found ${ragResults.length} relevant documents via text search`);
+          ragContext = '\n\nRELEVANT KNOWLEDGE BASE CONTEXT:\n' + 
+            ragResults.map((r: any) => r.content).join('\n---\n');
+        } else {
+          console.log('No relevant documents found in knowledge base');
+        }
       }
     } catch (e) {
-      console.log('RAG search not available or failed:', e);
+      console.error('RAG search error:', e);
     }
 
     // Add file context if provided
@@ -137,6 +221,8 @@ serve(async (req) => {
       parts: [{ text: message }]
     });
 
+    console.log('Calling Gemini API with', messages.length, 'messages');
+
     // Call Gemini API
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
@@ -170,6 +256,7 @@ serve(async (req) => {
     
     // Clean the response text to remove any remaining markdown
     const aiResponse = cleanResponseText(rawResponse);
+    console.log('Generated response length:', aiResponse.length);
 
     // Extract citations from response (simple pattern matching)
     const citationPattern = /\[([^\]]+(?:Act|Code|Law|Section|Article)[^\]]*)\]/gi;
@@ -183,6 +270,10 @@ serve(async (req) => {
         section: sectionMatch ? sectionMatch[1] : '',
         text: citationText
       });
+    }
+    
+    if (citations.length > 0) {
+      console.log(`Extracted ${citations.length} citations from response`);
     }
 
     // Store messages in database if conversationId provided
@@ -198,6 +289,8 @@ serve(async (req) => {
         .update({ message_count: (conversationHistory?.length || 0) + 2 })
         .eq('id', conversationId);
     }
+
+    console.log('Request completed successfully');
 
     return new Response(
       JSON.stringify({ 
