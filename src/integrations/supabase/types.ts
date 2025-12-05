@@ -470,6 +470,17 @@ export type Database = {
     Functions: {
       get_analytics_data: { Args: { days_back?: number }; Returns: Json }
       get_dashboard_stats: { Args: never; Returns: Json }
+      get_visitor_by_fingerprint: {
+        Args: { fingerprint: string }
+        Returns: {
+          fingerprint_hash: string
+          first_visit_at: string
+          id: string
+          last_visit_at: string
+          onboarding_complete: boolean
+          visit_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -485,6 +496,16 @@ export type Database = {
           metadata: Json
           similarity: number
         }[]
+      }
+      update_visitor_by_fingerprint: {
+        Args: {
+          fingerprint: string
+          new_device_info?: Json
+          new_location_data?: Json
+          new_onboarding_complete?: boolean
+          new_visit_count?: number
+        }
+        Returns: string
       }
     }
     Enums: {
