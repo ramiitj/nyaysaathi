@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface AdminLoginModalProps {
   open: boolean;
@@ -23,17 +26,65 @@ const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ open, onOpenChange })
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // TODO: Implement actual admin authentication
-    setTimeout(() => {
-      setIsLoading(false);
+    setError(null);
+
+    try {
+      // Sign in with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) {
+        if (authError.message.includes('Invalid login credentials')) {
+          setError('Invalid email or password. Please try again.');
+        } else {
+          setError(authError.message);
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      if (!authData.user) {
+        setError('Login failed. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if user has admin role
+      const { data: isAdmin, error: roleError } = await supabase
+        .rpc('has_role', { _user_id: authData.user.id, _role: 'admin' });
+
+      if (roleError) {
+        console.error('Error checking admin role:', roleError);
+        setError('Error verifying admin privileges.');
+        await supabase.auth.signOut();
+        setIsLoading(false);
+        return;
+      }
+
+      if (!isAdmin) {
+        setError('You do not have admin privileges.');
+        await supabase.auth.signOut();
+        setIsLoading(false);
+        return;
+      }
+
+      // Success - navigate to admin dashboard
+      toast.success('Welcome back, Admin!');
       onOpenChange(false);
       navigate('/admin');
-    }, 1000);
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -49,6 +100,13 @@ const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ open, onOpenChange })
           </DialogDescription>
         </DialogHeader>
 
+        {error && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -59,6 +117,7 @@ const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ open, onOpenChange })
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -72,6 +131,7 @@ const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ open, onOpenChange })
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
               <Button
                 type="button"
@@ -79,6 +139,7 @@ const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ open, onOpenChange })
                 size="icon"
                 className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
                 onClick={() => setShowPassword(!showPassword)}
+                disabled={isLoading}
               >
                 {showPassword ? (
                   <EyeOff className="w-4 h-4" />

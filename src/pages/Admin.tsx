@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Scale, Activity, BookOpen, MessageSquare, Settings, Palette, BarChart3, CreditCard, LogOut, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import AdminRoute from "@/components/AdminRoute";
 import SystemStatus from "@/components/admin/SystemStatus";
 import KnowledgeBase from "@/components/admin/KnowledgeBase";
 import Conversations from "@/components/admin/Conversations";
@@ -11,12 +14,19 @@ import Branding from "@/components/admin/Branding";
 import Analytics from "@/components/admin/Analytics";
 import Billing from "@/components/admin/Billing";
 
-const Admin = () => {
+const AdminContent = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("status");
 
-  const handleLogout = () => {
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success('Logged out successfully');
+      navigate("/");
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Error logging out');
+    }
   };
 
   return (
@@ -124,6 +134,14 @@ const Admin = () => {
         </div>
       </Tabs>
     </div>
+  );
+};
+
+const Admin = () => {
+  return (
+    <AdminRoute>
+      <AdminContent />
+    </AdminRoute>
   );
 };
 
