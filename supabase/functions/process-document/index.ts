@@ -94,9 +94,16 @@ serve(async (req) => {
 
     logger.info('Document downloaded successfully', { size: fileData.size });
 
-    // Convert file to base64 for Gemini
+    // Convert file to base64 for Gemini (chunked to avoid stack overflow on large files)
     const arrayBuffer = await fileData.arrayBuffer();
-    const base64Content = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const uint8Array = new Uint8Array(arrayBuffer);
+    let binaryString = '';
+    const chunkSize = 8192; // Process 8KB chunks at a time
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.slice(i, i + chunkSize);
+      binaryString += String.fromCharCode.apply(null, Array.from(chunk));
+    }
+    const base64Content = btoa(binaryString);
     logger.info('File converted to base64', { base64Length: base64Content.length });
 
     // Use Gemini to extract text and analyze document
