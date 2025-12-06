@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Scale, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Scale, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -11,7 +11,7 @@ import { LANGUAGES, LanguageCode } from '@/config/languages';
 const Landing: React.FC = () => {
   const navigate = useNavigate();
   const { language, setLanguage } = useLanguage();
-  const { consent, setConsent, allConsented } = useConsent();
+  const { hasConsented, setConsent } = useConsent();
   const [step, setStep] = useState<'language' | 'consent'>('language');
 
   const handleLanguageSelect = (langCode: LanguageCode) => {
@@ -20,28 +20,16 @@ const Landing: React.FC = () => {
   };
 
   const handleStartChat = () => {
-    if (allConsented) {
+    if (hasConsented) {
       navigate('/chat');
     }
   };
 
-  const consentItems = [
-    {
-      key: 'location' as const,
-      label: 'Share your location so I can give you relevant local legal advice',
-    },
-    {
-      key: 'recording' as const,
-      label: 'Help us keep your account safe by logging your connection',
-    },
-    {
-      key: 'informational' as const,
-      label: 'Let us learn from our chats to serve you better (all data stays anonymous)',
-    },
-    {
-      key: 'privacy' as const,
-      label: 'I agree to the Terms and Privacy Policy',
-    },
+  const consentPoints = [
+    'Share your location for relevant local legal advice',
+    'Allow anonymous connection logging for security',
+    'Let us learn from chats to improve (all data stays anonymous)',
+    'Accept the Terms and Privacy Policy',
   ];
 
   return (
@@ -106,27 +94,36 @@ const Landing: React.FC = () => {
 
             {/* Consent Section */}
             <div className="mb-6">
-              <p className="text-sm font-medium text-foreground mb-4">
-                Just a few things before we start:
+              <p className="text-sm font-medium text-foreground mb-3">
+                By using Nyay Saathi, you agree to:
               </p>
               
-              <div className="space-y-4">
-                {consentItems.map((item) => (
-                  <div key={item.key} className="flex items-start gap-3">
-                    <Checkbox
-                      id={item.key}
-                      checked={consent[item.key]}
-                      onCheckedChange={(checked) => setConsent(item.key, checked as boolean)}
-                      className="mt-0.5"
-                    />
-                    <Label
-                      htmlFor={item.key}
-                      className="text-sm text-muted-foreground cursor-pointer leading-relaxed"
-                    >
-                      {item.label}
-                    </Label>
-                  </div>
-                ))}
+              {/* Consent points as bullet list */}
+              <div className="bg-muted/50 rounded-xl p-4 mb-4">
+                <ul className="space-y-2">
+                  {consentPoints.map((point, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Single consent checkbox */}
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="consent-all"
+                  checked={hasConsented}
+                  onCheckedChange={(checked) => setConsent(checked as boolean)}
+                  className="mt-0.5"
+                />
+                <Label
+                  htmlFor="consent-all"
+                  className="text-sm font-medium text-foreground cursor-pointer leading-relaxed"
+                >
+                  I agree to all of the above
+                </Label>
               </div>
             </div>
 
@@ -142,7 +139,7 @@ const Landing: React.FC = () => {
               </Button>
               <Button
                 onClick={handleStartChat}
-                disabled={!allConsented}
+                disabled={!hasConsented}
                 className="flex-1"
               >
                 Let's Chat

@@ -1,43 +1,26 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-interface ConsentState {
-  informational: boolean;
-  location: boolean;
-  recording: boolean;
-  privacy: boolean;
-}
-
 interface ConsentContextType {
-  consent: ConsentState;
-  setConsent: (key: keyof ConsentState, value: boolean) => void;
-  allConsented: boolean;
+  hasConsented: boolean;
+  setConsent: (value: boolean) => void;
   resetConsent: () => void;
 }
-
-const defaultConsent: ConsentState = {
-  informational: false,
-  location: false,
-  recording: false,
-  privacy: false,
-};
 
 const ConsentContext = createContext<ConsentContextType | undefined>(undefined);
 
 export const ConsentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [consent, setConsentState] = useState<ConsentState>(defaultConsent);
+  const [hasConsented, setHasConsented] = useState(false);
 
-  const setConsent = (key: keyof ConsentState, value: boolean) => {
-    setConsentState(prev => ({ ...prev, [key]: value }));
+  const setConsent = (value: boolean) => {
+    setHasConsented(value);
   };
 
-  const allConsented = Object.values(consent).every(Boolean);
-
   const resetConsent = () => {
-    setConsentState(defaultConsent);
+    setHasConsented(false);
   };
 
   return (
-    <ConsentContext.Provider value={{ consent, setConsent, allConsented, resetConsent }}>
+    <ConsentContext.Provider value={{ hasConsented, setConsent, resetConsent }}>
       {children}
     </ConsentContext.Provider>
   );
