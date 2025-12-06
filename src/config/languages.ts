@@ -24,6 +24,32 @@ export interface ConsentTranslations {
   agreeToAll: string;
 }
 
+export interface LandingTranslations {
+  welcome: string;
+  tagline: string;
+  selectLanguage: string;
+  trustedCompanion: string;
+  back: string;
+  letsChat: string;
+  talkToUs: string;
+}
+
+export interface AboutTranslations {
+  title: string;
+  back: string;
+  missionTitle: string;
+  missionDescription: string;
+  createdBy: string;
+  profile: string;
+  feature1Title: string;
+  feature1Desc: string;
+  feature2Title: string;
+  feature2Desc: string;
+  feature3Title: string;
+  feature3Desc: string;
+  footer: string;
+}
+
 export interface LanguageConfig {
   code: LanguageCode;
   name: string;
@@ -62,6 +88,8 @@ export interface LanguageConfig {
     references: string;
     onboarding: OnboardingTranslations;
     consent: ConsentTranslations;
+    landing: LandingTranslations;
+    about: AboutTranslations;
   };
 }
 
@@ -124,6 +152,30 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         acceptTerms: 'नियम और गोपनीयता नीति स्वीकार करें',
         agreeToAll: 'मैं उपरोक्त सभी से सहमत हूं',
       },
+      landing: {
+        welcome: 'न्याय साथी में आपका स्वागत है',
+        tagline: 'आपकी भाषा में तत्काल कानूनी प्राथमिक चिकित्सा',
+        selectLanguage: 'अपनी भाषा चुनें',
+        trustedCompanion: 'आपका विश्वसनीय कानूनी प्राथमिक चिकित्सा साथी',
+        back: 'वापस',
+        letsChat: 'बात करें',
+        talkToUs: 'अपने कानूनी प्रश्नों के बारे में हमसे बात करें',
+      },
+      about: {
+        title: 'न्याय साथी के बारे में',
+        back: 'वापस',
+        missionTitle: 'भारत के लिए कानूनी ज्ञान का लोकतंत्रीकरण',
+        missionDescription: 'न्याय साथी सिर्फ एक ऐप नहीं है—यह एक मिशन है। हर भारतीय को उनकी अपनी भाषा में तत्काल, सुलभ और सटीक कानूनी मार्गदर्शन देने के लिए बनाया गया।',
+        createdBy: 'प्रो. वेंकट, आईआईटी जोधपुर',
+        profile: 'प्रोफ़ाइल',
+        feature1Title: 'समावेशी प्रौद्योगिकी',
+        feature1Desc: '12+ भारतीय भाषाओं के समर्थन से भाषा बाधाओं को तोड़ना, हर नागरिक को कानूनी जानकारी सुलभ बनाना।',
+        feature2Title: 'सशक्तिकरण',
+        feature2Desc: 'जटिल कानूनी शब्दावली को सरल, कार्रवाई योग्य सलाह में बदलना जो कोई भी समझ सके।',
+        feature3Title: 'सहानुभूति से सेवा',
+        feature3Desc: 'एक AI साथी जो पहले सुनता है, आपकी स्थिति समझता है, और देखभाल के साथ मार्गदर्शन प्रदान करता है।',
+        footer: 'प्रो. वेंकट, आईआईटी जोधपुर द्वारा भारत के लिए ❤️ से निर्मित',
+      },
     },
   },
   EN: {
@@ -183,6 +235,30 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         helpImprove: 'Let us learn from chats to improve (all data stays anonymous)',
         acceptTerms: 'Accept the Terms and Privacy Policy',
         agreeToAll: 'I agree to all of the above',
+      },
+      landing: {
+        welcome: 'Welcome to Nyay Saathi',
+        tagline: 'Instant legal first-aid in your language',
+        selectLanguage: 'Select your language',
+        trustedCompanion: 'Your trusted legal first-aid companion',
+        back: 'Back',
+        letsChat: "Let's Chat",
+        talkToUs: 'Talk to us about your legal questions',
+      },
+      about: {
+        title: 'About Nyay Saathi',
+        back: 'Back',
+        missionTitle: 'Democratizing Legal Knowledge for Bharat',
+        missionDescription: "Nyay Saathi is more than just an app—it's a mission. Built to give every Indian instant, accessible, and accurate legal guidance in their own language.",
+        createdBy: 'Prof. Venkat, IIT Jodhpur',
+        profile: 'Profile',
+        feature1Title: 'Inclusive Technology',
+        feature1Desc: 'Breaking language barriers with support for 12+ Indian languages, making legal information accessible to every citizen.',
+        feature2Title: 'Empowerment',
+        feature2Desc: 'Turning confusing legal jargon into simple, actionable advice that anyone can understand.',
+        feature3Title: 'Served with Empathy',
+        feature3Desc: 'An AI companion that listens first, understands your situation, and provides guidance with care.',
+        footer: 'Built with ❤️ for Bharat by Prof. Venkat, IIT Jodhpur',
       },
     },
   },
@@ -244,6 +320,30 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         acceptTerms: 'শর্তাবলী এবং গোপনীয়তা নীতি স্বীকার করুন',
         agreeToAll: 'আমি উপরের সবকিছুতে সম্মত',
       },
+      landing: {
+        welcome: 'ন্যায় সাথীতে স্বাগতম',
+        tagline: 'আপনার ভাষায় তাৎক্ষণিক আইনি প্রাথমিক চিকিৎসা',
+        selectLanguage: 'আপনার ভাষা নির্বাচন করুন',
+        trustedCompanion: 'আপনার বিশ্বস্ত আইনি প্রাথমিক চিকিৎসা সঙ্গী',
+        back: 'পিছনে',
+        letsChat: 'চ্যাট করুন',
+        talkToUs: 'আপনার আইনি প্রশ্ন সম্পর্কে আমাদের সাথে কথা বলুন',
+      },
+      about: {
+        title: 'ন্যায় সাথী সম্পর্কে',
+        back: 'পিছনে',
+        missionTitle: 'ভারতের জন্য আইনি জ্ঞানের গণতন্ত্রীকরণ',
+        missionDescription: 'ন্যায় সাথী শুধু একটি অ্যাপ নয়—এটি একটি মিশন। প্রতিটি ভারতীয়কে তাদের নিজের ভাষায় তাৎক্ষণিক, সুলভ এবং সঠিক আইনি নির্দেশনা দিতে তৈরি।',
+        createdBy: 'অধ্যাপক ভেঙ্কট, আইআইটি যোধপুর',
+        profile: 'প্রোফাইল',
+        feature1Title: 'অন্তর্ভুক্তিমূলক প্রযুক্তি',
+        feature1Desc: '১২+ ভারতীয় ভাষার সমর্থনে ভাষার বাধা ভেঙে, প্রতিটি নাগরিকের কাছে আইনি তথ্য সুলভ করা।',
+        feature2Title: 'ক্ষমতায়ন',
+        feature2Desc: 'জটিল আইনি শব্দকে সহজ, কার্যকর পরামর্শে রূপান্তরিত করা যা যে কেউ বুঝতে পারে।',
+        feature3Title: 'সহানুভূতির সাথে সেবা',
+        feature3Desc: 'একটি AI সঙ্গী যে প্রথমে শোনে, আপনার পরিস্থিতি বোঝে এবং যত্ন সহকারে নির্দেশনা দেয়।',
+        footer: 'অধ্যাপক ভেঙ্কট, আইআইটি যোধপুর দ্বারা ভারতের জন্য ❤️ দিয়ে তৈরি',
+      },
     },
   },
   TA: {
@@ -303,6 +403,30 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         helpImprove: 'மேம்படுத்த அரட்டைகளிலிருந்து கற்றுக்கொள்ள அனுமதிக்கவும் (எல்லா தரவும் அநாமதேயமாக இருக்கும்)',
         acceptTerms: 'விதிமுறைகள் மற்றும் தனியுரிமைக் கொள்கையை ஏற்கவும்',
         agreeToAll: 'மேலே உள்ள அனைத்திற்கும் ஒப்புக்கொள்கிறேன்',
+      },
+      landing: {
+        welcome: 'நியாய சாதிக்கு வரவேற்கிறோம்',
+        tagline: 'உங்கள் மொழியில் உடனடி சட்ட முதலுதவி',
+        selectLanguage: 'உங்கள் மொழியைத் தேர்ந்தெடுங்கள்',
+        trustedCompanion: 'உங்கள் நம்பகமான சட்ட முதலுதவி தோழன்',
+        back: 'பின்னால்',
+        letsChat: 'பேசலாம்',
+        talkToUs: 'உங்கள் சட்ட கேள்விகள் பற்றி எங்களிடம் பேசுங்கள்',
+      },
+      about: {
+        title: 'நியாய சாதி பற்றி',
+        back: 'பின்னால்',
+        missionTitle: 'பாரதத்திற்கான சட்ட அறிவின் ஜனநாயகமயமாக்கல்',
+        missionDescription: 'நியாய சாதி வெறும் ஆப் அல்ல—இது ஒரு இயக்கம். ஒவ்வொரு இந்தியருக்கும் அவரவர் மொழியில் உடனடி, எளிமையான, துல்லியமான சட்ட வழிகாட்டுதலை வழங்க உருவாக்கப்பட்டது.',
+        createdBy: 'பேராசிரியர் வெங்கட், ஐஐடி ஜோத்பூர்',
+        profile: 'சுயவிவரம்',
+        feature1Title: 'உள்ளடக்கிய தொழில்நுட்பம்',
+        feature1Desc: '12+ இந்திய மொழிகளின் ஆதரவுடன் மொழி தடைகளை உடைத்து, ஒவ்வொரு குடிமகனுக்கும் சட்ட தகவல்களை அணுகக்கூடியதாக்குகிறது.',
+        feature2Title: 'அதிகாரமளித்தல்',
+        feature2Desc: 'குழப்பமான சட்ட சொற்களை யாரும் புரிந்துகொள்ளக்கூடிய எளிய, செயல்படுத்தக்கூடிய ஆலோசனையாக மாற்றுகிறது.',
+        feature3Title: 'அனுதாபத்துடன் சேவை',
+        feature3Desc: 'முதலில் கேட்கும், உங்கள் நிலையைப் புரிந்துகொள்ளும், அக்கறையுடன் வழிகாட்டும் AI தோழன்.',
+        footer: 'பேராசிரியர் வெங்கட், ஐஐடி ஜோத்பூர் ❤️ உடன் பாரதத்திற்காக உருவாக்கியது',
       },
     },
   },
@@ -364,6 +488,30 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         acceptTerms: 'నిబంధనలు మరియు గోప్యతా విధానాన్ని అంగీకరించండి',
         agreeToAll: 'పైన ఉన్న అన్నింటికీ అంగీకరిస్తున్నాను',
       },
+      landing: {
+        welcome: 'న్యాయ సాథికి స్వాగతం',
+        tagline: 'మీ భాషలో తక్షణ చట్ట ప్రథమ చికిత్స',
+        selectLanguage: 'మీ భాషను ఎంచుకోండి',
+        trustedCompanion: 'మీ నమ్మకమైన చట్ట ప్రథమ చికిత్స సహచరుడు',
+        back: 'వెనుకకు',
+        letsChat: 'మాట్లాడదాం',
+        talkToUs: 'మీ చట్ట ప్రశ్నల గురించి మాతో మాట్లాడండి',
+      },
+      about: {
+        title: 'న్యాయ సాథి గురించి',
+        back: 'వెనుకకు',
+        missionTitle: 'భారత్ కోసం చట్ట జ్ఞానాన్ని ప్రజాస్వామ్యం చేయడం',
+        missionDescription: 'న్యాయ సాథి కేవలం యాప్ కాదు—ఇది ఒక మిషన్. ప్రతి భారతీయుడికి వారి స్వంత భాషలో తక్షణ, అందుబాటులో ఉన్న, ఖచ్చితమైన చట్ట మార్గదర్శకత్వం అందించడానికి నిర్మించబడింది.',
+        createdBy: 'ప్రొ. వెంకట్, IIT జోధ్‌పూర్',
+        profile: 'ప్రొఫైల్',
+        feature1Title: 'సమగ్ర సాంకేతికత',
+        feature1Desc: '12+ భారతీయ భాషల మద్దతుతో భాషా అడ్డంకులను తొలగించి, ప్రతి పౌరుడికి చట్ట సమాచారాన్ని అందుబాటులో ఉంచడం.',
+        feature2Title: 'సాధికారత',
+        feature2Desc: 'గందరగోళ చట్ట పదజాలాన్ని ఎవరైనా అర్థం చేసుకోగల సరళమైన, చర్య తీసుకోగల సలహాగా మార్చడం.',
+        feature3Title: 'సానుభూతితో సేవ',
+        feature3Desc: 'మొదట వినే, మీ పరిస్థితిని అర్థం చేసుకునే, శ్రద్ధతో మార్గదర్శకత్వం అందించే AI సహచరుడు.',
+        footer: 'ప్రొ. వెంకట్, IIT జోధ్‌పూర్ ❤️ తో భారత్ కోసం నిర్మించబడింది',
+      },
     },
   },
   MR: {
@@ -423,6 +571,30 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         helpImprove: 'सुधारणा करण्यासाठी चॅटमधून शिकण्याची परवानगी द्या (सर्व डेटा अनामिक राहतो)',
         acceptTerms: 'अटी आणि गोपनीयता धोरण स्वीकारा',
         agreeToAll: 'मी वरील सर्वांशी सहमत आहे',
+      },
+      landing: {
+        welcome: 'न्याय साथीमध्ये आपले स्वागत आहे',
+        tagline: 'तुमच्या भाषेत त्वरित कायदेशीर प्रथमोपचार',
+        selectLanguage: 'तुमची भाषा निवडा',
+        trustedCompanion: 'तुमचा विश्वासू कायदेशीर प्रथमोपचार सोबती',
+        back: 'मागे',
+        letsChat: 'बोलूया',
+        talkToUs: 'तुमच्या कायदेशीर प्रश्नांबद्दल आमच्याशी बोला',
+      },
+      about: {
+        title: 'न्याय साथी बद्दल',
+        back: 'मागे',
+        missionTitle: 'भारतासाठी कायदेशीर ज्ञानाचे लोकशाहीकरण',
+        missionDescription: 'न्याय साथी फक्त एक अॅप नाही—हे एक मिशन आहे. प्रत्येक भारतीयाला त्यांच्या स्वतःच्या भाषेत त्वरित, सुलभ आणि अचूक कायदेशीर मार्गदर्शन देण्यासाठी बनवले.',
+        createdBy: 'प्रो. वेंकट, IIT जोधपूर',
+        profile: 'प्रोफाइल',
+        feature1Title: 'समावेशक तंत्रज्ञान',
+        feature1Desc: '12+ भारतीय भाषांच्या समर्थनासह भाषा अडथळे तोडणे, प्रत्येक नागरिकाला कायदेशीर माहिती उपलब्ध करणे.',
+        feature2Title: 'सशक्तीकरण',
+        feature2Desc: 'गोंधळात टाकणारे कायदेशीर शब्द कोणालाही समजेल अशा सोप्या, कृतीयोग्य सल्ल्यात बदलणे.',
+        feature3Title: 'सहानुभूतीने सेवा',
+        feature3Desc: 'प्रथम ऐकणारा, तुमची परिस्थिती समजून घेणारा आणि काळजीने मार्गदर्शन करणारा AI सोबती.',
+        footer: 'प्रो. वेंकट, IIT जोधपूर यांनी भारतासाठी ❤️ ने बनवले',
       },
     },
   },
@@ -484,6 +656,30 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         acceptTerms: 'શરતો અને ગોપનીયતા નીતિ સ્વીકારો',
         agreeToAll: 'હું ઉપરોક્ત બધા સાથે સંમત છું',
       },
+      landing: {
+        welcome: 'ન્યાય સાથીમાં આપનું સ્વાગત છે',
+        tagline: 'તમારી ભાષામાં તાત્કાલિક કાનૂની પ્રાથમિક સારવાર',
+        selectLanguage: 'તમારી ભાષા પસંદ કરો',
+        trustedCompanion: 'તમારો વિશ્વસનીય કાનૂની પ્રાથમિક સારવાર સાથી',
+        back: 'પાછળ',
+        letsChat: 'વાત કરીએ',
+        talkToUs: 'તમારા કાનૂની પ્રશ્નો વિશે અમારી સાથે વાત કરો',
+      },
+      about: {
+        title: 'ન્યાય સાથી વિશે',
+        back: 'પાછળ',
+        missionTitle: 'ભારત માટે કાનૂની જ્ઞાનનું લોકશાહીકરણ',
+        missionDescription: 'ન્યાય સાથી માત્ર એક એપ નથી—તે એક મિશન છે. દરેક ભારતીયને તેમની પોતાની ભાષામાં તાત્કાલિક, સુલભ અને સચોટ કાનૂની માર્ગદર્શન આપવા માટે બનાવેલ.',
+        createdBy: 'પ્રો. વેંકટ, IIT જોધપુર',
+        profile: 'પ્રોફાઇલ',
+        feature1Title: 'સમાવેશક ટેક્નોલોજી',
+        feature1Desc: '12+ ભારતીય ભાષાઓના સમર્થન સાથે ભાષા અવરોધો તોડીને, દરેક નાગરિક માટે કાનૂની માહિતી સુલભ બનાવે છે.',
+        feature2Title: 'સશક્તિકરણ',
+        feature2Desc: 'ગૂંચવણભરી કાનૂની ભાષાને કોઈપણ સમજી શકે તેવી સરળ, ક્રિયાશીલ સલાહમાં ફેરવે છે.',
+        feature3Title: 'સહાનુભૂતિ સાથે સેવા',
+        feature3Desc: 'પહેલા સાંભળનાર, તમારી પરિસ્થિતિ સમજનાર અને કાળજી સાથે માર્ગદર્શન આપનાર AI સાથી.',
+        footer: 'પ્રો. વેંકટ, IIT જોધપુર દ્વારા ભારત માટે ❤️ થી બનાવેલ',
+      },
     },
   },
   KN: {
@@ -543,6 +739,30 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         helpImprove: 'ಸುಧಾರಣೆಗಾಗಿ ಚಾಟ್‌ಗಳಿಂದ ಕಲಿಯಲು ಅವಕಾಶ ಕೊಡಿ (ಎಲ್ಲಾ ಡೇಟಾ ಅನಾಮಧೇಯವಾಗಿರುತ್ತದೆ)',
         acceptTerms: 'ನಿಯಮಗಳು ಮತ್ತು ಗೌಪ್ಯತೆ ನೀತಿಯನ್ನು ಸ್ವೀಕರಿಸಿ',
         agreeToAll: 'ಮೇಲಿನ ಎಲ್ಲದಕ್ಕೂ ನಾನು ಒಪ್ಪುತ್ತೇನೆ',
+      },
+      landing: {
+        welcome: 'ನ್ಯಾಯ ಸಾಥಿಗೆ ಸ್ವಾಗತ',
+        tagline: 'ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ತತ್‌ಕ್ಷಣ ಕಾನೂನು ಪ್ರಥಮ ಚಿಕಿತ್ಸೆ',
+        selectLanguage: 'ನಿಮ್ಮ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ',
+        trustedCompanion: 'ನಿಮ್ಮ ನಂಬಿಕಸ್ಥ ಕಾನೂನು ಪ್ರಥಮ ಚಿಕಿತ್ಸೆ ಸಂಗಾತಿ',
+        back: 'ಹಿಂದೆ',
+        letsChat: 'ಮಾತನಾಡೋಣ',
+        talkToUs: 'ನಿಮ್ಮ ಕಾನೂನು ಪ್ರಶ್ನೆಗಳ ಬಗ್ಗೆ ನಮ್ಮೊಂದಿಗೆ ಮಾತನಾಡಿ',
+      },
+      about: {
+        title: 'ನ್ಯಾಯ ಸಾಥಿ ಬಗ್ಗೆ',
+        back: 'ಹಿಂದೆ',
+        missionTitle: 'ಭಾರತಕ್ಕಾಗಿ ಕಾನೂನು ಜ್ಞಾನದ ಪ್ರಜಾಪ್ರಭುತ್ವೀಕರಣ',
+        missionDescription: 'ನ್ಯಾಯ ಸಾಥಿ ಕೇವಲ ಆ್ಯಪ್ ಅಲ್ಲ—ಇದು ಒಂದು ಮಿಷನ್. ಪ್ರತಿ ಭಾರತೀಯರಿಗೆ ಅವರ ಸ್ವಂತ ಭಾಷೆಯಲ್ಲಿ ತತ್‌ಕ್ಷಣ, ಲಭ್ಯವಾಗುವ, ನಿಖರ ಕಾನೂನು ಮಾರ್ಗದರ್ಶನ ನೀಡಲು ನಿರ್ಮಿಸಲಾಗಿದೆ.',
+        createdBy: 'ಪ್ರೊ. ವೆಂಕಟ್, IIT ಜೋಧ್‌ಪುರ್',
+        profile: 'ಪ್ರೊಫೈಲ್',
+        feature1Title: 'ಸಮಗ್ರ ತಂತ್ರಜ್ಞಾನ',
+        feature1Desc: '12+ ಭಾರತೀಯ ಭಾಷೆಗಳ ಬೆಂಬಲದೊಂದಿಗೆ ಭಾಷಾ ತಡೆಗಳನ್ನು ಮುರಿದು, ಪ್ರತಿ ನಾಗರಿಕರಿಗೆ ಕಾನೂನು ಮಾಹಿತಿಯನ್ನು ಲಭ್ಯವಾಗಿಸುವುದು.',
+        feature2Title: 'ಸಬಲೀಕರಣ',
+        feature2Desc: 'ಗೊಂದಲಮಯ ಕಾನೂನು ಪದಗಳನ್ನು ಯಾರಾದರೂ ಅರ್ಥಮಾಡಿಕೊಳ್ಳಬಹುದಾದ ಸರಳ, ಕ್ರಿಯಾಶೀಲ ಸಲಹೆಯಾಗಿ ಪರಿವರ್ತಿಸುವುದು.',
+        feature3Title: 'ಸಹಾನುಭೂತಿಯಿಂದ ಸೇವೆ',
+        feature3Desc: 'ಮೊದಲು ಆಲಿಸುವ, ನಿಮ್ಮ ಪರಿಸ್ಥಿತಿಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವ, ಕಾಳಜಿಯಿಂದ ಮಾರ್ಗದರ್ಶನ ಮಾಡುವ AI ಸಂಗಾತಿ.',
+        footer: 'ಪ್ರೊ. ವೆಂಕಟ್, IIT ಜೋಧ್‌ಪುರ್ ❤️ ನಿಂದ ಭಾರತಕ್ಕಾಗಿ ನಿರ್ಮಿಸಲಾಗಿದೆ',
       },
     },
   },
@@ -604,6 +824,30 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         acceptTerms: 'നിബന്ധനകളും സ്വകാര്യതാ നയവും സ്വീകരിക്കുക',
         agreeToAll: 'മുകളിലുള്ള എല്ലാത്തിനും ഞാൻ സമ്മതിക്കുന്നു',
       },
+      landing: {
+        welcome: 'ന്യായ സാഥിയിലേക്ക് സ്വാഗതം',
+        tagline: 'നിങ്ങളുടെ ഭാഷയിൽ തൽക്ഷണ നിയമ പ്രഥമശുശ്രൂഷ',
+        selectLanguage: 'നിങ്ങളുടെ ഭാഷ തിരഞ്ഞെടുക്കുക',
+        trustedCompanion: 'നിങ്ങളുടെ വിശ്വസ്ത നിയമ പ്രഥമശുശ്രൂഷ സഹചാരി',
+        back: 'പിന്നോട്ട്',
+        letsChat: 'സംസാരിക്കാം',
+        talkToUs: 'നിങ്ങളുടെ നിയമ ചോദ്യങ്ങളെക്കുറിച്ച് ഞങ്ങളോട് സംസാരിക്കുക',
+      },
+      about: {
+        title: 'ന്യായ സാഥിയെക്കുറിച്ച്',
+        back: 'പിന്നോട്ട്',
+        missionTitle: 'ഭാരതത്തിനായി നിയമ അറിവിന്റെ ജനാധിപത്യവൽക്കരണം',
+        missionDescription: 'ന്യായ സാഥി വെറും ആപ്പ് അല്ല—ഇത് ഒരു ദൗത്യമാണ്. ഓരോ ഇന്ത്യക്കാരനും അവരുടെ സ്വന്തം ഭാഷയിൽ തൽക്ഷണ, ലഭ്യമായ, കൃത്യമായ നിയമ മാർഗ്ഗനിർദ്ദേശം നൽകാൻ നിർമ്മിച്ചത്.',
+        createdBy: 'പ്രൊ. വെങ്കട്, IIT ജോധ്പൂർ',
+        profile: 'പ്രൊഫൈൽ',
+        feature1Title: 'സമഗ്ര സാങ്കേതികവിദ്യ',
+        feature1Desc: '12+ ഇന്ത്യൻ ഭാഷകളുടെ പിന്തുണയോടെ ഭാഷാ തടസ്സങ്ങൾ തകർത്ത്, എല്ലാ പൗരന്മാർക്കും നിയമ വിവരങ്ങൾ ലഭ്യമാക്കുന്നു.',
+        feature2Title: 'ശാക്തീകരണം',
+        feature2Desc: 'ആശയക്കുഴപ്പമുണ്ടാക്കുന്ന നിയമ പദങ്ങളെ ആർക്കും മനസ്സിലാക്കാൻ കഴിയുന്ന ലളിതമായ, പ്രവർത്തനക്ഷമമായ ഉപദേശമാക്കി മാറ്റുന്നു.',
+        feature3Title: 'സഹാനുഭൂതിയോടെ സേവനം',
+        feature3Desc: 'ആദ്യം കേൾക്കുന്ന, നിങ്ങളുടെ സാഹചര്യം മനസ്സിലാക്കുന്ന, കരുതലോടെ മാർഗ്ഗനിർദ്ദേശം നൽകുന്ന AI സഹചാരി.',
+        footer: 'പ്രൊ. വെങ്കട്, IIT ജോധ്പൂർ ❤️ ഭാരതത്തിനായി നിർമ്മിച്ചത്',
+      },
     },
   },
   PA: {
@@ -663,6 +907,30 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         helpImprove: 'ਸੁਧਾਰ ਲਈ ਚੈਟਾਂ ਤੋਂ ਸਿੱਖਣ ਦਿਓ (ਸਾਰਾ ਡਾਟਾ ਅਗਿਆਤ ਰਹਿੰਦਾ ਹੈ)',
         acceptTerms: 'ਸ਼ਰਤਾਂ ਅਤੇ ਗੋਪਨੀਯਤਾ ਨੀਤੀ ਸਵੀਕਾਰ ਕਰੋ',
         agreeToAll: 'ਮੈਂ ਉਪਰੋਕਤ ਸਾਰਿਆਂ ਨਾਲ ਸਹਿਮਤ ਹਾਂ',
+      },
+      landing: {
+        welcome: 'ਨਿਆਂ ਸਾਥੀ ਵਿੱਚ ਜੀ ਆਇਆਂ ਨੂੰ',
+        tagline: 'ਤੁਹਾਡੀ ਭਾਸ਼ਾ ਵਿੱਚ ਤੁਰੰਤ ਕਾਨੂੰਨੀ ਮੁੱਢਲੀ ਸਹਾਇਤਾ',
+        selectLanguage: 'ਆਪਣੀ ਭਾਸ਼ਾ ਚੁਣੋ',
+        trustedCompanion: 'ਤੁਹਾਡਾ ਭਰੋਸੇਮੰਦ ਕਾਨੂੰਨੀ ਮੁੱਢਲੀ ਸਹਾਇਤਾ ਸਾਥੀ',
+        back: 'ਪਿੱਛੇ',
+        letsChat: 'ਗੱਲ ਕਰੀਏ',
+        talkToUs: 'ਆਪਣੇ ਕਾਨੂੰਨੀ ਸਵਾਲਾਂ ਬਾਰੇ ਸਾਡੇ ਨਾਲ ਗੱਲ ਕਰੋ',
+      },
+      about: {
+        title: 'ਨਿਆਂ ਸਾਥੀ ਬਾਰੇ',
+        back: 'ਪਿੱਛੇ',
+        missionTitle: 'ਭਾਰਤ ਲਈ ਕਾਨੂੰਨੀ ਗਿਆਨ ਦਾ ਲੋਕਤੰਤਰੀਕਰਨ',
+        missionDescription: 'ਨਿਆਂ ਸਾਥੀ ਸਿਰਫ਼ ਇੱਕ ਐਪ ਨਹੀਂ ਹੈ—ਇਹ ਇੱਕ ਮਿਸ਼ਨ ਹੈ। ਹਰ ਭਾਰਤੀ ਨੂੰ ਉਨ੍ਹਾਂ ਦੀ ਆਪਣੀ ਭਾਸ਼ਾ ਵਿੱਚ ਤੁਰੰਤ, ਪਹੁੰਚਯੋਗ ਅਤੇ ਸਹੀ ਕਾਨੂੰਨੀ ਮਾਰਗਦਰਸ਼ਨ ਦੇਣ ਲਈ ਬਣਾਇਆ ਗਿਆ।',
+        createdBy: 'ਪ੍ਰੋ. ਵੈਂਕਟ, IIT ਜੋਧਪੁਰ',
+        profile: 'ਪ੍ਰੋਫਾਈਲ',
+        feature1Title: 'ਸਮਾਵੇਸ਼ੀ ਟੈਕਨੋਲੋਜੀ',
+        feature1Desc: '12+ ਭਾਰਤੀ ਭਾਸ਼ਾਵਾਂ ਦੇ ਸਮਰਥਨ ਨਾਲ ਭਾਸ਼ਾ ਦੀਆਂ ਰੁਕਾਵਟਾਂ ਤੋੜਦਿਆਂ, ਹਰ ਨਾਗਰਿਕ ਲਈ ਕਾਨੂੰਨੀ ਜਾਣਕਾਰੀ ਪਹੁੰਚਯੋਗ ਬਣਾਉਣਾ।',
+        feature2Title: 'ਸਸ਼ਕਤੀਕਰਨ',
+        feature2Desc: 'ਗੁੰਝਲਦਾਰ ਕਾਨੂੰਨੀ ਸ਼ਬਦਾਵਲੀ ਨੂੰ ਸਰਲ, ਕਾਰਵਾਈਯੋਗ ਸਲਾਹ ਵਿੱਚ ਬਦਲਣਾ ਜੋ ਕੋਈ ਵੀ ਸਮਝ ਸਕੇ।',
+        feature3Title: 'ਹਮਦਰਦੀ ਨਾਲ ਸੇਵਾ',
+        feature3Desc: 'ਪਹਿਲਾਂ ਸੁਣਨ ਵਾਲਾ, ਤੁਹਾਡੀ ਸਥਿਤੀ ਸਮਝਣ ਵਾਲਾ, ਦੇਖਭਾਲ ਨਾਲ ਮਾਰਗਦਰਸ਼ਨ ਕਰਨ ਵਾਲਾ AI ਸਾਥੀ।',
+        footer: 'ਪ੍ਰੋ. ਵੈਂਕਟ, IIT ਜੋਧਪੁਰ ❤️ ਨਾਲ ਭਾਰਤ ਲਈ ਬਣਾਇਆ',
       },
     },
   },
@@ -724,6 +992,30 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         acceptTerms: 'ସର୍ତ୍ତାବଳୀ ଏବଂ ଗୋପନୀୟତା ନୀତି ସ୍ୱୀକାର କରନ୍ତୁ',
         agreeToAll: 'ମୁଁ ଉପରୋକ୍ତ ସମସ୍ତଙ୍କ ସହିତ ସହମତ',
       },
+      landing: {
+        welcome: 'ନ୍ୟାୟ ସାଥୀରେ ସ୍ୱାଗତ',
+        tagline: 'ଆପଣଙ୍କ ଭାଷାରେ ତତ୍କ୍ଷଣାତ୍ ଆଇନଗତ ପ୍ରଥମ ସହାୟତା',
+        selectLanguage: 'ଆପଣଙ୍କ ଭାଷା ବାଛନ୍ତୁ',
+        trustedCompanion: 'ଆପଣଙ୍କ ବିଶ୍ୱସ୍ତ ଆଇନଗତ ପ୍ରଥମ ସହାୟତା ସାଥୀ',
+        back: 'ପଛକୁ',
+        letsChat: 'କଥା ହେବା',
+        talkToUs: 'ଆପଣଙ୍କ ଆଇନଗତ ପ୍ରଶ୍ନ ବିଷୟରେ ଆମ ସହ କଥା ହୁଅନ୍ତୁ',
+      },
+      about: {
+        title: 'ନ୍ୟାୟ ସାଥୀ ବିଷୟରେ',
+        back: 'ପଛକୁ',
+        missionTitle: 'ଭାରତ ପାଇଁ ଆଇନଗତ ଜ୍ଞାନର ଲୋକତନ୍ତ୍ରୀକରଣ',
+        missionDescription: 'ନ୍ୟାୟ ସାଥୀ କେବଳ ଏକ ଆପ୍ ନୁହେଁ—ଏହା ଏକ ମିଶନ। ପ୍ରତ୍ୟେକ ଭାରତୀୟଙ୍କୁ ସେମାନଙ୍କ ନିଜ ଭାଷାରେ ତତ୍କ୍ଷଣାତ୍, ସୁଲଭ ଏବଂ ସଠିକ୍ ଆଇନଗତ ମାର୍ଗଦର୍ଶନ ଦେବା ପାଇଁ ନିର୍ମିତ।',
+        createdBy: 'ପ୍ରୋ. ଭେଙ୍କଟ, IIT ଯୋଧପୁର',
+        profile: 'ପ୍ରୋଫାଇଲ୍',
+        feature1Title: 'ସମାବେଶୀ ପ୍ରଯୁକ୍ତି',
+        feature1Desc: '୧୨+ ଭାରତୀୟ ଭାଷାର ସମର୍ଥନ ସହ ଭାଷା ବାଧା ଭାଙ୍ଗି, ପ୍ରତ୍ୟେକ ନାଗରିକଙ୍କ ପାଇଁ ଆଇନଗତ ସୂଚନା ସୁଲଭ କରିବା।',
+        feature2Title: 'ସଶକ୍ତୀକରଣ',
+        feature2Desc: 'ଜଟିଳ ଆଇନଗତ ଶବ୍ଦାବଳୀକୁ ସରଳ, କାର୍ଯ୍ୟକ୍ଷମ ପରାମର୍ଶରେ ପରିଣତ କରିବା ଯାହା ସମସ୍ତେ ବୁଝିପାରିବେ।',
+        feature3Title: 'ସହାନୁଭୂତି ସହ ସେବା',
+        feature3Desc: 'ପ୍ରଥମେ ଶୁଣିବା, ଆପଣଙ୍କ ପରିସ୍ଥିତି ବୁଝିବା ଏବଂ ଯତ୍ନ ସହ ମାର୍ଗଦର୍ଶନ ଦେବା AI ସାଥୀ।',
+        footer: 'ପ୍ରୋ. ଭେଙ୍କଟ, IIT ଯୋଧପୁର ❤️ ସହ ଭାରତ ପାଇଁ ନିର୍ମିତ',
+      },
     },
   },
   UR: {
@@ -783,6 +1075,30 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         helpImprove: 'بہتری کے لیے چیٹس سے سیکھنے دیں (تمام ڈیٹا گمنام رہتا ہے)',
         acceptTerms: 'شرائط اور رازداری کی پالیسی قبول کریں',
         agreeToAll: 'میں مندرجہ بالا سب سے متفق ہوں',
+      },
+      landing: {
+        welcome: 'نیائے ساتھی میں خوش آمدید',
+        tagline: 'آپ کی زبان میں فوری قانونی ابتدائی طبی امداد',
+        selectLanguage: 'اپنی زبان منتخب کریں',
+        trustedCompanion: 'آپ کا قابل اعتماد قانونی ابتدائی طبی امداد ساتھی',
+        back: 'واپس',
+        letsChat: 'بات کریں',
+        talkToUs: 'اپنے قانونی سوالات کے بارے میں ہم سے بات کریں',
+      },
+      about: {
+        title: 'نیائے ساتھی کے بارے میں',
+        back: 'واپس',
+        missionTitle: 'بھارت کے لیے قانونی علم کی جمہوریت',
+        missionDescription: 'نیائے ساتھی صرف ایک ایپ نہیں ہے—یہ ایک مشن ہے۔ ہر ہندوستانی کو ان کی اپنی زبان میں فوری، قابل رسائی اور درست قانونی رہنمائی فراہم کرنے کے لیے بنایا گیا۔',
+        createdBy: 'پروفیسر وینکٹ، IIT جودھپور',
+        profile: 'پروفائل',
+        feature1Title: 'جامع ٹیکنالوجی',
+        feature1Desc: '12+ ہندوستانی زبانوں کی حمایت کے ساتھ زبان کی رکاوٹیں توڑتے ہوئے، ہر شہری کے لیے قانونی معلومات قابل رسائی بنانا۔',
+        feature2Title: 'بااختیار بنانا',
+        feature2Desc: 'پیچیدہ قانونی اصطلاحات کو سادہ، قابل عمل مشورے میں تبدیل کرنا جو کوئی بھی سمجھ سکے۔',
+        feature3Title: 'ہمدردی کے ساتھ خدمت',
+        feature3Desc: 'پہلے سننے والا، آپ کی صورتحال سمجھنے والا، اور خیال رکھتے ہوئے رہنمائی کرنے والا AI ساتھی۔',
+        footer: 'پروفیسر وینکٹ، IIT جودھپور نے ❤️ کے ساتھ بھارت کے لیے بنایا',
       },
     },
   },

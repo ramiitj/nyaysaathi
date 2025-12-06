@@ -37,34 +37,36 @@ const Landing: React.FC = () => {
       <div className="w-full max-w-md">
         {/* Language Selection Step */}
         {step === 'language' && (
-          <div className="bg-card rounded-3xl shadow-xl p-8 animate-fade-in">
+          <div className="bg-card rounded-3xl shadow-xl p-6 sm:p-8 animate-fade-in max-h-[90vh] overflow-y-auto">
             {/* Logo */}
-            <div className="flex flex-col items-center mb-8">
-              <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mb-4">
-                <Scale className="w-8 h-8 text-primary-foreground" />
+            <div className="flex flex-col items-center mb-6">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary flex items-center justify-center mb-3">
+                <Scale className="w-7 h-7 sm:w-8 sm:h-8 text-primary-foreground" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground">Welcome to Nyay Saathi</h1>
-              <p className="text-muted-foreground text-center mt-2">
-                Instant legal first-aid in your language
+              <h1 className={`text-xl sm:text-2xl font-bold text-foreground text-center ${config.fontClass}`}>
+                {config.ui.landing.welcome}
+              </h1>
+              <p className={`text-muted-foreground text-center mt-2 text-sm sm:text-base ${config.fontClass}`}>
+                {config.ui.landing.tagline}
               </p>
             </div>
 
-            {/* Language Grid */}
-            <div className="grid grid-cols-2 gap-3 mb-8">
+            {/* Language Grid - 2 columns, scrollable */}
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-6">
               {(Object.keys(LANGUAGES) as LanguageCode[]).map((code) => {
-                const config = LANGUAGES[code];
+                const langConfig = LANGUAGES[code];
                 return (
                   <button
                     key={code}
                     onClick={() => handleLanguageSelect(code)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 ${
+                    className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 ${
                       language === code
                         ? 'border-primary bg-primary/10'
                         : 'border-border hover:border-primary/50'
                     }`}
                   >
-                    <span className={`text-lg font-medium ${config.fontClass}`}>
-                      {config.nativeName}
+                    <span className={`text-base sm:text-lg font-medium ${langConfig.fontClass}`}>
+                      {langConfig.nativeName}
                     </span>
                   </button>
                 );
@@ -72,29 +74,28 @@ const Landing: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <p className="text-center text-sm text-muted-foreground">
-              Your trusted legal first-aid companion
+            <p className={`text-center text-xs sm:text-sm text-muted-foreground ${config.fontClass}`}>
+              {config.ui.landing.trustedCompanion}
             </p>
           </div>
         )}
 
         {/* Consent Step */}
         {step === 'consent' && (
-          <div className="bg-card rounded-3xl shadow-xl p-8 animate-fade-in">
+          <div className={`bg-card rounded-3xl shadow-xl p-6 sm:p-8 animate-fade-in ${config.fontClass}`}>
             {/* Logo */}
             <div className="flex flex-col items-center mb-6">
-              <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mb-4">
-                <Scale className="w-8 h-8 text-primary-foreground" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary flex items-center justify-center mb-3">
+                <Scale className="w-7 h-7 sm:w-8 sm:h-8 text-primary-foreground" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground">Welcome to Nyay Saathi</h1>
-              <p className="text-muted-foreground text-center mt-2">
-                Your trusted friend for all legal matters
-              </p>
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground text-center">
+                {config.ui.landing.welcome}
+              </h1>
             </div>
 
             {/* Consent Section */}
             <div className="mb-6">
-              <p className={`text-sm font-medium text-foreground mb-3 ${config.fontClass}`}>
+              <p className="text-sm font-medium text-foreground mb-3">
                 {config.ui.consent.byUsing}
               </p>
               
@@ -102,7 +103,7 @@ const Landing: React.FC = () => {
               <div className="bg-muted/50 rounded-xl p-4 mb-4">
                 <ul className="space-y-2">
                   {consentPoints.map((point, index) => (
-                    <li key={index} className={`flex items-start gap-2 text-sm text-muted-foreground ${config.fontClass}`}>
+                    <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
                       <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                       <span>{point}</span>
                     </li>
@@ -120,7 +121,7 @@ const Landing: React.FC = () => {
                 />
                 <Label
                   htmlFor="consent-all"
-                  className={`text-sm font-medium text-foreground cursor-pointer leading-relaxed ${config.fontClass}`}
+                  className="text-sm font-medium text-foreground cursor-pointer leading-relaxed"
                 >
                   {config.ui.consent.agreeToAll}
                 </Label>
@@ -135,21 +136,21 @@ const Landing: React.FC = () => {
                 className="flex-1"
               >
                 <ChevronLeft className="w-4 h-4 mr-1" />
-                Back
+                {config.ui.landing.back}
               </Button>
               <Button
                 onClick={handleStartChat}
                 disabled={!hasConsented}
                 className="flex-1"
               >
-                Let's Chat
+                {config.ui.landing.letsChat}
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
 
             {/* Footer */}
             <p className="text-center text-xs text-muted-foreground mt-6">
-              Talk to us about your legal questions
+              {config.ui.landing.talkToUs}
             </p>
           </div>
         )}
