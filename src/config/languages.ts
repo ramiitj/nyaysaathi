@@ -15,6 +15,15 @@ export interface OnboardingTranslations {
   stepOf: string;
 }
 
+export interface ConsentTranslations {
+  byUsing: string;
+  shareLocation: string;
+  allowLogging: string;
+  helpImprove: string;
+  acceptTerms: string;
+  agreeToAll: string;
+}
+
 export interface LanguageConfig {
   code: LanguageCode;
   name: string;
@@ -52,6 +61,7 @@ export interface LanguageConfig {
     stop: string;
     references: string;
     onboarding: OnboardingTranslations;
+    consent: ConsentTranslations;
   };
 }
 
@@ -106,6 +116,14 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         getStarted: 'शुरू करें',
         stepOf: 'चरण {current} का {total}',
       },
+      consent: {
+        byUsing: 'न्याय साथी का उपयोग करके, आप सहमत हैं:',
+        shareLocation: 'स्थानीय कानूनी सलाह के लिए अपना स्थान साझा करें',
+        allowLogging: 'सुरक्षा के लिए गुमनाम कनेक्शन लॉगिंग की अनुमति दें',
+        helpImprove: 'सुधार के लिए चैट से सीखने दें (सभी डेटा गुमनाम रहता है)',
+        acceptTerms: 'नियम और गोपनीयता नीति स्वीकार करें',
+        agreeToAll: 'मैं उपरोक्त सभी से सहमत हूं',
+      },
     },
   },
   EN: {
@@ -157,6 +175,14 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         next: 'Next',
         getStarted: 'Get Started',
         stepOf: 'Step {current} of {total}',
+      },
+      consent: {
+        byUsing: 'By using Nyay Saathi, you agree to:',
+        shareLocation: 'Share your location for relevant local legal advice',
+        allowLogging: 'Allow anonymous connection logging for security',
+        helpImprove: 'Let us learn from chats to improve (all data stays anonymous)',
+        acceptTerms: 'Accept the Terms and Privacy Policy',
+        agreeToAll: 'I agree to all of the above',
       },
     },
   },
@@ -210,6 +236,14 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         getStarted: 'শুরু করুন',
         stepOf: 'ধাপ {current} এর {total}',
       },
+      consent: {
+        byUsing: 'ন্যায় সাথী ব্যবহার করে, আপনি সম্মত হচ্ছেন:',
+        shareLocation: 'প্রাসঙ্গিক স্থানীয় আইনি পরামর্শের জন্য আপনার অবস্থান শেয়ার করুন',
+        allowLogging: 'নিরাপত্তার জন্য বেনামী সংযোগ লগিং এর অনুমতি দিন',
+        helpImprove: 'উন্নতির জন্য চ্যাট থেকে শিখতে দিন (সমস্ত ডেটা বেনামী থাকে)',
+        acceptTerms: 'শর্তাবলী এবং গোপনীয়তা নীতি স্বীকার করুন',
+        agreeToAll: 'আমি উপরের সবকিছুতে সম্মত',
+      },
     },
   },
   TA: {
@@ -261,6 +295,14 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         next: 'அடுத்து',
         getStarted: 'தொடங்கு',
         stepOf: 'படி {current} இல் {total}',
+      },
+      consent: {
+        byUsing: 'நியாய சாதி பயன்படுத்துவதன் மூலம், நீங்கள் ஒப்புக்கொள்கிறீர்கள்:',
+        shareLocation: 'தொடர்புடைய உள்ளூர் சட்ட ஆலோசனைக்கு உங்கள் இருப்பிடத்தைப் பகிரவும்',
+        allowLogging: 'பாதுகாப்பிற்கான அநாமதேய இணைப்பு பதிவை அனுமதிக்கவும்',
+        helpImprove: 'மேம்படுத்த அரட்டைகளிலிருந்து கற்றுக்கொள்ள அனுமதிக்கவும் (எல்லா தரவும் அநாமதேயமாக இருக்கும்)',
+        acceptTerms: 'விதிமுறைகள் மற்றும் தனியுரிமைக் கொள்கையை ஏற்கவும்',
+        agreeToAll: 'மேலே உள்ள அனைத்திற்கும் ஒப்புக்கொள்கிறேன்',
       },
     },
   },
@@ -314,6 +356,14 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         getStarted: 'ప్రారంభించండి',
         stepOf: 'దశ {current} లో {total}',
       },
+      consent: {
+        byUsing: 'న్యాయ సాథి ఉపయోగించడం ద్వారా, మీరు అంగీకరిస్తున్నారు:',
+        shareLocation: 'సంబంధిత స్థానిక చట్ట సలహా కోసం మీ స్థానాన్ని షేర్ చేయండి',
+        allowLogging: 'భద్రత కోసం అనామక కనెక్షన్ లాగింగ్‌ను అనుమతించండి',
+        helpImprove: 'మెరుగుపరచడానికి చాట్‌ల నుండి నేర్చుకోనివ్వండి (అన్ని డేటా అనామకంగా ఉంటుంది)',
+        acceptTerms: 'నిబంధనలు మరియు గోప్యతా విధానాన్ని అంగీకరించండి',
+        agreeToAll: 'పైన ఉన్న అన్నింటికీ అంగీకరిస్తున్నాను',
+      },
     },
   },
   MR: {
@@ -365,6 +415,14 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         next: 'पुढे',
         getStarted: 'सुरू करा',
         stepOf: 'पाऊल {current} चे {total}',
+      },
+      consent: {
+        byUsing: 'न्याय साथी वापरून, तुम्ही सहमत आहात:',
+        shareLocation: 'संबंधित स्थानिक कायदेशीर सल्ल्यासाठी तुमचे स्थान शेअर करा',
+        allowLogging: 'सुरक्षिततेसाठी अनामिक कनेक्शन लॉगिंगला परवानगी द्या',
+        helpImprove: 'सुधारणा करण्यासाठी चॅटमधून शिकण्याची परवानगी द्या (सर्व डेटा अनामिक राहतो)',
+        acceptTerms: 'अटी आणि गोपनीयता धोरण स्वीकारा',
+        agreeToAll: 'मी वरील सर्वांशी सहमत आहे',
       },
     },
   },
@@ -418,6 +476,14 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         getStarted: 'શરૂ કરો',
         stepOf: 'પગલું {current} માંથી {total}',
       },
+      consent: {
+        byUsing: 'ન્યાય સાથી વાપરીને, તમે સંમત થાઓ છો:',
+        shareLocation: 'સંબંધિત સ્થાનિક કાનૂની સલાહ માટે તમારું સ્થાન શેર કરો',
+        allowLogging: 'સુરક્ષા માટે અનામી કનેક્શન લોગિંગની મંજૂરી આપો',
+        helpImprove: 'સુધારણા માટે ચેટમાંથી શીખવા દો (બધો ડેટા અનામી રહે છે)',
+        acceptTerms: 'શરતો અને ગોપનીયતા નીતિ સ્વીકારો',
+        agreeToAll: 'હું ઉપરોક્ત બધા સાથે સંમત છું',
+      },
     },
   },
   KN: {
@@ -469,6 +535,14 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         next: 'ಮುಂದೆ',
         getStarted: 'ಪ್ರಾರಂಭಿಸಿ',
         stepOf: 'ಹಂತ {current} ರಲ್ಲಿ {total}',
+      },
+      consent: {
+        byUsing: 'ನ್ಯಾಯ ಸಾಥಿ ಬಳಸುವ ಮೂಲಕ, ನೀವು ಒಪ್ಪುತ್ತೀರಿ:',
+        shareLocation: 'ಸಂಬಂಧಿತ ಸ್ಥಳೀಯ ಕಾನೂನು ಸಲಹೆಗಾಗಿ ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಹಂಚಿಕೊಳ್ಳಿ',
+        allowLogging: 'ಭದ್ರತೆಗಾಗಿ ಅನಾಮಧೇಯ ಸಂಪರ್ಕ ಲಾಗಿಂಗ್ ಅನ್ನು ಅನುಮತಿಸಿ',
+        helpImprove: 'ಸುಧಾರಣೆಗಾಗಿ ಚಾಟ್‌ಗಳಿಂದ ಕಲಿಯಲು ಅವಕಾಶ ಕೊಡಿ (ಎಲ್ಲಾ ಡೇಟಾ ಅನಾಮಧೇಯವಾಗಿರುತ್ತದೆ)',
+        acceptTerms: 'ನಿಯಮಗಳು ಮತ್ತು ಗೌಪ್ಯತೆ ನೀತಿಯನ್ನು ಸ್ವೀಕರಿಸಿ',
+        agreeToAll: 'ಮೇಲಿನ ಎಲ್ಲದಕ್ಕೂ ನಾನು ಒಪ್ಪುತ್ತೇನೆ',
       },
     },
   },
@@ -522,6 +596,14 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         getStarted: 'ആരംഭിക്കുക',
         stepOf: 'ഘട്ടം {current} ൽ {total}',
       },
+      consent: {
+        byUsing: 'ന്യായ സാഥി ഉപയോഗിക്കുന്നതിലൂടെ, നിങ്ങൾ സമ്മതിക്കുന്നു:',
+        shareLocation: 'പ്രസക്തമായ പ്രാദേശിക നിയമ ഉപദേശത്തിനായി നിങ്ങളുടെ ലൊക്കേഷൻ പങ്കിടുക',
+        allowLogging: 'സുരക്ഷയ്ക്കായി അജ്ഞാത കണക്ഷൻ ലോഗിംഗ് അനുവദിക്കുക',
+        helpImprove: 'മെച്ചപ്പെടുത്തുന്നതിനായി ചാറ്റുകളിൽ നിന്ന് പഠിക്കാൻ അനുവദിക്കുക (എല്ലാ ഡാറ്റയും അജ്ഞാതമായി തുടരും)',
+        acceptTerms: 'നിബന്ധനകളും സ്വകാര്യതാ നയവും സ്വീകരിക്കുക',
+        agreeToAll: 'മുകളിലുള്ള എല്ലാത്തിനും ഞാൻ സമ്മതിക്കുന്നു',
+      },
     },
   },
   PA: {
@@ -573,6 +655,14 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         next: 'ਅਗਲਾ',
         getStarted: 'ਸ਼ੁਰੂ ਕਰੋ',
         stepOf: 'ਕਦਮ {current} ਵਿੱਚੋਂ {total}',
+      },
+      consent: {
+        byUsing: 'ਨਿਆਂ ਸਾਥੀ ਵਰਤ ਕੇ, ਤੁਸੀਂ ਸਹਿਮਤ ਹੋ:',
+        shareLocation: 'ਸੰਬੰਧਿਤ ਸਥਾਨਕ ਕਾਨੂੰਨੀ ਸਲਾਹ ਲਈ ਆਪਣਾ ਸਥਾਨ ਸਾਂਝਾ ਕਰੋ',
+        allowLogging: 'ਸੁਰੱਖਿਆ ਲਈ ਅਗਿਆਤ ਕਨੈਕਸ਼ਨ ਲੌਗਿੰਗ ਦੀ ਆਗਿਆ ਦਿਓ',
+        helpImprove: 'ਸੁਧਾਰ ਲਈ ਚੈਟਾਂ ਤੋਂ ਸਿੱਖਣ ਦਿਓ (ਸਾਰਾ ਡਾਟਾ ਅਗਿਆਤ ਰਹਿੰਦਾ ਹੈ)',
+        acceptTerms: 'ਸ਼ਰਤਾਂ ਅਤੇ ਗੋਪਨੀਯਤਾ ਨੀਤੀ ਸਵੀਕਾਰ ਕਰੋ',
+        agreeToAll: 'ਮੈਂ ਉਪਰੋਕਤ ਸਾਰਿਆਂ ਨਾਲ ਸਹਿਮਤ ਹਾਂ',
       },
     },
   },
@@ -626,6 +716,14 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         getStarted: 'ଆରମ୍ଭ କରନ୍ତୁ',
         stepOf: 'ପାଦ {current} ର {total}',
       },
+      consent: {
+        byUsing: 'ନ୍ୟାୟ ସାଥୀ ବ୍ୟବହାର କରି, ଆପଣ ସହମତ ହେଉଛନ୍ତି:',
+        shareLocation: 'ସମ୍ପୃକ୍ତ ସ୍ଥାନୀୟ ଆଇନଗତ ପରାମର୍ଶ ପାଇଁ ଆପଣଙ୍କ ଅବସ୍ଥାନ ସେୟାର କରନ୍ତୁ',
+        allowLogging: 'ସୁରକ୍ଷା ପାଇଁ ଅଜ୍ଞାତ ସଂଯୋଗ ଲଗିଂ ର ଅନୁମତି ଦିଅନ୍ତୁ',
+        helpImprove: 'ଉନ୍ନତି ପାଇଁ ଚାଟ୍ ରୁ ଶିଖିବାକୁ ଦିଅନ୍ତୁ (ସମସ୍ତ ଡାଟା ଅଜ୍ଞାତ ରହେ)',
+        acceptTerms: 'ସର୍ତ୍ତାବଳୀ ଏବଂ ଗୋପନୀୟତା ନୀତି ସ୍ୱୀକାର କରନ୍ତୁ',
+        agreeToAll: 'ମୁଁ ଉପରୋକ୍ତ ସମସ୍ତଙ୍କ ସହିତ ସହମତ',
+      },
     },
   },
   UR: {
@@ -677,6 +775,14 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         next: 'اگلا',
         getStarted: 'شروع کریں',
         stepOf: 'قدم {current} میں سے {total}',
+      },
+      consent: {
+        byUsing: 'نیائے ساتھی استعمال کرتے ہوئے، آپ رضامند ہیں:',
+        shareLocation: 'متعلقہ مقامی قانونی مشورے کے لیے اپنا مقام شیئر کریں',
+        allowLogging: 'سیکیورٹی کے لیے گمنام کنکشن لاگنگ کی اجازت دیں',
+        helpImprove: 'بہتری کے لیے چیٹس سے سیکھنے دیں (تمام ڈیٹا گمنام رہتا ہے)',
+        acceptTerms: 'شرائط اور رازداری کی پالیسی قبول کریں',
+        agreeToAll: 'میں مندرجہ بالا سب سے متفق ہوں',
       },
     },
   },
