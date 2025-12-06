@@ -27,7 +27,7 @@ export interface Message {
 const Chat: React.FC = () => {
   const navigate = useNavigate();
   const { config } = useLanguage();
-  const { allConsented } = useConsent();
+  const { hasConsented } = useConsent();
   const { toast } = useToast();
 
   // State
@@ -73,17 +73,17 @@ const Chat: React.FC = () => {
 
   // Redirect if not consented
   useEffect(() => {
-    if (!allConsented) {
+    if (!hasConsented) {
       navigate('/');
     }
-  }, [allConsented, navigate]);
+  }, [hasConsented, navigate]);
 
   // Request location on mount (after consent)
   useEffect(() => {
-    if (allConsented && visitorId) {
+    if (hasConsented && visitorId) {
       requestLocation();
     }
-  }, [allConsented, visitorId, requestLocation]);
+  }, [hasConsented, visitorId, requestLocation]);
 
   // Show error toast
   useEffect(() => {
