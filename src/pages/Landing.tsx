@@ -10,7 +10,7 @@ import { LANGUAGES, LanguageCode } from '@/config/languages';
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, config } = useLanguage();
   const { hasConsented, setConsent } = useConsent();
   const [step, setStep] = useState<'language' | 'consent'>('language');
 
@@ -26,10 +26,10 @@ const Landing: React.FC = () => {
   };
 
   const consentPoints = [
-    'Share your location for relevant local legal advice',
-    'Allow anonymous connection logging for security',
-    'Let us learn from chats to improve (all data stays anonymous)',
-    'Accept the Terms and Privacy Policy',
+    config.ui.consent.shareLocation,
+    config.ui.consent.allowLogging,
+    config.ui.consent.helpImprove,
+    config.ui.consent.acceptTerms,
   ];
 
   return (
@@ -94,15 +94,15 @@ const Landing: React.FC = () => {
 
             {/* Consent Section */}
             <div className="mb-6">
-              <p className="text-sm font-medium text-foreground mb-3">
-                By using Nyay Saathi, you agree to:
+              <p className={`text-sm font-medium text-foreground mb-3 ${config.fontClass}`}>
+                {config.ui.consent.byUsing}
               </p>
               
               {/* Consent points as bullet list */}
               <div className="bg-muted/50 rounded-xl p-4 mb-4">
                 <ul className="space-y-2">
                   {consentPoints.map((point, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <li key={index} className={`flex items-start gap-2 text-sm text-muted-foreground ${config.fontClass}`}>
                       <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                       <span>{point}</span>
                     </li>
@@ -120,9 +120,9 @@ const Landing: React.FC = () => {
                 />
                 <Label
                   htmlFor="consent-all"
-                  className="text-sm font-medium text-foreground cursor-pointer leading-relaxed"
+                  className={`text-sm font-medium text-foreground cursor-pointer leading-relaxed ${config.fontClass}`}
                 >
-                  I agree to all of the above
+                  {config.ui.consent.agreeToAll}
                 </Label>
               </div>
             </div>
