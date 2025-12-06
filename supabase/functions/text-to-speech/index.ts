@@ -6,20 +6,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Map language codes to Google Cloud TTS Neural2 voice names (Indian voices)
+// Map language codes to Google Cloud TTS voice names (Indian voices)
+// Neural2 is preferred where available, fallback to Wavenet or Standard
 const VOICE_MAP: Record<string, { languageCode: string; name: string }> = {
-  'HI': { languageCode: 'hi-IN', name: 'hi-IN-Neural2-A' },
-  'EN': { languageCode: 'en-IN', name: 'en-IN-Neural2-A' },
-  'BN': { languageCode: 'bn-IN', name: 'bn-IN-Neural2-A' },
-  'TA': { languageCode: 'ta-IN', name: 'ta-IN-Neural2-A' },
-  'TE': { languageCode: 'te-IN', name: 'te-IN-Neural2-A' },
-  'MR': { languageCode: 'mr-IN', name: 'mr-IN-Neural2-A' },
-  'GU': { languageCode: 'gu-IN', name: 'gu-IN-Neural2-A' },
-  'KN': { languageCode: 'kn-IN', name: 'kn-IN-Neural2-A' },
-  'ML': { languageCode: 'ml-IN', name: 'ml-IN-Neural2-A' },
-  'PA': { languageCode: 'pa-IN', name: 'pa-IN-Neural2-A' },
-  'OR': { languageCode: 'or-IN', name: 'or-IN-Standard-A' },
-  'UR': { languageCode: 'ur-IN', name: 'ur-IN-Standard-A' },
+  'HI': { languageCode: 'hi-IN', name: 'hi-IN-Neural2-A' },      // Neural2 available
+  'EN': { languageCode: 'en-IN', name: 'en-IN-Neural2-A' },      // Neural2 available
+  'BN': { languageCode: 'bn-IN', name: 'bn-IN-Wavenet-A' },      // Wavenet available (no Neural2)
+  'TA': { languageCode: 'ta-IN', name: 'ta-IN-Wavenet-A' },      // Wavenet available (no Neural2)
+  'TE': { languageCode: 'te-IN', name: 'te-IN-Standard-A' },     // Standard only (no Neural2/Wavenet)
+  'MR': { languageCode: 'mr-IN', name: 'mr-IN-Wavenet-A' },      // Wavenet available (no Neural2)
+  'GU': { languageCode: 'gu-IN', name: 'gu-IN-Wavenet-A' },      // Wavenet available (no Neural2)
+  'KN': { languageCode: 'kn-IN', name: 'kn-IN-Wavenet-A' },      // Wavenet available (no Neural2)
+  'ML': { languageCode: 'ml-IN', name: 'ml-IN-Wavenet-A' },      // Wavenet available (no Neural2)
+  'PA': { languageCode: 'pa-IN', name: 'pa-IN-Wavenet-A' },      // Wavenet available (no Neural2)
+  'OR': { languageCode: 'or-IN', name: 'or-IN-Standard-A' },     // Standard only
+  'UR': { languageCode: 'ur-IN', name: 'ur-IN-Wavenet-A' },      // Wavenet available
 };
 
 // Generate OAuth2 access token from service account credentials

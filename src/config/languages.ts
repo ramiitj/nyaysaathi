@@ -192,7 +192,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     nativeName: 'বাংলা',
     fontClass: 'font-bengali',
     direction: 'ltr',
-    ttsVoice: 'bn-IN-Neural2-A',
+    ttsVoice: 'bn-IN-Wavenet-A',
     disclaimer: 'এটি আইনি পরামর্শ নয়। শুধুমাত্র সাধারণ তথ্য।',
     ui: {
       startConsultation: 'আইনি পরামর্শ শুরু করুন',
@@ -252,7 +252,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     nativeName: 'தமிழ்',
     fontClass: 'font-tamil',
     direction: 'ltr',
-    ttsVoice: 'ta-IN-Neural2-A',
+    ttsVoice: 'ta-IN-Wavenet-A',
     disclaimer: 'இது சட்ட ஆலோசனை அல்ல। பொது தகவல் மட்டுமே।',
     ui: {
       startConsultation: 'சட்ட ஆலோசனை தொடங்கு',
@@ -312,7 +312,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     nativeName: 'తెలుగు',
     fontClass: 'font-telugu',
     direction: 'ltr',
-    ttsVoice: 'te-IN-Neural2-A',
+    ttsVoice: 'te-IN-Standard-A',
     disclaimer: 'ఇది చట్టపరమైన సలహా కాదు. సాధారణ సమాచారం మాత్రమే.',
     ui: {
       startConsultation: 'చట్టపరమైన సలహా ప్రారంభించండి',
@@ -372,7 +372,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     nativeName: 'मराठी',
     fontClass: 'font-hindi',
     direction: 'ltr',
-    ttsVoice: 'mr-IN-Neural2-A',
+    ttsVoice: 'mr-IN-Wavenet-A',
     disclaimer: 'हा कायदेशीर सल्ला नाही. केवळ सामान्य माहिती.',
     ui: {
       startConsultation: 'कायदेशीर सल्ला सुरू करा',
@@ -432,7 +432,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     nativeName: 'ગુજરાતી',
     fontClass: 'font-gujarati',
     direction: 'ltr',
-    ttsVoice: 'gu-IN-Neural2-A',
+    ttsVoice: 'gu-IN-Wavenet-A',
     disclaimer: 'આ કાનૂની સલાહ નથી. ફક્ત સામાન્ય માહિતી.',
     ui: {
       startConsultation: 'કાનૂની સલાહ શરૂ કરો',
@@ -492,7 +492,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     nativeName: 'ಕನ್ನಡ',
     fontClass: 'font-kannada',
     direction: 'ltr',
-    ttsVoice: 'kn-IN-Neural2-A',
+    ttsVoice: 'kn-IN-Wavenet-A',
     disclaimer: 'ಇದು ಕಾನೂನು ಸಲಹೆ ಅಲ್ಲ. ಸಾಮಾನ್ಯ ಮಾಹಿತಿ ಮಾತ್ರ.',
     ui: {
       startConsultation: 'ಕಾನೂನು ಸಮಾಲೋಚನೆ ಪ್ರಾರಂಭಿಸಿ',
@@ -552,7 +552,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     nativeName: 'മലയാളം',
     fontClass: 'font-malayalam',
     direction: 'ltr',
-    ttsVoice: 'ml-IN-Neural2-A',
+    ttsVoice: 'ml-IN-Wavenet-A',
     disclaimer: 'ഇത് നിയമ ഉപദേശമല്ല. പൊതു വിവരങ്ങൾ മാത്രം.',
     ui: {
       startConsultation: 'നിയമ കൺസൾട്ടേഷൻ ആരംഭിക്കുക',
@@ -612,7 +612,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     nativeName: 'ਪੰਜਾਬੀ',
     fontClass: 'font-punjabi',
     direction: 'ltr',
-    ttsVoice: 'pa-IN-Neural2-A',
+    ttsVoice: 'pa-IN-Wavenet-A',
     disclaimer: 'ਇਹ ਕਾਨੂੰਨੀ ਸਲਾਹ ਨਹੀਂ ਹੈ। ਸਿਰਫ਼ ਆਮ ਜਾਣਕਾਰੀ।',
     ui: {
       startConsultation: 'ਕਾਨੂੰਨੀ ਸਲਾਹ ਸ਼ੁਰੂ ਕਰੋ',
@@ -732,7 +732,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     nativeName: 'اردو',
     fontClass: 'font-urdu',
     direction: 'rtl',
-    ttsVoice: 'ur-IN-Standard-A',
+    ttsVoice: 'ur-IN-Wavenet-A',
     disclaimer: 'یہ قانونی مشورہ نہیں ہے۔ صرف عام معلومات۔',
     ui: {
       startConsultation: 'قانونی مشاورت شروع کریں',
