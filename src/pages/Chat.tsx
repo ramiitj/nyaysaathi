@@ -101,6 +101,10 @@ const Chat: React.FC = () => {
     clearAllFiles();
     setTranscription('');
     setVoiceState('idle');
+    toast({
+      title: config.ui.newSessionStarted,
+      description: config.ui.newSessionDesc,
+    });
   };
 
   const handleSendMessage = async (content: string) => {

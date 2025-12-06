@@ -40,6 +40,7 @@ export interface AboutTranslations {
   missionTitle: string;
   missionDescription: string;
   createdBy: string;
+  creatorDescription: string;
   profile: string;
   feature1Title: string;
   feature1Desc: string;
@@ -86,6 +87,8 @@ export interface LanguageConfig {
     listen: string;
     stop: string;
     references: string;
+    newSessionStarted: string;
+    newSessionDesc: string;
     onboarding: OnboardingTranslations;
     consent: ConsentTranslations;
     landing: LandingTranslations;
@@ -129,6 +132,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       transcribing: 'लिख रहा हूँ',
       listen: 'सुनें',
       stop: 'रोकें',
+      newSessionStarted: 'नया सत्र शुरू हुआ',
+      newSessionDesc: 'आपकी बातचीत साफ़ कर दी गई है',
       references: 'संदर्भ',
       onboarding: {
         talkToMe: 'मुझसे बात करो',
@@ -166,7 +171,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         back: 'वापस',
         missionTitle: 'भारत के लिए कानूनी ज्ञान का लोकतंत्रीकरण',
         missionDescription: 'न्याय साथी सिर्फ एक ऐप नहीं है—यह एक मिशन है। हर भारतीय को उनकी अपनी भाषा में तत्काल, सुलभ और सटीक कानूनी मार्गदर्शन देने के लिए बनाया गया।',
-        createdBy: 'प्रो. वेंकट, आईआईटी जोधपुर',
+        createdBy: 'वेंकट राम रेड्डी गानुतुला',
+        creatorDescription: 'सामाजिक प्रभाव के प्रति जुनूनी, भारत के लिए समाधान बनाने में विश्वास रखते हैं।',
         profile: 'प्रोफ़ाइल',
         feature1Title: 'समावेशी प्रौद्योगिकी',
         feature1Desc: '12+ भारतीय भाषाओं के समर्थन से भाषा बाधाओं को तोड़ना, हर नागरिक को कानूनी जानकारी सुलभ बनाना।',
@@ -174,7 +180,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         feature2Desc: 'जटिल कानूनी शब्दावली को सरल, कार्रवाई योग्य सलाह में बदलना जो कोई भी समझ सके।',
         feature3Title: 'सहानुभूति से सेवा',
         feature3Desc: 'एक AI साथी जो पहले सुनता है, आपकी स्थिति समझता है, और देखभाल के साथ मार्गदर्शन प्रदान करता है।',
-        footer: 'प्रो. वेंकट, आईआईटी जोधपुर द्वारा भारत के लिए ❤️ से निर्मित',
+        footer: 'वेंकट राम रेड्डी गानुतुला द्वारा भारत के लिए ❤️ से निर्मित',
       },
     },
   },
@@ -214,6 +220,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'Listen',
       stop: 'Stop',
       references: 'References',
+      newSessionStarted: 'New session started',
+      newSessionDesc: 'Your conversation has been cleared',
       onboarding: {
         talkToMe: 'Talk to Me',
         talkToMeDesc: 'Just tap the mic and ask your question. Speak naturally like you would to a friend!',
@@ -250,7 +258,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         back: 'Back',
         missionTitle: 'Democratizing Legal Knowledge for Bharat',
         missionDescription: "Nyay Saathi is more than just an app—it's a mission. Built to give every Indian instant, accessible, and accurate legal guidance in their own language.",
-        createdBy: 'Prof. Venkat, IIT Jodhpur',
+        createdBy: 'Venkat Ram Reddy Ganuthula',
+        creatorDescription: 'Passionate about social impact, believes in building Solutions for Bharat.',
         profile: 'Profile',
         feature1Title: 'Inclusive Technology',
         feature1Desc: 'Breaking language barriers with support for 12+ Indian languages, making legal information accessible to every citizen.',
@@ -258,7 +267,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         feature2Desc: 'Turning confusing legal jargon into simple, actionable advice that anyone can understand.',
         feature3Title: 'Served with Empathy',
         feature3Desc: 'An AI companion that listens first, understands your situation, and provides guidance with care.',
-        footer: 'Built with ❤️ for Bharat by Prof. Venkat, IIT Jodhpur',
+        footer: 'Built with ❤️ for Bharat by Venkat Ram Reddy Ganuthula',
       },
     },
   },
@@ -298,6 +307,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'শুনুন',
       stop: 'বন্ধ করুন',
       references: 'তথ্যসূত্র',
+      newSessionStarted: 'নতুন সেশন শুরু হয়েছে',
+      newSessionDesc: 'আপনার কথোপকথন মুছে ফেলা হয়েছে',
       onboarding: {
         talkToMe: 'আমার সাথে কথা বলুন',
         talkToMeDesc: 'শুধু মাইক ট্যাপ করুন এবং আপনার প্রশ্ন জিজ্ঞাসা করুন। বন্ধুর মতো স্বাভাবিকভাবে কথা বলুন!',
@@ -334,7 +345,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         back: 'পিছনে',
         missionTitle: 'ভারতের জন্য আইনি জ্ঞানের গণতন্ত্রীকরণ',
         missionDescription: 'ন্যায় সাথী শুধু একটি অ্যাপ নয়—এটি একটি মিশন। প্রতিটি ভারতীয়কে তাদের নিজের ভাষায় তাৎক্ষণিক, সুলভ এবং সঠিক আইনি নির্দেশনা দিতে তৈরি।',
-        createdBy: 'অধ্যাপক ভেঙ্কট, আইআইটি যোধপুর',
+        createdBy: 'ভেঙ্কট রাম রেড্ডি গানুতুলা',
+        creatorDescription: 'সামাজিক প্রভাবের প্রতি আগ্রহী, ভারতের জন্য সমাধান তৈরিতে বিশ্বাসী।',
         profile: 'প্রোফাইল',
         feature1Title: 'অন্তর্ভুক্তিমূলক প্রযুক্তি',
         feature1Desc: '১২+ ভারতীয় ভাষার সমর্থনে ভাষার বাধা ভেঙে, প্রতিটি নাগরিকের কাছে আইনি তথ্য সুলভ করা।',
@@ -342,7 +354,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         feature2Desc: 'জটিল আইনি শব্দকে সহজ, কার্যকর পরামর্শে রূপান্তরিত করা যা যে কেউ বুঝতে পারে।',
         feature3Title: 'সহানুভূতির সাথে সেবা',
         feature3Desc: 'একটি AI সঙ্গী যে প্রথমে শোনে, আপনার পরিস্থিতি বোঝে এবং যত্ন সহকারে নির্দেশনা দেয়।',
-        footer: 'অধ্যাপক ভেঙ্কট, আইআইটি যোধপুর দ্বারা ভারতের জন্য ❤️ দিয়ে তৈরি',
+        footer: 'ভেঙ্কট রাম রেড্ডি গানুতুলা দ্বারা ভারতের জন্য ❤️ দিয়ে তৈরি',
       },
     },
   },
@@ -382,6 +394,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'கேளுங்கள்',
       stop: 'நிறுத்து',
       references: 'குறிப்புகள்',
+      newSessionStarted: 'புதிய அமர்வு தொடங்கியது',
+      newSessionDesc: 'உங்கள் உரையாடல் அழிக்கப்பட்டது',
       onboarding: {
         talkToMe: 'என்னிடம் பேசுங்கள்',
         talkToMeDesc: 'மைக்கை தட்டி உங்கள் கேள்வியை கேளுங்கள். நண்பரிடம் பேசுவது போல் இயல்பாக பேசுங்கள்!',
@@ -418,7 +432,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         back: 'பின்னால்',
         missionTitle: 'பாரதத்திற்கான சட்ட அறிவின் ஜனநாயகமயமாக்கல்',
         missionDescription: 'நியாய சாதி வெறும் ஆப் அல்ல—இது ஒரு இயக்கம். ஒவ்வொரு இந்தியருக்கும் அவரவர் மொழியில் உடனடி, எளிமையான, துல்லியமான சட்ட வழிகாட்டுதலை வழங்க உருவாக்கப்பட்டது.',
-        createdBy: 'பேராசிரியர் வெங்கட், ஐஐடி ஜோத்பூர்',
+        createdBy: 'வெங்கட் ராம் ரெட்டி கனுதுலா',
+        creatorDescription: 'சமூக தாக்கத்தில் ஆர்வமுள்ள, பாரதத்திற்கான தீர்வுகளை உருவாக்குவதில் நம்பிக்கை கொண்டவர்.',
         profile: 'சுயவிவரம்',
         feature1Title: 'உள்ளடக்கிய தொழில்நுட்பம்',
         feature1Desc: '12+ இந்திய மொழிகளின் ஆதரவுடன் மொழி தடைகளை உடைத்து, ஒவ்வொரு குடிமகனுக்கும் சட்ட தகவல்களை அணுகக்கூடியதாக்குகிறது.',
@@ -426,7 +441,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         feature2Desc: 'குழப்பமான சட்ட சொற்களை யாரும் புரிந்துகொள்ளக்கூடிய எளிய, செயல்படுத்தக்கூடிய ஆலோசனையாக மாற்றுகிறது.',
         feature3Title: 'அனுதாபத்துடன் சேவை',
         feature3Desc: 'முதலில் கேட்கும், உங்கள் நிலையைப் புரிந்துகொள்ளும், அக்கறையுடன் வழிகாட்டும் AI தோழன்.',
-        footer: 'பேராசிரியர் வெங்கட், ஐஐடி ஜோத்பூர் ❤️ உடன் பாரதத்திற்காக உருவாக்கியது',
+        footer: 'வெங்கட் ராம் ரெட்டி கனுதுலா ❤️ உடன் பாரதத்திற்காக உருவாக்கியது',
       },
     },
   },
@@ -466,6 +481,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'వినండి',
       stop: 'ఆపు',
       references: 'సూచనలు',
+      newSessionStarted: 'కొత్త సెషన్ ప్రారంభమైంది',
+      newSessionDesc: 'మీ సంభాషణ తొలగించబడింది',
       onboarding: {
         talkToMe: 'నాతో మాట్లాడండి',
         talkToMeDesc: 'మైక్ ను ట్యాప్ చేసి మీ ప్రశ్న అడగండి. స్నేహితుడితో మాట్లాడినట్లు సహజంగా మాట్లాడండి!',
@@ -502,7 +519,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         back: 'వెనుకకు',
         missionTitle: 'భారత్ కోసం చట్ట జ్ఞానాన్ని ప్రజాస్వామ్యం చేయడం',
         missionDescription: 'న్యాయ సాథి కేవలం యాప్ కాదు—ఇది ఒక మిషన్. ప్రతి భారతీయుడికి వారి స్వంత భాషలో తక్షణ, అందుబాటులో ఉన్న, ఖచ్చితమైన చట్ట మార్గదర్శకత్వం అందించడానికి నిర్మించబడింది.',
-        createdBy: 'ప్రొ. వెంకట్, IIT జోధ్‌పూర్',
+        createdBy: 'వెంకట్ రామ్ రెడ్డి గానుతుల',
+        creatorDescription: 'సామాజిక ప్రభావంపై ఆసక్తిగలవారు, భారత్ కోసం పరిష్కారాలను నిర్మించడంలో నమ్మకం.',
         profile: 'ప్రొఫైల్',
         feature1Title: 'సమగ్ర సాంకేతికత',
         feature1Desc: '12+ భారతీయ భాషల మద్దతుతో భాషా అడ్డంకులను తొలగించి, ప్రతి పౌరుడికి చట్ట సమాచారాన్ని అందుబాటులో ఉంచడం.',
@@ -510,7 +528,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         feature2Desc: 'గందరగోళ చట్ట పదజాలాన్ని ఎవరైనా అర్థం చేసుకోగల సరళమైన, చర్య తీసుకోగల సలహాగా మార్చడం.',
         feature3Title: 'సానుభూతితో సేవ',
         feature3Desc: 'మొదట వినే, మీ పరిస్థితిని అర్థం చేసుకునే, శ్రద్ధతో మార్గదర్శకత్వం అందించే AI సహచరుడు.',
-        footer: 'ప్రొ. వెంకట్, IIT జోధ్‌పూర్ ❤️ తో భారత్ కోసం నిర్మించబడింది',
+        footer: 'వెంకట్ రామ్ రెడ్డి గానుతుల ❤️ తో భారత్ కోసం నిర్మించబడింది',
       },
     },
   },
@@ -550,6 +568,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'ऐका',
       stop: 'थांबा',
       references: 'संदर्भ',
+      newSessionStarted: 'नवीन सत्र सुरू झाले',
+      newSessionDesc: 'तुमचे संभाषण साफ केले गेले',
       onboarding: {
         talkToMe: 'माझ्याशी बोला',
         talkToMeDesc: 'फक्त माइक टॅप करा आणि तुमचा प्रश्न विचारा. मित्राशी बोलता तसे नैसर्गिकपणे बोला!',
@@ -586,7 +606,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         back: 'मागे',
         missionTitle: 'भारतासाठी कायदेशीर ज्ञानाचे लोकशाहीकरण',
         missionDescription: 'न्याय साथी फक्त एक अॅप नाही—हे एक मिशन आहे. प्रत्येक भारतीयाला त्यांच्या स्वतःच्या भाषेत त्वरित, सुलभ आणि अचूक कायदेशीर मार्गदर्शन देण्यासाठी बनवले.',
-        createdBy: 'प्रो. वेंकट, IIT जोधपूर',
+        createdBy: 'वेंकट राम रेड्डी गानुतुला',
+        creatorDescription: 'सामाजिक प्रभावाबद्दल उत्साही, भारतासाठी समाधान तयार करण्यावर विश्वास ठेवतात.',
         profile: 'प्रोफाइल',
         feature1Title: 'समावेशक तंत्रज्ञान',
         feature1Desc: '12+ भारतीय भाषांच्या समर्थनासह भाषा अडथळे तोडणे, प्रत्येक नागरिकाला कायदेशीर माहिती उपलब्ध करणे.',
@@ -594,7 +615,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         feature2Desc: 'गोंधळात टाकणारे कायदेशीर शब्द कोणालाही समजेल अशा सोप्या, कृतीयोग्य सल्ल्यात बदलणे.',
         feature3Title: 'सहानुभूतीने सेवा',
         feature3Desc: 'प्रथम ऐकणारा, तुमची परिस्थिती समजून घेणारा आणि काळजीने मार्गदर्शन करणारा AI सोबती.',
-        footer: 'प्रो. वेंकट, IIT जोधपूर यांनी भारतासाठी ❤️ ने बनवले',
+        footer: 'वेंकट राम रेड्डी गानुतुला यांनी भारतासाठी ❤️ ने बनवले',
       },
     },
   },
@@ -634,6 +655,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'સાંભળો',
       stop: 'બંધ કરો',
       references: 'સંદર્ભો',
+      newSessionStarted: 'નવું સત્ર શરૂ થયું',
+      newSessionDesc: 'તમારી વાતચીત સાફ કરવામાં આવી',
       onboarding: {
         talkToMe: 'મારી સાથે વાત કરો',
         talkToMeDesc: 'બસ માઇક ટેપ કરો અને તમારો પ્રશ્ન પૂછો. મિત્ર સાથે વાત કરો તેમ કુદરતી રીતે બોલો!',
@@ -670,7 +693,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         back: 'પાછળ',
         missionTitle: 'ભારત માટે કાનૂની જ્ઞાનનું લોકશાહીકરણ',
         missionDescription: 'ન્યાય સાથી માત્ર એક એપ નથી—તે એક મિશન છે. દરેક ભારતીયને તેમની પોતાની ભાષામાં તાત્કાલિક, સુલભ અને સચોટ કાનૂની માર્ગદર્શન આપવા માટે બનાવેલ.',
-        createdBy: 'પ્રો. વેંકટ, IIT જોધપુર',
+        createdBy: 'વેંકટ રામ રેડ્ડી ગાનુતુલા',
+        creatorDescription: 'સામાજિક પ્રભાવ માટે ઉત્સાહી, ભારત માટે સોલ્યુશન્સ બનાવવામાં વિશ્વાસ રાખે છે.',
         profile: 'પ્રોફાઇલ',
         feature1Title: 'સમાવેશક ટેક્નોલોજી',
         feature1Desc: '12+ ભારતીય ભાષાઓના સમર્થન સાથે ભાષા અવરોધો તોડીને, દરેક નાગરિક માટે કાનૂની માહિતી સુલભ બનાવે છે.',
@@ -678,7 +702,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
         feature2Desc: 'ગૂંચવણભરી કાનૂની ભાષાને કોઈપણ સમજી શકે તેવી સરળ, ક્રિયાશીલ સલાહમાં ફેરવે છે.',
         feature3Title: 'સહાનુભૂતિ સાથે સેવા',
         feature3Desc: 'પહેલા સાંભળનાર, તમારી પરિસ્થિતિ સમજનાર અને કાળજી સાથે માર્ગદર્શન આપનાર AI સાથી.',
-        footer: 'પ્રો. વેંકટ, IIT જોધપુર દ્વારા ભારત માટે ❤️ થી બનાવેલ',
+        footer: 'વેંકટ રામ રેડ્ડી ગાનુતુલા દ્વારા ભારત માટે ❤️ થી બનાવેલ',
       },
     },
   },
@@ -718,6 +742,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'ಕೇಳಿ',
       stop: 'ನಿಲ್ಲಿಸಿ',
       references: 'ಉಲ್ಲೇಖಗಳು',
+      newSessionStarted: 'ಹೊಸ ಸೆಷನ್ ಪ್ರಾರಂಭವಾಯಿತು',
+      newSessionDesc: 'ನಿಮ್ಮ ಸಂಭಾಷಣೆ ತೆರವುಗೊಳಿಸಲಾಗಿದೆ',
       onboarding: {
         talkToMe: 'ನನ್ನೊಂದಿಗೆ ಮಾತನಾಡಿ',
         talkToMeDesc: 'ಮೈಕ್ ಟ್ಯಾಪ್ ಮಾಡಿ ಮತ್ತು ನಿಮ್ಮ ಪ್ರಶ್ನೆ ಕೇಳಿ. ಸ್ನೇಹಿತರೊಂದಿಗೆ ಮಾತನಾಡುವಂತೆ ಸಹಜವಾಗಿ ಮಾತನಾಡಿ!',
@@ -802,6 +828,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'കേൾക്കുക',
       stop: 'നിർത്തുക',
       references: 'റഫറൻസുകൾ',
+      newSessionStarted: 'പുതിയ സെഷൻ ആരംഭിച്ചു',
+      newSessionDesc: 'നിങ്ങളുടെ സംഭാഷണം മായ്ച്ചു',
       onboarding: {
         talkToMe: 'എന്നോട് സംസാരിക്കൂ',
         talkToMeDesc: 'മൈക്ക് ടാപ്പ് ചെയ്ത് നിങ്ങളുടെ ചോദ്യം ചോദിക്കൂ. ഒരു സുഹൃത്തിനോട് സംസാരിക്കുന്നത് പോലെ സ്വാഭാവികമായി സംസാരിക്കൂ!',
@@ -886,6 +914,8 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       listen: 'ਸੁਣੋ',
       stop: 'ਰੋਕੋ',
       references: 'ਹਵਾਲੇ',
+      newSessionStarted: 'ਨਵਾਂ ਸੈਸ਼ਨ ਸ਼ੁਰੂ ਹੋਇਆ',
+      newSessionDesc: 'ਤੁਹਾਡੀ ਗੱਲਬਾਤ ਸਾਫ਼ ਕੀਤੀ ਗਈ',
       onboarding: {
         talkToMe: 'ਮੇਰੇ ਨਾਲ ਗੱਲ ਕਰੋ',
         talkToMeDesc: 'ਬੱਸ ਮਾਈਕ ਟੈਪ ਕਰੋ ਅਤੇ ਆਪਣਾ ਸਵਾਲ ਪੁੱਛੋ। ਦੋਸਤ ਨਾਲ ਗੱਲ ਕਰਦੇ ਹੋ ਜਿਵੇਂ ਕੁਦਰਤੀ ਤੌਰ ਤੇ ਬੋਲੋ!',
