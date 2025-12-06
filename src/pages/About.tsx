@@ -68,12 +68,18 @@ const About: React.FC = () => {
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50 mb-6">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground font-bold text-lg">
-              VK
+              VR
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-foreground">{config.ui.about.createdBy}</h3>
+              <p className="text-sm text-muted-foreground">{config.ui.about.creatorDescription}</p>
             </div>
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-1.5"
+              onClick={() => window.open('https://www.linkedin.com/in/venkat-ram-reddy-ganuthula/', '_blank')}
+            >
               <ExternalLink className="w-3 h-3" />
               {config.ui.about.profile}
             </Button>
