@@ -27,7 +27,7 @@ export interface Message {
 const Chat: React.FC = () => {
   const navigate = useNavigate();
   const { config } = useLanguage();
-  const { hasConsented } = useConsent();
+  const { hasConsented, resetConsent } = useConsent();
   const { toast } = useToast();
 
   // State
@@ -101,10 +101,8 @@ const Chat: React.FC = () => {
     clearAllFiles();
     setTranscription('');
     setVoiceState('idle');
-    toast({
-      title: config.ui.newSessionStarted,
-      description: config.ui.newSessionDesc,
-    });
+    resetConsent(); // Reset consent to show full flow
+    navigate('/'); // Navigate back to language selection
   };
 
   const handleSendMessage = async (content: string) => {
