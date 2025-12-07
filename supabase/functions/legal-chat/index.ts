@@ -11,6 +11,128 @@ const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+// ============ RATE LIMITING ============
+interface RateLimitEntry {
+  count: number;
+  windowStart: number;
+}
+const rateLimitStore = new Map<string, RateLimitEntry>();
+const RATE_LIMIT = { windowMs: 60000, maxRequests: 30 };
+
+function getClientIP(req: Request): string {
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+         req.headers.get('cf-connecting-ip') ||
+         req.headers.get('x-real-ip') ||
+         'unknown';
+}
+
+function checkRateLimit(identifier: string): { allowed: boolean; resetIn: number } {
+  const now = Date.now();
+  const key = `legal-chat:${identifier}`;
+  let entry = rateLimitStore.get(key);
+  
+  if (rateLimitStore.size > 10000) {
+    const cutoff = now - RATE_LIMIT.windowMs * 2;
+    for (const [k, v] of rateLimitStore) {
+      if (v.windowStart < cutoff) rateLimitStore.delete(k);
+    }
+  }
+  
+  if (!entry || now - entry.windowStart >= RATE_LIMIT.windowMs) {
+    rateLimitStore.set(key, { count: 1, windowStart: now });
+    return { allowed: true, resetIn: RATE_LIMIT.windowMs };
+  }
+  
+  if (entry.count >= RATE_LIMIT.maxRequests) {
+    return { allowed: false, resetIn: RATE_LIMIT.windowMs - (now - entry.windowStart) };
+  }
+  
+  entry.count++;
+  return { allowed: true, resetIn: RATE_LIMIT.windowMs - (now - entry.windowStart) };
+}
+
+// ============ INPUT VALIDATION ============
+const VALID_LANGUAGES = ['HI', 'EN', 'BN', 'TA', 'TE', 'MR', 'GU', 'KN', 'ML', 'PA', 'OR', 'UR'];
+
+function sanitizeString(str: string, maxLength = 10000): string {
+  if (!str) return '';
+  return str.slice(0, maxLength).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
+}
+
+function isValidUUID(uuid: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid);
+}
+
+interface ValidatedInput {
+  message: string;
+  conversationId?: string;
+  language: string;
+  conversationHistory: Array<{ role: string; content: string }>;
+  locationState?: string;
+  fileContext?: string;
+}
+
+function validateInput(body: any): { valid: boolean; data?: ValidatedInput; error?: string } {
+  if (!body || typeof body !== 'object') {
+    return { valid: false, error: 'Invalid request body' };
+  }
+
+  const { message, conversationId, language, conversationHistory, locationState, fileContext } = body;
+
+  if (typeof message !== 'string' || message.trim().length === 0) {
+    return { valid: false, error: 'Message is required' };
+  }
+  if (message.length > 10000) {
+    return { valid: false, error: 'Message exceeds maximum length' };
+  }
+
+  if (conversationId !== undefined && conversationId !== null) {
+    if (typeof conversationId !== 'string' || !isValidUUID(conversationId)) {
+      return { valid: false, error: 'Invalid conversation ID format' };
+    }
+  }
+
+  let validatedLanguage = 'EN';
+  if (language && typeof language === 'string') {
+    if (!VALID_LANGUAGES.includes(language.toUpperCase())) {
+      return { valid: false, error: 'Invalid language code' };
+    }
+    validatedLanguage = language.toUpperCase();
+  }
+
+  let validatedHistory: Array<{ role: string; content: string }> = [];
+  if (conversationHistory && Array.isArray(conversationHistory)) {
+    if (conversationHistory.length > 50) {
+      return { valid: false, error: 'Conversation history too long' };
+    }
+    for (const msg of conversationHistory) {
+      if (!msg || typeof msg !== 'object' || typeof msg.role !== 'string' || typeof msg.content !== 'string') {
+        return { valid: false, error: 'Invalid message in history' };
+      }
+      if (!['user', 'assistant', 'model'].includes(msg.role)) {
+        return { valid: false, error: 'Invalid role in history' };
+      }
+      validatedHistory.push({
+        role: msg.role,
+        content: sanitizeString(msg.content, 5000)
+      });
+    }
+  }
+
+  return {
+    valid: true,
+    data: {
+      message: sanitizeString(message),
+      conversationId,
+      language: validatedLanguage,
+      conversationHistory: validatedHistory,
+      locationState: locationState ? sanitizeString(locationState, 100) : undefined,
+      fileContext: fileContext ? sanitizeString(fileContext, 20000) : undefined,
+    }
+  };
+}
+
+// ============ MAIN LOGIC ============
 const DEFAULT_SYSTEM_PROMPT = `You are Nyay Saathi, a trusted legal information assistant for Indian citizens.
 
 CRITICAL RULES:
@@ -42,20 +164,18 @@ RESPONSE FORMAT:
 
 SUPPORTED LANGUAGES: Hindi, English, Bengali, Tamil, Telugu, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Odia, Urdu`;
 
-// Function to clean response text of any remaining markdown
 function cleanResponseText(text: string): string {
   return text
-    .replace(/\*\*/g, '')           // Remove bold markers
-    .replace(/\*/g, '')             // Remove italics markers
-    .replace(/#{1,6}\s/g, '')       // Remove headers
-    .replace(/^-\s/gm, '• ')        // Replace dash bullets with simple bullet
-    .replace(/^•\s/gm, '')          // Remove bullet points entirely for cleaner text
-    .replace(/`([^`]+)`/g, '$1')    // Remove code formatting
-    .replace(/\n{3,}/g, '\n\n')     // Reduce multiple newlines
+    .replace(/\*\*/g, '')
+    .replace(/\*/g, '')
+    .replace(/#{1,6}\s/g, '')
+    .replace(/^-\s/gm, '• ')
+    .replace(/^•\s/gm, '')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
 
-// Generate embedding for semantic search using Gemini text-embedding-004
 async function generateQueryEmbedding(query: string): Promise<number[] | null> {
   try {
     console.log('Generating embedding for query:', query.substring(0, 100) + '...');
@@ -80,13 +200,7 @@ async function generateQueryEmbedding(query: string): Promise<number[] | null> {
     }
 
     const data = await response.json();
-    const embedding = data.embedding?.values;
-    
-    if (embedding) {
-      console.log(`Generated ${embedding.length}-dimensional embedding`);
-    }
-    
-    return embedding || null;
+    return data.embedding?.values || null;
   } catch (error) {
     console.error('Error generating embedding:', error);
     return null;
@@ -99,7 +213,37 @@ serve(async (req) => {
   }
 
   try {
-    const { message, conversationId, language, conversationHistory, locationState, fileContext } = await req.json();
+    // Rate limiting
+    const clientIP = getClientIP(req);
+    const rateLimit = checkRateLimit(clientIP);
+    if (!rateLimit.allowed) {
+      console.warn(`Rate limit exceeded for IP: ${clientIP.substring(0, 8)}...`);
+      return new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.', retryAfter: Math.ceil(rateLimit.resetIn / 1000) }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': String(Math.ceil(rateLimit.resetIn / 1000)) } }
+      );
+    }
+
+    // Parse and validate input
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const validation = validateInput(body);
+    if (!validation.valid) {
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { message, conversationId, language, conversationHistory, locationState, fileContext } = validation.data!;
 
     console.log('Processing legal-chat request:', {
       messageLength: message?.length,
@@ -109,10 +253,6 @@ serve(async (req) => {
       historyLength: conversationHistory?.length || 0,
       conversationId
     });
-
-    if (!message) {
-      throw new Error('Message is required');
-    }
 
     if (!GEMINI_API_KEY) {
       throw new Error('GEMINI_API_KEY not configured');
@@ -134,16 +274,13 @@ serve(async (req) => {
     const systemPrompt = settingsMap.system_prompt || DEFAULT_SYSTEM_PROMPT;
     const temperature = parseFloat(settingsMap.temperature) || 0.4;
 
-    // Perform semantic RAG search with vector embeddings
+    // Perform semantic RAG search
     let ragContext = '';
     try {
-      // First try semantic search with embeddings
       const queryEmbedding = await generateQueryEmbedding(message);
       
       if (queryEmbedding) {
         console.log('Attempting semantic search with embedding...');
-        
-        // Format embedding as a string for the RPC call
         const embeddingStr = `[${queryEmbedding.join(',')}]`;
         
         const { data: ragResults, error: semanticError } = await supabase.rpc('search_documents_semantic', {
@@ -153,21 +290,16 @@ serve(async (req) => {
 
         if (semanticError) {
           console.error('Semantic search error:', semanticError);
-          // Fall through to text search
         } else if (ragResults && ragResults.length > 0) {
           console.log(`Found ${ragResults.length} relevant documents via semantic search`);
           ragContext = '\n\nRELEVANT KNOWLEDGE BASE CONTEXT:\n' + 
             ragResults.map((r: any) => {
               const similarityPercent = (r.similarity * 100).toFixed(1);
-              console.log(`- Document chunk (${similarityPercent}% similar): ${r.content.substring(0, 50)}...`);
               return `[Relevance: ${similarityPercent}%]\n${r.content}`;
             }).join('\n---\n');
-        } else {
-          console.log('Semantic search returned no results');
         }
       }
       
-      // Fallback to text search if semantic search didn't return results
       if (!ragContext) {
         console.log('Falling back to text-based search...');
         const { data: ragResults } = await supabase.rpc('search_documents', {
@@ -179,21 +311,17 @@ serve(async (req) => {
           console.log(`Found ${ragResults.length} relevant documents via text search`);
           ragContext = '\n\nRELEVANT KNOWLEDGE BASE CONTEXT:\n' + 
             ragResults.map((r: any) => r.content).join('\n---\n');
-        } else {
-          console.log('No relevant documents found in knowledge base');
         }
       }
     } catch (e) {
       console.error('RAG search error:', e);
     }
 
-    // Add file context if provided
     let fileContextStr = '';
     if (fileContext && fileContext.trim()) {
       fileContextStr = `\n\nUSER UPLOADED DOCUMENTS:\n${fileContext}\n\nPlease consider these documents when answering the user's question.`;
     }
 
-    // Build conversation messages for Gemini
     const messages = [
       {
         role: 'user',
@@ -205,9 +333,8 @@ serve(async (req) => {
       }
     ];
 
-    // Add conversation history
     if (conversationHistory && conversationHistory.length > 0) {
-      for (const msg of conversationHistory.slice(-10)) { // Last 10 messages for context
+      for (const msg of conversationHistory.slice(-10)) {
         messages.push({
           role: msg.role === 'user' ? 'user' : 'model',
           parts: [{ text: msg.content }]
@@ -215,7 +342,6 @@ serve(async (req) => {
       }
     }
 
-    // Add current message
     messages.push({
       role: 'user',
       parts: [{ text: message }]
@@ -223,7 +349,6 @@ serve(async (req) => {
 
     console.log('Calling Gemini API with', messages.length, 'messages');
 
-    // Call Gemini API
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
       {
@@ -253,12 +378,9 @@ serve(async (req) => {
 
     const data = await response.json();
     const rawResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, I could not generate a response. Please try again.';
-    
-    // Clean the response text to remove any remaining markdown
     const aiResponse = cleanResponseText(rawResponse);
     console.log('Generated response length:', aiResponse.length);
 
-    // Extract citations from response (simple pattern matching)
     const citationPattern = /\[([^\]]+(?:Act|Code|Law|Section|Article)[^\]]*)\]/gi;
     const citations: Array<{ act: string; section: string; text: string }> = [];
     let match;
@@ -271,19 +393,13 @@ serve(async (req) => {
         text: citationText
       });
     }
-    
-    if (citations.length > 0) {
-      console.log(`Extracted ${citations.length} citations from response`);
-    }
 
-    // Store messages in database if conversationId provided
     if (conversationId) {
       await supabase.from('messages').insert([
         { conversation_id: conversationId, role: 'user', content: message },
         { conversation_id: conversationId, role: 'assistant', content: aiResponse, citations }
       ]);
 
-      // Update conversation message count
       await supabase
         .from('conversations')
         .update({ message_count: (conversationHistory?.length || 0) + 2 })
@@ -293,11 +409,7 @@ serve(async (req) => {
     console.log('Request completed successfully');
 
     return new Response(
-      JSON.stringify({ 
-        response: aiResponse, 
-        citations,
-        conversationId 
-      }),
+      JSON.stringify({ response: aiResponse, citations, conversationId }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
