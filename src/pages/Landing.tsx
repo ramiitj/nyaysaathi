@@ -33,11 +33,11 @@ const Landing: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-warm flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-warm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="w-full max-w-md my-auto">
         {/* Language Selection Step */}
         {step === 'language' && (
-          <div className="bg-card rounded-3xl shadow-xl p-6 sm:p-8 animate-fade-in max-h-[90vh] overflow-y-auto">
+          <div className="bg-card rounded-3xl shadow-xl p-6 sm:p-8 animate-fade-in">
             {/* Logo */}
             <div className="flex flex-col items-center mb-6">
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary flex items-center justify-center mb-3">
