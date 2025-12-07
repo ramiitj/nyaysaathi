@@ -1,9 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-import { BookOpen, Upload, RefreshCw, Trash2, FileText, CheckCircle, Clock, AlertCircle, Loader2 } from "lucide-react";
+import { BookOpen, Upload, RefreshCw, Trash2, FileText, CheckCircle, Clock, AlertCircle, Loader2, Eye } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -23,10 +31,32 @@ const KnowledgeBase = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchDocuments();
+
+    // Set up real-time subscription for document updates
+    const channel = supabase
+      .channel('documents-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'documents'
+        },
+        (payload) => {
+          console.log('Document change:', payload);
+          fetchDocuments(); // Refresh data on any change
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchDocuments = async () => {
@@ -213,16 +243,15 @@ const KnowledgeBase = () => {
 
   // Calculate stats from real data
   const processedDocs = documents.filter(d => d.status === 'processed');
-  const totalTopics = new Set(processedDocs.flatMap(d => d.topics_extracted || [])).size;
-  const totalRules = processedDocs.reduce((sum, d) => sum + (d.rules_extracted?.length || 0), 0);
-  const allTopics = [...new Set(processedDocs.flatMap(d => d.topics_extracted || []))].slice(0, 8);
-  const allRules = processedDocs.flatMap(d => d.rules_extracted || []).slice(0, 4);
+  const allTopics = [...new Set(processedDocs.flatMap(d => d.topics_extracted || []))];
+  const allRules = processedDocs.flatMap(d => d.rules_extracted || []);
+  const totalChunks = processedDocs.reduce((sum, d) => sum + (d.chunk_count || 0), 0);
 
   const trainingStats = [
-    { label: "Topics Learned", value: totalTopics.toString(), color: "bg-primary text-primary-foreground" },
-    { label: "Behavioral Rules", value: totalRules.toString(), color: "bg-green-500 text-white" },
+    { label: "Topics Learned", value: allTopics.length.toString(), color: "bg-primary text-primary-foreground" },
+    { label: "Behavioral Rules", value: allRules.length.toString(), color: "bg-green-500 text-white" },
     { label: "Documents Processed", value: processedDocs.length.toString(), color: "bg-rose-500 text-white" },
-    { label: "Total Chunks", value: processedDocs.reduce((sum, d) => sum + (d.chunk_count || 0), 0).toString(), color: "bg-amber-500 text-white" },
+    { label: "Total Chunks", value: totalChunks.toString(), color: "bg-amber-500 text-white" },
   ];
 
   return (
@@ -238,6 +267,16 @@ const KnowledgeBase = () => {
               </CardTitle>
               <CardDescription>How your documents are influencing AI behavior</CardDescription>
             </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              onClick={() => setShowDetailsDialog(true)}
+              disabled={processedDocs.length === 0}
+            >
+              <Eye className="h-4 w-4" />
+              View Full Details
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -251,31 +290,41 @@ const KnowledgeBase = () => {
             ))}
           </div>
 
-          {/* Topics */}
+          {/* Topics Preview */}
           {allTopics.length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-foreground mb-3">Topics AI Learned From Documents:</h4>
               <div className="flex flex-wrap gap-2">
-                {allTopics.map((topic) => (
+                {allTopics.slice(0, 8).map((topic) => (
                   <Badge key={topic} variant="secondary" className="bg-muted text-muted-foreground">
                     {topic}
                   </Badge>
                 ))}
+                {allTopics.length > 8 && (
+                  <Badge variant="outline" className="cursor-pointer" onClick={() => setShowDetailsDialog(true)}>
+                    +{allTopics.length - 8} more
+                  </Badge>
+                )}
               </div>
             </div>
           )}
 
-          {/* Rules */}
+          {/* Rules Preview */}
           {allRules.length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-foreground mb-3">Sample Behavioral Rules:</h4>
               <ul className="space-y-2">
-                {allRules.map((rule, index) => (
+                {allRules.slice(0, 4).map((rule, index) => (
                   <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
                     <span className="text-primary mt-1">•</span>
                     {rule}
                   </li>
                 ))}
+                {allRules.length > 4 && (
+                  <li className="text-sm text-primary cursor-pointer hover:underline" onClick={() => setShowDetailsDialog(true)}>
+                    View all {allRules.length} rules...
+                  </li>
+                )}
               </ul>
             </div>
           )}
@@ -410,6 +459,100 @@ const KnowledgeBase = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Full Details Dialog */}
+      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-primary" />
+              Full Training Details
+            </DialogTitle>
+            <DialogDescription>
+              Complete overview of what the AI has learned from your documents
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ScrollArea className="max-h-[60vh] pr-4">
+            <div className="space-y-6">
+              {/* Stats Summary */}
+              <div className="grid grid-cols-2 gap-3">
+                {trainingStats.map((stat) => (
+                  <div key={stat.label} className={`${stat.color} rounded-lg p-3 text-center`}>
+                    <p className="text-xl font-bold">{stat.value}</p>
+                    <p className="text-xs opacity-90">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* All Topics */}
+              <div>
+                <h4 className="text-sm font-semibold text-foreground mb-3">
+                  All Topics ({allTopics.length})
+                </h4>
+                {allTopics.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {allTopics.map((topic) => (
+                      <Badge key={topic} variant="secondary" className="bg-muted text-muted-foreground">
+                        {topic}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No topics extracted yet</p>
+                )}
+              </div>
+
+              {/* All Rules */}
+              <div>
+                <h4 className="text-sm font-semibold text-foreground mb-3">
+                  All Behavioral Rules ({allRules.length})
+                </h4>
+                {allRules.length > 0 ? (
+                  <ul className="space-y-2">
+                    {allRules.map((rule, index) => (
+                      <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <span className="text-primary font-bold">{index + 1}.</span>
+                        {rule}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No behavioral rules extracted yet</p>
+                )}
+              </div>
+
+              {/* Document Breakdown */}
+              <div>
+                <h4 className="text-sm font-semibold text-foreground mb-3">
+                  Document Breakdown
+                </h4>
+                <div className="space-y-3">
+                  {processedDocs.map((doc) => (
+                    <div key={doc.id} className="border rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-sm truncate max-w-[300px]">{doc.name}</span>
+                        <Badge variant="outline" className="text-xs">
+                          {doc.chunk_count || 0} chunks
+                        </Badge>
+                      </div>
+                      {doc.topics_extracted && doc.topics_extracted.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {doc.topics_extracted.map((topic) => (
+                            <Badge key={topic} variant="secondary" className="text-xs">
+                              {topic}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
