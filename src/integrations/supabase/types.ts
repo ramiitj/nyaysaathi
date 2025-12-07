@@ -511,6 +511,10 @@ export type Database = {
         }
         Returns: string
       }
+      validate_user_file_access: {
+        Args: { file_conversation_id: string; file_visitor_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
