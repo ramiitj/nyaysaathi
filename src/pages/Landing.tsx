@@ -26,6 +26,7 @@ const Landing: React.FC = () => {
   };
 
   const consentPoints = [
+    config.ui.consent.dataProtection,
     config.ui.consent.shareLocation,
     config.ui.consent.allowLogging,
     config.ui.consent.helpImprove,

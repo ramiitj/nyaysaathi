@@ -132,6 +132,66 @@ function validateInput(body: any): { valid: boolean; data?: ValidatedInput; erro
   };
 }
 
+// ============ PII ANONYMIZATION ============
+function anonymizePII(text: string): string {
+  let anonymized = text;
+  
+  // Phone numbers: Indian mobile (10 digits, optionally with +91 or 0 prefix)
+  anonymized = anonymized.replace(/(\+91[\s-]?)?[6-9]\d{9}/g, '[PHONE]');
+  anonymized = anonymized.replace(/\b0[6-9]\d{9}\b/g, '[PHONE]');
+  
+  // Aadhaar numbers: 12 digits, often in groups of 4
+  anonymized = anonymized.replace(/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, '[AADHAAR]');
+  
+  // PAN numbers: 5 letters, 4 digits, 1 letter (ABCDE1234F)
+  anonymized = anonymized.replace(/\b[A-Z]{5}\d{4}[A-Z]\b/gi, '[PAN]');
+  
+  // Bank account numbers: 9-18 digits
+  anonymized = anonymized.replace(/\b\d{9,18}\b/g, (match) => {
+    // Preserve if it looks like a year or small number
+    if (match.length <= 6) return match;
+    return '[ACCOUNT]';
+  });
+  
+  // IFSC codes: 4 letters, 0, 6 alphanumeric
+  anonymized = anonymized.replace(/\b[A-Z]{4}0[A-Z0-9]{6}\b/gi, '[IFSC]');
+  
+  // Credit/Debit card numbers: 16 digits, often in groups of 4
+  anonymized = anonymized.replace(/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, '[CARD]');
+  
+  // UPI IDs: word@word pattern
+  anonymized = anonymized.replace(/\b[\w.-]+@[\w]+\b/gi, (match) => {
+    // Don't mask emails - only UPI IDs
+    if (match.includes('.com') || match.includes('.in') || match.includes('.org') || match.includes('.net')) {
+      return '[EMAIL]';
+    }
+    return '[UPI]';
+  });
+  
+  // Email addresses
+  anonymized = anonymized.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL]');
+  
+  // Money amounts: ₹ followed by numbers (with optional commas)
+  anonymized = anonymized.replace(/₹\s?[\d,]+(?:\.\d{1,2})?/g, '₹[AMOUNT]');
+  anonymized = anonymized.replace(/Rs\.?\s?[\d,]+(?:\.\d{1,2})?/gi, 'Rs.[AMOUNT]');
+  anonymized = anonymized.replace(/INR\s?[\d,]+(?:\.\d{1,2})?/gi, 'INR [AMOUNT]');
+  
+  // Large standalone numbers (likely financial - 5+ digits)
+  anonymized = anonymized.replace(/\b\d{1,2},\d{2},\d{3}\b/g, '[AMOUNT]'); // Indian format: 1,00,000
+  anonymized = anonymized.replace(/\b\d{1,3}(?:,\d{3})+\b/g, '[AMOUNT]'); // Western format: 100,000
+  
+  // Passport numbers: letter followed by 7 digits
+  anonymized = anonymized.replace(/\b[A-Z]\d{7}\b/gi, '[PASSPORT]');
+  
+  // Driving license: state code + year + number pattern
+  anonymized = anonymized.replace(/\b[A-Z]{2}\d{2}\s?\d{11}\b/gi, '[LICENSE]');
+  
+  // Voter ID: 3 letters + 7 digits
+  anonymized = anonymized.replace(/\b[A-Z]{3}\d{7}\b/gi, '[VOTER_ID]');
+  
+  return anonymized;
+}
+
 // ============ MAIN LOGIC ============
 const DEFAULT_SYSTEM_PROMPT = `You are Nyay Saathi, a trusted legal information assistant for Indian citizens.
 
@@ -395,8 +455,11 @@ serve(async (req) => {
     }
 
     if (conversationId) {
+      // Anonymize user message before storing to protect PII
+      const anonymizedUserMessage = anonymizePII(message);
+      
       await supabase.from('messages').insert([
-        { conversation_id: conversationId, role: 'user', content: message },
+        { conversation_id: conversationId, role: 'user', content: anonymizedUserMessage },
         { conversation_id: conversationId, role: 'assistant', content: aiResponse, citations }
       ]);
 
