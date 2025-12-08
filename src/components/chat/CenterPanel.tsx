@@ -52,12 +52,13 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
   const [inputValue, setInputValue] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastMessageIdRef = useRef<string | null>(null);
-  const welcomeSpokenRef = useRef(false);
+  const lastInputMethodRef = useRef<'voice' | 'text'>('text');
 
   // Voice recording hook
   const { isRecording, isProcessing, toggleRecording } = useVoiceRecording({
     language: config.code,
     onTranscription: (text) => {
+      lastInputMethodRef.current = 'voice';
       setTranscription(text);
       onSendMessage(text);
     },
@@ -100,25 +101,7 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
     }
   }, [messages]);
 
-  // Auto-speak welcome message on mount in voice mode
-  useEffect(() => {
-    if (
-      inputMode === 'voice' &&
-      messages.length === 0 &&
-      !welcomeSpokenRef.current &&
-      !isSpeaking &&
-      !ttsLoading
-    ) {
-      welcomeSpokenRef.current = true;
-      // Small delay to ensure audio context is ready
-      const timer = setTimeout(() => {
-        speak(config.ui.welcomeMessage);
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [inputMode, messages.length, speak, config.ui.welcomeMessage, isSpeaking, ttsLoading]);
-
-  // Auto-speak new assistant messages in voice mode (concurrent playback - immediate)
+  // Auto-speak new assistant messages ONLY when user's last input was voice
   useEffect(() => {
     if (messages.length === 0) return;
     
@@ -126,18 +109,18 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
     
     // Only auto-speak if:
     // 1. It's an assistant message
-    // 2. We're in voice mode
+    // 2. User's last input was via VOICE (not text)
     // 3. It's a new message (not already spoken)
     if (
       lastMessage.role === 'assistant' &&
-      inputMode === 'voice' &&
+      lastInputMethodRef.current === 'voice' &&
       lastMessage.id !== lastMessageIdRef.current
     ) {
       lastMessageIdRef.current = lastMessage.id;
       // Start speaking immediately (concurrent with text display)
       speak(lastMessage.content);
     }
-  }, [messages, inputMode, speak]);
+  }, [messages, speak]);
 
   const handleVoiceClick = () => {
     // ALWAYS stop TTS first when user wants to speak (voice interruption)
@@ -158,6 +141,7 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
   const handleTextSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputValue.trim() && !isLoading) {
+      lastInputMethodRef.current = 'text';
       onSendMessage(inputValue.trim());
       setInputValue('');
     }
