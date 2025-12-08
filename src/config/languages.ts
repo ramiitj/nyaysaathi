@@ -17,6 +17,7 @@ export interface OnboardingTranslations {
 
 export interface ConsentTranslations {
   byUsing: string;
+  dataProtection: string;
   shareLocation: string;
   allowLogging: string;
   helpImprove: string;
@@ -159,6 +160,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       },
       consent: {
         byUsing: 'न्याय साथी का उपयोग करके, आप सहमत हैं:',
+        dataProtection: 'आपके फ़ोन नंबर, बैंक विवरण, आधार और वित्तीय डेटा स्वचालित रूप से मास्क किए जाते हैं। आपकी फाइलें केवल आपके ब्राउज़र में संग्रहीत होती हैं, हमारे सर्वर पर नहीं।',
         shareLocation: 'स्थानीय कानूनी सलाह के लिए अपना स्थान साझा करें',
         allowLogging: 'सुरक्षा के लिए गुमनाम कनेक्शन लॉगिंग की अनुमति दें',
         helpImprove: 'सुधार के लिए चैट से सीखने दें (सभी डेटा गुमनाम रहता है)',
@@ -250,6 +252,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       },
       consent: {
         byUsing: 'By using Nyay Saathi, you agree to:',
+        dataProtection: 'Your phone numbers, bank details, Aadhaar, and financial data are automatically masked before storage. Your files are stored only in your browser, not on our servers.',
         shareLocation: 'Share your location for relevant local legal advice',
         allowLogging: 'Allow anonymous connection logging for security',
         helpImprove: 'Let us learn from chats to improve (all data stays anonymous)',
@@ -341,6 +344,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       },
       consent: {
         byUsing: 'ন্যায় সাথী ব্যবহার করে, আপনি সম্মত হচ্ছেন:',
+        dataProtection: 'আপনার ফোন নম্বর, ব্যাংক বিবরণ, আধার এবং আর্থিক ডেটা স্বয়ংক্রিয়ভাবে মাস্ক করা হয়। আপনার ফাইলগুলি শুধুমাত্র আপনার ব্রাউজারে সংরক্ষিত থাকে, আমাদের সার্ভারে নয়।',
         shareLocation: 'প্রাসঙ্গিক স্থানীয় আইনি পরামর্শের জন্য আপনার অবস্থান শেয়ার করুন',
         allowLogging: 'নিরাপত্তার জন্য বেনামী সংযোগ লগিং এর অনুমতি দিন',
         helpImprove: 'উন্নতির জন্য চ্যাট থেকে শিখতে দিন (সমস্ত ডেটা বেনামী থাকে)',
@@ -432,6 +436,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       },
       consent: {
         byUsing: 'நியாய சாதி பயன்படுத்துவதன் மூலம், நீங்கள் ஒப்புக்கொள்கிறீர்கள்:',
+        dataProtection: 'உங்கள் தொலைபேசி எண்கள், வங்கி விவரங்கள், ஆதார் மற்றும் நிதி தரவுகள் தானாகவே மறைக்கப்படும். உங்கள் கோப்புகள் உங்கள் உலாவியில் மட்டுமே சேமிக்கப்படும், எங்கள் சர்வர்களில் அல்ல।',
         shareLocation: 'தொடர்புடைய உள்ளூர் சட்ட ஆலோசனைக்கு உங்கள் இருப்பிடத்தைப் பகிரவும்',
         allowLogging: 'பாதுகாப்பிற்கான அநாமதேய இணைப்பு பதிவை அனுமதிக்கவும்',
         helpImprove: 'மேம்படுத்த அரட்டைகளிலிருந்து கற்றுக்கொள்ள அனுமதிக்கவும் (எல்லா தரவும் அநாமதேயமாக இருக்கும்)',
@@ -523,6 +528,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       },
       consent: {
         byUsing: 'న్యాయ సాథి ఉపయోగించడం ద్వారా, మీరు అంగీకరిస్తున్నారు:',
+        dataProtection: 'మీ ఫోన్ నంబర్లు, బ్యాంక్ వివరాలు, ఆధార్ మరియు ఆర్థిక డేటా స్వయంచాలకంగా మాస్క్ చేయబడతాయి। మీ ఫైల్‌లు మీ బ్రౌజర్‌లో మాత్రమే నిల్వ చేయబడతాయి, మా సర్వర్‌లలో కాదు।',
         shareLocation: 'సంబంధిత స్థానిక చట్ట సలహా కోసం మీ స్థానాన్ని షేర్ చేయండి',
         allowLogging: 'భద్రత కోసం అనామక కనెక్షన్ లాగింగ్‌ను అనుమతించండి',
         helpImprove: 'మెరుగుపరచడానికి చాట్‌ల నుండి నేర్చుకోనివ్వండి (అన్ని డేటా అనామకంగా ఉంటుంది)',
@@ -614,6 +620,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       },
       consent: {
         byUsing: 'न्याय साथी वापरून, तुम्ही सहमत आहात:',
+        dataProtection: 'तुमचे फोन नंबर, बँक तपशील, आधार आणि आर्थिक डेटा स्वयंचलितपणे मास्क केले जातात। तुमच्या फाइल्स फक्त तुमच्या ब्राउझरमध्ये साठवल्या जातात, आमच्या सर्व्हरवर नाही।',
         shareLocation: 'संबंधित स्थानिक कायदेशीर सल्ल्यासाठी तुमचे स्थान शेअर करा',
         allowLogging: 'सुरक्षिततेसाठी अनामिक कनेक्शन लॉगिंगला परवानगी द्या',
         helpImprove: 'सुधारणा करण्यासाठी चॅटमधून शिकण्याची परवानगी द्या (सर्व डेटा अनामिक राहतो)',
@@ -705,6 +712,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       },
       consent: {
         byUsing: 'ન્યાય સાથી વાપરીને, તમે સંમત થાઓ છો:',
+        dataProtection: 'તમારા ફોન નંબર, બેંક વિગતો, આધાર અને નાણાકીય ડેટા આપોઆપ માસ્ક થાય છે। તમારી ફાઇલો ફક્ત તમારા બ્રાઉઝરમાં સ્ટોર થાય છે, અમારા સર્વર પર નહીં।',
         shareLocation: 'સંબંધિત સ્થાનિક કાનૂની સલાહ માટે તમારું સ્થાન શેર કરો',
         allowLogging: 'સુરક્ષા માટે અનામી કનેક્શન લોગિંગની મંજૂરી આપો',
         helpImprove: 'સુધારણા માટે ચેટમાંથી શીખવા દો (બધો ડેટા અનામી રહે છે)',
@@ -796,6 +804,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       },
       consent: {
         byUsing: 'ನ್ಯಾಯ ಸಾಥಿ ಬಳಸುವ ಮೂಲಕ, ನೀವು ಒಪ್ಪುತ್ತೀರಿ:',
+        dataProtection: 'ನಿಮ್ಮ ಫೋನ್ ಸಂಖ್ಯೆಗಳು, ಬ್ಯಾಂಕ್ ವಿವರಗಳು, ಆಧಾರ್ ಮತ್ತು ಹಣಕಾಸು ಡೇಟಾ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮಾಸ್ಕ್ ಆಗುತ್ತದೆ। ನಿಮ್ಮ ಫೈಲ್‌ಗಳು ನಿಮ್ಮ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಮಾತ್ರ ಸಂಗ್ರಹವಾಗುತ್ತವೆ, ನಮ್ಮ ಸರ್ವರ್‌ಗಳಲ್ಲಿ ಅಲ್ಲ।',
         shareLocation: 'ಸಂಬಂಧಿತ ಸ್ಥಳೀಯ ಕಾನೂನು ಸಲಹೆಗಾಗಿ ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಹಂಚಿಕೊಳ್ಳಿ',
         allowLogging: 'ಭದ್ರತೆಗಾಗಿ ಅನಾಮಧೇಯ ಸಂಪರ್ಕ ಲಾಗಿಂಗ್ ಅನ್ನು ಅನುಮತಿಸಿ',
         helpImprove: 'ಸುಧಾರಣೆಗಾಗಿ ಚಾಟ್‌ಗಳಿಂದ ಕಲಿಯಲು ಅವಕಾಶ ಕೊಡಿ (ಎಲ್ಲಾ ಡೇಟಾ ಅನಾಮಧೇಯವಾಗಿರುತ್ತದೆ)',
@@ -887,6 +896,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       },
       consent: {
         byUsing: 'ന്യായ സാഥി ഉപയോഗിക്കുന്നതിലൂടെ, നിങ്ങൾ സമ്മതിക്കുന്നു:',
+        dataProtection: 'നിങ്ങളുടെ ഫോൺ നമ്പറുകൾ, ബാങ്ക് വിവരങ്ങൾ, ആധാർ, സാമ്പത്തിക ഡാറ്റ എന്നിവ സ്വയമേവ മാസ്‌ക് ചെയ്യപ്പെടുന്നു। നിങ്ങളുടെ ഫയലുകൾ നിങ്ങളുടെ ബ്രൌസറിൽ മാത്രമേ സൂക്ഷിക്കുന്നുള്ളൂ, ഞങ്ങളുടെ സെർവറുകളിൽ അല്ല।',
         shareLocation: 'പ്രസക്തമായ പ്രാദേശിക നിയമ ഉപദേശത്തിനായി നിങ്ങളുടെ ലൊക്കേഷൻ പങ്കിടുക',
         allowLogging: 'സുരക്ഷയ്ക്കായി അജ്ഞാത കണക്ഷൻ ലോഗിംഗ് അനുവദിക്കുക',
         helpImprove: 'മെച്ചപ്പെടുത്തുന്നതിനായി ചാറ്റുകളിൽ നിന്ന് പഠിക്കാൻ അനുവദിക്കുക (എല്ലാ ഡാറ്റയും അജ്ഞാതമായി തുടരും)',
@@ -978,6 +988,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       },
       consent: {
         byUsing: 'ਨਿਆਂ ਸਾਥੀ ਵਰਤ ਕੇ, ਤੁਸੀਂ ਸਹਿਮਤ ਹੋ:',
+        dataProtection: 'ਤੁਹਾਡੇ ਫ਼ੋਨ ਨੰਬਰ, ਬੈਂਕ ਵੇਰਵੇ, ਆਧਾਰ ਅਤੇ ਵਿੱਤੀ ਡਾਟਾ ਆਪਣੇ ਆਪ ਮਾਸਕ ਹੋ ਜਾਂਦੇ ਹਨ। ਤੁਹਾਡੀਆਂ ਫਾਈਲਾਂ ਸਿਰਫ਼ ਤੁਹਾਡੇ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਸਟੋਰ ਹੁੰਦੀਆਂ ਹਨ, ਸਾਡੇ ਸਰਵਰਾਂ ਤੇ ਨਹੀਂ।',
         shareLocation: 'ਸੰਬੰਧਿਤ ਸਥਾਨਕ ਕਾਨੂੰਨੀ ਸਲਾਹ ਲਈ ਆਪਣਾ ਸਥਾਨ ਸਾਂਝਾ ਕਰੋ',
         allowLogging: 'ਸੁਰੱਖਿਆ ਲਈ ਅਗਿਆਤ ਕਨੈਕਸ਼ਨ ਲੌਗਿੰਗ ਦੀ ਆਗਿਆ ਦਿਓ',
         helpImprove: 'ਸੁਧਾਰ ਲਈ ਚੈਟਾਂ ਤੋਂ ਸਿੱਖਣ ਦਿਓ (ਸਾਰਾ ਡਾਟਾ ਅਗਿਆਤ ਰਹਿੰਦਾ ਹੈ)',
@@ -1069,6 +1080,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       },
       consent: {
         byUsing: 'ନ୍ୟାୟ ସାଥୀ ବ୍ୟବହାର କରି, ଆପଣ ସହମତ ହେଉଛନ୍ତି:',
+        dataProtection: 'ଆପଣଙ୍କ ଫୋନ୍ ନମ୍ବର, ବ୍ୟାଙ୍କ ବିବରଣୀ, ଆଧାର ଏବଂ ଆର୍ଥିକ ତଥ୍ୟ ସ୍ୱୟଂଚାଳିତ ଭାବରେ ମାସ୍କ ହୋଇଯାଏ। ଆପଣଙ୍କ ଫାଇଲଗୁଡ଼ିକ କେବଳ ଆପଣଙ୍କ ବ୍ରାଉଜରରେ ସଂରକ୍ଷିତ ହୁଏ, ଆମ ସର୍ଭରରେ ନୁହେଁ।',
         shareLocation: 'ସମ୍ପୃକ୍ତ ସ୍ଥାନୀୟ ଆଇନଗତ ପରାମର୍ଶ ପାଇଁ ଆପଣଙ୍କ ଅବସ୍ଥାନ ସେୟାର କରନ୍ତୁ',
         allowLogging: 'ସୁରକ୍ଷା ପାଇଁ ଅଜ୍ଞାତ ସଂଯୋଗ ଲଗିଂ ର ଅନୁମତି ଦିଅନ୍ତୁ',
         helpImprove: 'ଉନ୍ନତି ପାଇଁ ଚାଟ୍ ରୁ ଶିଖିବାକୁ ଦିଅନ୍ତୁ (ସମସ୍ତ ଡାଟା ଅଜ୍ଞାତ ରହେ)',
@@ -1160,6 +1172,7 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
       },
       consent: {
         byUsing: 'نیائے ساتھی استعمال کرتے ہوئے، آپ رضامند ہیں:',
+        dataProtection: 'آپ کے فون نمبر، بینک تفصیلات، آدھار اور مالی ڈیٹا خود بخود ماسک ہو جاتے ہیں۔ آپ کی فائلیں صرف آپ کے براؤزر میں محفوظ ہوتی ہیں، ہمارے سرورز پر نہیں۔',
         shareLocation: 'متعلقہ مقامی قانونی مشورے کے لیے اپنا مقام شیئر کریں',
         allowLogging: 'سیکیورٹی کے لیے گمنام کنکشن لاگنگ کی اجازت دیں',
         helpImprove: 'بہتری کے لیے چیٹس سے سیکھنے دیں (تمام ڈیٹا گمنام رہتا ہے)',

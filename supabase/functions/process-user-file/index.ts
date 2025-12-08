@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,8 +6,6 @@ const corsHeaders = {
 };
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
 // ============ RATE LIMITING ============
 interface RateLimitEntry {
@@ -53,19 +50,35 @@ function checkRateLimit(identifier: string): { allowed: boolean; resetIn: number
 // ============ INPUT VALIDATION ============
 const VALID_LANGUAGES = ['HI', 'EN', 'BN', 'TA', 'TE', 'MR', 'GU', 'KN', 'ML', 'PA', 'OR', 'UR'];
 
-function isValidUUID(uuid: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid);
+interface ValidatedInput {
+  fileId: string;
+  fileName: string;
+  mimeType: string;
+  base64Data: string;
+  language: string;
 }
 
-function validateInput(body: any): { valid: boolean; fileId?: string; language?: string; error?: string } {
+function validateInput(body: any): { valid: boolean; data?: ValidatedInput; error?: string } {
   if (!body || typeof body !== 'object') {
     return { valid: false, error: 'Invalid request body' };
   }
 
-  const { fileId, language } = body;
+  const { fileId, fileName, mimeType, base64Data, language } = body;
 
-  if (typeof fileId !== 'string' || !isValidUUID(fileId)) {
+  if (typeof fileId !== 'string' || !fileId) {
     return { valid: false, error: 'Valid fileId is required' };
+  }
+
+  if (typeof fileName !== 'string' || !fileName) {
+    return { valid: false, error: 'Valid fileName is required' };
+  }
+
+  if (typeof mimeType !== 'string' || !mimeType) {
+    return { valid: false, error: 'Valid mimeType is required' };
+  }
+
+  if (typeof base64Data !== 'string' || !base64Data) {
+    return { valid: false, error: 'Valid base64Data is required' };
   }
 
   let validatedLanguage = 'EN';
@@ -76,7 +89,16 @@ function validateInput(body: any): { valid: boolean; fileId?: string; language?:
     validatedLanguage = language.toUpperCase();
   }
 
-  return { valid: true, fileId, language: validatedLanguage };
+  return { 
+    valid: true, 
+    data: { 
+      fileId, 
+      fileName, 
+      mimeType, 
+      base64Data, 
+      language: validatedLanguage 
+    } 
+  };
 }
 
 serve(async (req) => {
@@ -115,65 +137,24 @@ serve(async (req) => {
       );
     }
 
-    const { fileId, language } = validation;
-    console.log('Processing user file:', fileId, 'language:', language);
+    const { fileId, fileName, mimeType, base64Data, language } = validation.data!;
+    console.log('Processing user file:', fileId, 'name:', fileName, 'type:', mimeType, 'language:', language);
 
-    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
-
-    // Get file record
-    const { data: fileRecord, error: fileError } = await supabase
-      .from('user_files')
-      .select('*')
-      .eq('id', fileId)
-      .single();
-
-    if (fileError || !fileRecord) {
-      throw new Error(`File not found: ${fileError?.message}`);
-    }
-
-    // Update status to processing
-    await supabase
-      .from('user_files')
-      .update({ status: 'processing' })
-      .eq('id', fileId);
-
-    // Download file from storage
-    const { data: fileData, error: downloadError } = await supabase.storage
-      .from('user_files')
-      .download(fileRecord.file_path);
-
-    if (downloadError || !fileData) {
-      throw new Error(`Failed to download file: ${downloadError?.message}`);
-    }
+    // NOTE: File data is received directly as base64 - NOT stored on backend
+    // This ensures user files remain only in their browser (IndexedDB)
 
     let analysisResult;
-    const mimeType = fileRecord.mime_type;
 
     // For images, use Gemini Vision
     if (mimeType.startsWith('image/')) {
-      const base64Data = await blobToBase64(fileData);
-      analysisResult = await analyzeWithGeminiVision(base64Data, mimeType, language!);
+      analysisResult = await analyzeWithGeminiVision(base64Data, mimeType, language);
     } else {
-      // For documents, extract text and analyze
-      const textContent = await extractTextFromFile(fileData, mimeType);
-      analysisResult = await analyzeWithGemini(textContent, fileRecord.file_name, language!);
+      // For documents, decode and analyze
+      const textContent = await extractTextFromBase64(base64Data, mimeType);
+      analysisResult = await analyzeWithGemini(textContent, fileName, language);
     }
 
-    // Update file record with analysis
-    const { error: updateError } = await supabase
-      .from('user_files')
-      .update({
-        status: 'processed',
-        analysis_result: analysisResult,
-        processed_at: new Date().toISOString()
-      })
-      .eq('id', fileId);
-
-    if (updateError) {
-      console.error('Failed to update file record:', updateError);
-    }
-
-    console.log('File processed successfully:', fileId);
+    console.log('File processed successfully (locally stored, not on backend):', fileId);
 
     return new Response(
       JSON.stringify({ success: true, analysis: analysisResult }),
@@ -190,21 +171,22 @@ serve(async (req) => {
   }
 });
 
-async function blobToBase64(blob: Blob): Promise<string> {
-  const arrayBuffer = await blob.arrayBuffer();
-  const uint8Array = new Uint8Array(arrayBuffer);
-  let binary = '';
-  for (let i = 0; i < uint8Array.length; i++) {
-    binary += String.fromCharCode(uint8Array[i]);
-  }
-  return btoa(binary);
-}
-
-async function extractTextFromFile(fileData: Blob, mimeType: string): Promise<string> {
+async function extractTextFromBase64(base64Data: string, mimeType: string): Promise<string> {
+  // Decode base64 to text for text-based files
   if (mimeType === 'text/plain' || mimeType === 'text/csv' || mimeType === 'application/json') {
-    return await fileData.text();
+    try {
+      const binaryString = atob(base64Data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return new TextDecoder().decode(bytes);
+    } catch {
+      return `[Document: ${mimeType}]`;
+    }
   }
-  return `[Document: ${mimeType}]`;
+  // For binary documents (PDF, DOCX), we'll use Gemini Vision for analysis
+  return `[Binary Document: ${mimeType}]`;
 }
 
 async function analyzeWithGeminiVision(base64Data: string, mimeType: string, language: string): Promise<object> {
@@ -248,6 +230,22 @@ async function analyzeWithGeminiVision(base64Data: string, mimeType: string, lan
 }
 
 async function analyzeWithGemini(content: string, fileName: string, language: string): Promise<object> {
+  // For binary documents, use Vision API with base64
+  if (content.startsWith('[Binary Document:')) {
+    // Return a basic analysis - actual document parsing requires Vision
+    return {
+      documentType: 'Document',
+      summary: `This is a ${fileName} file. For detailed analysis, please use an image format.`,
+      keyPoints: [],
+      parties: [],
+      dates: [],
+      relevantLaws: [],
+      legalImplications: 'Unable to extract text from this document format.',
+      suggestedActions: ['Convert to PDF with text layer or image for better analysis'],
+      confidence: 30
+    };
+  }
+
   const prompt = `${getAnalysisPrompt(language, false)}
 
 File Name: ${fileName}

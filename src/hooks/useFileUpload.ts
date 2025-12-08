@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { openDB, IDBPDatabase } from 'idb';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -11,6 +12,7 @@ export interface UploadedFile {
   status: 'uploading' | 'processing' | 'processed' | 'failed';
   analysis?: FileAnalysis;
   error?: string;
+  base64Data?: string;
 }
 
 export interface FileAnalysis {
@@ -35,11 +37,13 @@ interface UseFileUploadOptions {
 
 const DEFAULT_MAX_STORAGE = 5 * 1024 * 1024; // 5MB
 const DEFAULT_MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB per file
+const DB_NAME = 'nyay-saathi-files';
+const STORE_NAME = 'files';
 
 const ALLOWED_TYPES = [
   'application/pdf',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // XLSX
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'text/csv',
   'application/json',
   'image/jpeg',
@@ -48,10 +52,34 @@ const ALLOWED_TYPES = [
 
 const ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.xlsx', '.csv', '.json', '.jpg', '.jpeg', '.png'];
 
+// Initialize IndexedDB
+async function getDB(): Promise<IDBPDatabase> {
+  return openDB(DB_NAME, 1, {
+    upgrade(db) {
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    },
+  });
+}
+
+// Convert File to base64
+async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Remove data URL prefix (e.g., "data:image/png;base64,")
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export const useFileUpload = (options: UseFileUploadOptions = {}) => {
   const {
-    visitorId,
-    conversationId,
     language = 'EN',
     maxStorage = DEFAULT_MAX_STORAGE,
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
@@ -63,8 +91,26 @@ export const useFileUpload = (options: UseFileUploadOptions = {}) => {
 
   const storageUsed = uploadedFiles.reduce((acc, f) => acc + f.fileSize, 0);
 
+  // Load files from IndexedDB on mount
+  useEffect(() => {
+    const loadFiles = async () => {
+      try {
+        const db = await getDB();
+        const storedFiles = await db.getAll(STORE_NAME);
+        if (storedFiles.length > 0) {
+          setUploadedFiles(storedFiles.map(sf => ({
+            ...sf,
+            file: new File([], sf.fileName), // Placeholder - actual file data is in base64Data
+          })));
+        }
+      } catch (error) {
+        console.error('Failed to load files from IndexedDB:', error);
+      }
+    };
+    loadFiles();
+  }, []);
+
   const validateFile = useCallback((file: File): string | null => {
-    // Check file type
     if (!ALLOWED_TYPES.includes(file.type)) {
       const ext = file.name.split('.').pop()?.toLowerCase();
       if (!ext || !ALLOWED_EXTENSIONS.includes(`.${ext}`)) {
@@ -72,12 +118,10 @@ export const useFileUpload = (options: UseFileUploadOptions = {}) => {
       }
     }
 
-    // Check file size
     if (file.size > maxFileSize) {
       return `${file.name} exceeds 5MB limit`;
     }
 
-    // Check total storage
     if (storageUsed + file.size > maxStorage) {
       return 'Total storage limit (5MB) exceeded';
     }
@@ -97,7 +141,6 @@ export const useFileUpload = (options: UseFileUploadOptions = {}) => {
     }
 
     const fileId = crypto.randomUUID();
-    const filePath = `${visitorId || 'anonymous'}/${fileId}/${file.name}`;
 
     // Add to state as uploading
     const uploadingFile: UploadedFile = {
@@ -113,44 +156,39 @@ export const useFileUpload = (options: UseFileUploadOptions = {}) => {
     setIsUploading(true);
 
     try {
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('user_files')
-        .upload(filePath, file);
+      // Convert file to base64 for local storage
+      const base64Data = await fileToBase64(file);
 
-      if (uploadError) {
-        throw new Error(`Upload failed: ${uploadError.message}`);
-      }
-
-      // Create database record
-      const { data: fileRecord, error: dbError } = await supabase
-        .from('user_files')
-        .insert({
-          id: fileId,
-          visitor_id: visitorId || null,
-          conversation_id: conversationId || null,
-          file_name: file.name,
-          file_path: filePath,
-          file_size: file.size,
-          mime_type: file.type,
-          status: 'pending',
-        })
-        .select()
-        .single();
-
-      if (dbError) {
-        console.error('Failed to create file record:', dbError);
-      }
+      // Store in IndexedDB (local browser storage - NOT backend)
+      const db = await getDB();
+      await db.put(STORE_NAME, {
+        id: fileId,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+        base64Data,
+        status: 'processing',
+        createdAt: new Date().toISOString(),
+      });
 
       // Update status to processing
       setUploadedFiles(prev =>
-        prev.map(f => f.id === fileId ? { ...f, status: 'processing' as const } : f)
+        prev.map(f => f.id === fileId ? { ...f, status: 'processing' as const, base64Data } : f)
       );
 
-      // Call process-user-file edge function
+      // Call process-user-file edge function with base64 data directly
+      // File is NOT stored on backend - only analyzed
       const { data: processResult, error: processError } = await supabase.functions.invoke(
         'process-user-file',
-        { body: { fileId, language } }
+        { 
+          body: { 
+            fileId,
+            fileName: file.name,
+            mimeType: file.type,
+            base64Data,
+            language 
+          } 
+        }
       );
 
       if (processError) {
@@ -162,7 +200,20 @@ export const useFileUpload = (options: UseFileUploadOptions = {}) => {
         ...uploadingFile,
         status: 'processed',
         analysis: processResult?.analysis,
+        base64Data,
       };
+
+      // Update IndexedDB
+      await db.put(STORE_NAME, {
+        id: fileId,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+        base64Data,
+        status: 'processed',
+        analysis: processResult?.analysis,
+        createdAt: new Date().toISOString(),
+      });
 
       setUploadedFiles(prev =>
         prev.map(f => f.id === fileId ? processedFile : f)
@@ -178,13 +229,15 @@ export const useFileUpload = (options: UseFileUploadOptions = {}) => {
     } catch (error) {
       console.error('File upload error:', error);
 
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       setUploadedFiles(prev =>
-        prev.map(f => f.id === fileId ? { ...f, status: 'failed' as const, error: error.message } : f)
+        prev.map(f => f.id === fileId ? { ...f, status: 'failed' as const, error: errorMessage } : f)
       );
 
       toast({
         title: 'Upload Failed',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive',
       });
 
@@ -193,7 +246,7 @@ export const useFileUpload = (options: UseFileUploadOptions = {}) => {
     } finally {
       setIsUploading(false);
     }
-  }, [visitorId, conversationId, language, validateFile, toast]);
+  }, [language, validateFile, toast]);
 
   const uploadFiles = useCallback(async (files: File[]): Promise<UploadedFile[]> => {
     const results: UploadedFile[] = [];
@@ -213,12 +266,9 @@ export const useFileUpload = (options: UseFileUploadOptions = {}) => {
     if (!file) return;
 
     try {
-      // Delete from storage
-      const filePath = `${visitorId || 'anonymous'}/${fileId}/${file.fileName}`;
-      await supabase.storage.from('user_files').remove([filePath]);
-
-      // Delete from database
-      await supabase.from('user_files').delete().eq('id', fileId);
+      // Remove from IndexedDB only (no backend storage to delete)
+      const db = await getDB();
+      await db.delete(STORE_NAME, fileId);
 
       // Remove from state
       setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
@@ -231,10 +281,16 @@ export const useFileUpload = (options: UseFileUploadOptions = {}) => {
     } catch (error) {
       console.error('Failed to remove file:', error);
     }
-  }, [uploadedFiles, visitorId, toast]);
+  }, [uploadedFiles, toast]);
 
-  const clearAllFiles = useCallback(() => {
-    setUploadedFiles([]);
+  const clearAllFiles = useCallback(async () => {
+    try {
+      const db = await getDB();
+      await db.clear(STORE_NAME);
+      setUploadedFiles([]);
+    } catch (error) {
+      console.error('Failed to clear files:', error);
+    }
   }, []);
 
   const getFileContext = useCallback((): string => {
