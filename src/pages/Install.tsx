@@ -176,7 +176,7 @@ const Install = () => {
 
   return (
     <div 
-      className="min-h-screen bg-gradient-to-br from-orange-100 via-amber-50 to-orange-50 flex items-center justify-center p-4"
+      className="h-screen bg-gradient-warm flex items-center justify-center p-4 overflow-hidden"
       dir={isRTL ? "rtl" : "ltr"}
     >
       <Card className="w-full max-w-md shadow-xl">
