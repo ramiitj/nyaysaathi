@@ -30,6 +30,7 @@ const KnowledgeBase = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -82,65 +83,107 @@ const KnowledgeBase = () => {
   };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
+    const fileList = event.target.files;
+    if (!fileList || fileList.length === 0) return;
 
-    const file = files[0];
+    const files = Array.from(fileList);
+    const maxFiles = 5;
     const maxSize = 5 * 1024 * 1024; // 5MB
-
-    if (file.size > maxSize) {
-      toast.error('File size must be less than 5MB');
-      return;
-    }
-
     const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error('Only PDF, DOCX, and TXT files are supported');
+
+    // Limit to 5 files
+    if (files.length > maxFiles) {
+      toast.error(`Maximum ${maxFiles} files allowed at once`);
       return;
     }
+
+    // Validate all files first
+    const invalidFiles: string[] = [];
+    const validFiles: File[] = [];
+
+    for (const file of files) {
+      if (file.size > maxSize) {
+        invalidFiles.push(`${file.name} (too large)`);
+      } else if (!allowedTypes.includes(file.type)) {
+        invalidFiles.push(`${file.name} (unsupported type)`);
+      } else {
+        validFiles.push(file);
+      }
+    }
+
+    if (invalidFiles.length > 0) {
+      toast.error(`Invalid files: ${invalidFiles.join(', ')}`);
+    }
+
+    if (validFiles.length === 0) return;
 
     setIsUploading(true);
+    setUploadProgress({ current: 0, total: validFiles.length });
 
-    try {
-      // Upload to storage
-      const filePath = `${Date.now()}_${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(filePath, file);
+    const uploadResults: { success: boolean; docId?: string; fileName: string }[] = [];
 
-      if (uploadError) throw uploadError;
+    // Upload all files in parallel
+    const uploadPromises = validFiles.map(async (file, index) => {
+      try {
+        // Upload to storage
+        const filePath = `${Date.now()}_${index}_${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(filePath, file);
 
-      // Create document record
-      const { data: docData, error: docError } = await supabase
-        .from('documents')
-        .insert({
-          name: file.name,
-          file_path: filePath,
-          file_size: file.size,
-          mime_type: file.type,
-          status: 'pending',
-        })
-        .select()
-        .single();
+        if (uploadError) throw uploadError;
 
-      if (docError) throw docError;
+        // Create document record
+        const { data: docData, error: docError } = await supabase
+          .from('documents')
+          .insert({
+            name: file.name,
+            file_path: filePath,
+            file_size: file.size,
+            mime_type: file.type,
+            status: 'pending',
+          })
+          .select()
+          .single();
 
-      toast.success('Document uploaded successfully');
+        if (docError) throw docError;
+
+        setUploadProgress(prev => ({ ...prev, current: prev.current + 1 }));
+        return { success: true, docId: docData.id, fileName: file.name };
+      } catch (err) {
+        console.error(`Upload error for ${file.name}:`, err);
+        setUploadProgress(prev => ({ ...prev, current: prev.current + 1 }));
+        return { success: false, fileName: file.name };
+      }
+    });
+
+    const results = await Promise.all(uploadPromises);
+    uploadResults.push(...results);
+
+    const successfulUploads = uploadResults.filter(r => r.success);
+    const failedUploads = uploadResults.filter(r => !r.success);
+
+    if (successfulUploads.length > 0) {
+      toast.success(`${successfulUploads.length} document(s) uploaded successfully`);
       
-      // Trigger processing
-      if (docData) {
-        processDocument(docData.id);
-      }
+      // Trigger processing for all successfully uploaded documents
+      successfulUploads.forEach(upload => {
+        if (upload.docId) {
+          processDocument(upload.docId);
+        }
+      });
+    }
 
-      fetchDocuments();
-    } catch (err) {
-      console.error('Upload error:', err);
-      toast.error('Failed to upload document');
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+    if (failedUploads.length > 0) {
+      toast.error(`Failed to upload: ${failedUploads.map(f => f.fileName).join(', ')}`);
+    }
+
+    fetchDocuments();
+    setIsUploading(false);
+    setUploadProgress({ current: 0, total: 0 });
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -348,6 +391,7 @@ const KnowledgeBase = () => {
             ref={fileInputRef}
             type="file"
             accept=".pdf,.docx,.txt"
+            multiple
             onChange={handleFileSelect}
             className="hidden"
           />
@@ -361,10 +405,22 @@ const KnowledgeBase = () => {
               <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
             )}
             <p className="text-sm text-muted-foreground mb-2">
-              {isUploading ? 'Uploading...' : 'Drag and drop files here, or click to browse'}
+              {isUploading 
+                ? `Uploading ${uploadProgress.current} of ${uploadProgress.total} files...` 
+                : 'Drag and drop up to 5 files here, or click to browse'}
             </p>
-            <p className="text-xs text-muted-foreground">Supports PDF, DOCX, TXT (Max 5MB per file)</p>
+            <p className="text-xs text-muted-foreground">Supports PDF, DOCX, TXT (Max 5MB per file, up to 5 files at once)</p>
           </div>
+          
+          {/* Processing indicator */}
+          {processingIds.size > 0 && (
+            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-sm text-amber-700 flex items-center">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Processing {processingIds.size} document(s)...
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
