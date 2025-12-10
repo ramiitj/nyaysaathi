@@ -59,8 +59,22 @@ serve(async (req) => {
     let userId: string;
 
     if (existingUser) {
-      console.log(`[Admin Setup] User ${email} already exists, checking admin role`);
+      console.log(`[Admin Setup] User ${email} already exists, updating password`);
       userId = existingUser.id;
+      
+      // Update password for existing user
+      const { error: updateError } = await supabase.auth.admin.updateUserById(userId, {
+        password,
+      });
+
+      if (updateError) {
+        console.error('[Admin Setup] Failed to update password:', updateError);
+        return new Response(
+          JSON.stringify({ error: `Failed to update password: ${updateError.message}` }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      console.log(`[Admin Setup] Password updated successfully for user ${email}`);
     } else {
       // Create new user using Admin API
       console.log(`[Admin Setup] Creating new user: ${email}`);
