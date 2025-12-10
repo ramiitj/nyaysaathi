@@ -393,6 +393,15 @@ serve(async (req) => {
       }
     ];
 
+    // CRITICAL: If this is the first message (no history), inject context that user has already been welcomed
+    // This prevents the AI from greeting the user again when they've already asked their question
+    if (!conversationHistory || conversationHistory.length === 0) {
+      messages.push({
+        role: 'model',
+        parts: [{ text: 'The user has already been shown a welcome message by the app UI. I will NOT greet them again or ask "Are you in legal trouble?" since they are now sending their first actual question. I will respond directly to their query with relevant legal information, starting with the disclaimer and then addressing their specific issue.' }]
+      });
+    }
+
     if (conversationHistory && conversationHistory.length > 0) {
       for (const msg of conversationHistory.slice(-10)) {
         messages.push({
