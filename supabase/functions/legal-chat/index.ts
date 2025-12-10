@@ -398,7 +398,7 @@ serve(async (req) => {
     if (!conversationHistory || conversationHistory.length === 0) {
       messages.push({
         role: 'model',
-        parts: [{ text: 'The user has already been shown a welcome message by the app UI. I will NOT greet them again or ask "Are you in legal trouble?" since they are now sending their first actual question. I will respond directly to their query with relevant legal information, starting with the disclaimer and then addressing their specific issue.' }]
+        parts: [{ text: 'The user has already been shown a welcome message by the app UI. I will NOT greet them again. I will respond directly to their query. DISCLAIMER PROTOCOL: I will ONLY add a legal disclaimer when recommending specific legal actions (filing complaints, court cases, legal notices, FIRs, petitions). I will NOT add "Reminder:" disclaimers on every conversational message - only when advising on actionable legal steps.' }]
       });
     }
 
