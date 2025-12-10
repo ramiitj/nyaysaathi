@@ -85,14 +85,17 @@ const SystemStatus = () => {
       ));
     }
 
-    // Check Gemini API (via legal-chat function)
+    // Check Gemini API - simple test by checking if the function responds
     try {
-      const { error } = await supabase.functions.invoke('legal-chat', {
-        body: { message: 'health check', language: 'en', conversationId: 'health-check' }
+      const response = await supabase.functions.invoke('legal-chat', {
+        body: { message: 'test', language: 'EN', history: [] }
       });
+      // Function is operational if it returns a response (even if there's a validation error)
+      // We check if the function itself is reachable
+      const isOperational = response.data?.response || response.error?.message?.includes('rate') || !response.error;
       setServiceStatus(prev => prev.map(s => 
         s.name === "Gemini API" 
-          ? { ...s, status: error ? "Error" : "Operational", checking: false }
+          ? { ...s, status: isOperational ? "Operational" : "Error", checking: false }
           : s
       ));
     } catch {
