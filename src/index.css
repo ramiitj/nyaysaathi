@@ -229,3 +229,28 @@
 .animate-waveform {
   animation: waveform 0.6s ease-in-out infinite;
 }
+
+/* Voice button smooth transitions */
+.voice-button-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.voice-badge-transition {
+  transition: all 0.2s ease-out;
+}
+
+/* Smooth message appearance */
+@keyframes message-appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-message-appear {
+  animation: message-appear 0.3s ease-out forwards;
+}
