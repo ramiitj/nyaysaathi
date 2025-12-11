@@ -39,6 +39,10 @@ export const useVoiceFlow = ({
   // TTS refs
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastInputMethodRef = useRef<'voice' | 'text'>('text');
+  
+  // Prevent duplicate speaking
+  const spokenMessagesRef = useRef<Set<string>>(new Set());
+  const isSpeakingRef = useRef<boolean>(false);
 
   // Cleanup recording resources
   const cleanupRecording = useCallback(() => {
@@ -64,15 +68,15 @@ export const useVoiceFlow = ({
       audioRef.current.currentTime = 0;
       audioRef.current = null;
     }
-    if (status === 'speaking') {
-      setStatus('idle');
-    }
-  }, [status]);
+    isSpeakingRef.current = false;
+    setStatus(prev => prev === 'speaking' ? 'idle' : prev);
+  }, []);
 
-  // Speak text via TTS
+  // Speak text via TTS - stable ref version
   const speak = useCallback(async (text: string) => {
-    if (!text) return;
+    if (!text || isSpeakingRef.current) return;
 
+    isSpeakingRef.current = true;
     setStatus('speaking');
 
     try {
@@ -93,11 +97,13 @@ export const useVoiceFlow = ({
       audioRef.current = audio;
 
       audio.onended = () => {
+        isSpeakingRef.current = false;
         setStatus('idle');
         audioRef.current = null;
       };
 
       audio.onerror = () => {
+        isSpeakingRef.current = false;
         setStatus('idle');
         audioRef.current = null;
       };
@@ -105,6 +111,7 @@ export const useVoiceFlow = ({
       await audio.play();
     } catch (err) {
       console.error('TTS error:', err);
+      isSpeakingRef.current = false;
       setStatus('idle');
     }
   }, [language]);
@@ -230,8 +237,8 @@ export const useVoiceFlow = ({
           if (data.text && data.text.trim()) {
             setPendingText(data.text);
             lastInputMethodRef.current = 'voice';
+            setStatus('thinking');
             onTranscription(data.text);
-            // Status will be set to 'thinking' by parent when API call starts
           } else if (data.error) {
             setStatus('idle');
             onError?.(data.error);
@@ -266,7 +273,6 @@ export const useVoiceFlow = ({
   const stopListening = useCallback(() => {
     if (mediaRecorderRef.current && status === 'listening') {
       mediaRecorderRef.current.stop();
-      // Status will change in onstop handler
     }
   }, [status]);
 
@@ -294,15 +300,18 @@ export const useVoiceFlow = ({
 
   // Set thinking state (called by parent when AI processing starts)
   const setThinking = useCallback(() => {
-    setStatus('thinking');
-  }, []);
+    if (status !== 'speaking') {
+      setStatus('thinking');
+    }
+  }, [status]);
 
-  // External method to trigger speaking
-  const speakResponse = useCallback((text: string) => {
-    // Only auto-speak if last input was voice
-    if (lastInputMethodRef.current === 'voice') {
+  // Speak response - with duplicate prevention
+  const speakResponse = useCallback((messageId: string, text: string) => {
+    // Only auto-speak if last input was voice AND message not already spoken
+    if (lastInputMethodRef.current === 'voice' && !spokenMessagesRef.current.has(messageId)) {
+      spokenMessagesRef.current.add(messageId);
       speak(text);
-    } else {
+    } else if (lastInputMethodRef.current === 'text') {
       setStatus('idle');
     }
   }, [speak]);
@@ -312,10 +321,15 @@ export const useVoiceFlow = ({
     lastInputMethodRef.current = 'text';
   }, []);
 
-  // Manual speak (for listen button)
+  // Manual speak (for listen button) - always allowed
   const manualSpeak = useCallback((text: string) => {
     speak(text);
   }, [speak]);
+
+  // Reset spoken messages (for new conversation)
+  const resetSpokenMessages = useCallback(() => {
+    spokenMessagesRef.current.clear();
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -330,7 +344,6 @@ export const useVoiceFlow = ({
 
   return {
     status,
-    setStatus,
     pendingText,
     handleVoiceAction,
     setThinking,
@@ -338,6 +351,7 @@ export const useVoiceFlow = ({
     stopSpeaking,
     manualSpeak,
     markTextInput,
+    resetSpokenMessages,
     isInterruptible: status === 'speaking' || status === 'listening',
   };
 };

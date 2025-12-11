@@ -63,6 +63,9 @@ export interface LanguageConfig {
   ui: {
     startConsultation: string;
     tapToSpeak: string;
+    tapToStop: string;
+    tapToInterrupt: string;
+    tapToCancel: string;
     listening: string;
     analyzing: string;
     speaking: string;
@@ -113,6 +116,9 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     ui: {
       startConsultation: 'कानूनी परामर्श शुरू करें',
       tapToSpeak: 'बोलने के लिए टैप करें',
+      tapToStop: 'रोकने के लिए टैप करें',
+      tapToInterrupt: 'बाधित करने के लिए टैप करें',
+      tapToCancel: 'रद्द करने के लिए टैप करें',
       listening: 'सुन रहा हूँ',
       analyzing: 'विश्लेषण कर रहा हूँ',
       speaking: 'बोल रहा हूँ',
@@ -205,6 +211,9 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     ui: {
       startConsultation: 'Start Legal Consultation',
       tapToSpeak: 'Tap to speak',
+      tapToStop: 'Tap to stop',
+      tapToInterrupt: 'Tap to interrupt',
+      tapToCancel: 'Tap to cancel',
       listening: 'Listening',
       analyzing: 'Analyzing',
       speaking: 'Speaking',
@@ -297,6 +306,9 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     ui: {
       startConsultation: 'আইনি পরামর্শ শুরু করুন',
       tapToSpeak: 'কথা বলতে ট্যাপ করুন',
+      tapToStop: 'থামাতে ট্যাপ করুন',
+      tapToInterrupt: 'বাধা দিতে ট্যাপ করুন',
+      tapToCancel: 'বাতিল করতে ট্যাপ করুন',
       listening: 'শুনছি',
       analyzing: 'বিশ্লেষণ করছি',
       speaking: 'বলছি',
@@ -389,6 +401,9 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     ui: {
       startConsultation: 'சட்ட ஆலோசனை தொடங்கு',
       tapToSpeak: 'பேச தட்டவும்',
+      tapToStop: 'நிறுத்த தட்டவும்',
+      tapToInterrupt: 'குறுக்கிட தட்டவும்',
+      tapToCancel: 'ரத்து செய்ய தட்டவும்',
       listening: 'கேட்கிறேன்',
       analyzing: 'பகுப்பாய்வு செய்கிறேன்',
       speaking: 'பேசுகிறேன்',
@@ -481,6 +496,9 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     ui: {
       startConsultation: 'చట్టపరమైన సలహా ప్రారంభించండి',
       tapToSpeak: 'మాట్లాడటానికి నొక్కండి',
+      tapToStop: 'ఆపడానికి నొక్కండి',
+      tapToInterrupt: 'అంతరాయం చేయడానికి నొక్కండి',
+      tapToCancel: 'రద్దు చేయడానికి నొక్కండి',
       listening: 'వింటున్నాను',
       analyzing: 'విశ్లేషిస్తున్నాను',
       speaking: 'మాట్లాడుతున్నాను',
@@ -573,6 +591,9 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     ui: {
       startConsultation: 'कायदेशीर सल्ला सुरू करा',
       tapToSpeak: 'बोलण्यासाठी टॅप करा',
+      tapToStop: 'थांबवण्यासाठी टॅप करा',
+      tapToInterrupt: 'व्यत्यय आणण्यासाठी टॅप करा',
+      tapToCancel: 'रद्द करण्यासाठी टॅप करा',
       listening: 'ऐकत आहे',
       analyzing: 'विश्लेषण करत आहे',
       speaking: 'बोलत आहे',
@@ -665,6 +686,9 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     ui: {
       startConsultation: 'કાનૂની સલાહ શરૂ કરો',
       tapToSpeak: 'બોલવા માટે ટૅપ કરો',
+      tapToStop: 'રોકવા માટે ટૅપ કરો',
+      tapToInterrupt: 'અટકાવવા માટે ટૅપ કરો',
+      tapToCancel: 'રદ કરવા માટે ટૅપ કરો',
       listening: 'સાંભળી રહ્યો છું',
       analyzing: 'વિશ્લેષણ કરી રહ્યો છું',
       speaking: 'બોલી રહ્યો છું',
@@ -757,6 +781,9 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     ui: {
       startConsultation: 'ಕಾನೂನು ಸಮಾಲೋಚನೆ ಪ್ರಾರಂಭಿಸಿ',
       tapToSpeak: 'ಮಾತನಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ',
+      tapToStop: 'ನಿಲ್ಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ',
+      tapToInterrupt: 'ಅಡ್ಡಿಪಡಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ',
+      tapToCancel: 'ರದ್ದುಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ',
       listening: 'ಕೇಳುತ್ತಿದ್ದೇನೆ',
       analyzing: 'ವಿಶ್ಲೇಷಿಸುತ್ತಿದ್ದೇನೆ',
       speaking: 'ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ',
@@ -849,6 +876,9 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     ui: {
       startConsultation: 'നിയമ കൺസൾട്ടേഷൻ ആരംഭിക്കുക',
       tapToSpeak: 'സംസാരിക്കാൻ ടാപ്പ് ചെയ്യുക',
+      tapToStop: 'നിർത്താൻ ടാപ്പ് ചെയ്യുക',
+      tapToInterrupt: 'തടസ്സപ്പെടുത്താൻ ടാപ്പ് ചെയ്യുക',
+      tapToCancel: 'റദ്ദാക്കാൻ ടാപ്പ് ചെയ്യുക',
       listening: 'കേൾക്കുന്നു',
       analyzing: 'വിശകലനം ചെയ്യുന്നു',
       speaking: 'സംസാരിക്കുന്നു',
@@ -941,6 +971,9 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     ui: {
       startConsultation: 'ਕਾਨੂੰਨੀ ਸਲਾਹ ਸ਼ੁਰੂ ਕਰੋ',
       tapToSpeak: 'ਬੋਲਣ ਲਈ ਟੈਪ ਕਰੋ',
+      tapToStop: 'ਰੋਕਣ ਲਈ ਟੈਪ ਕਰੋ',
+      tapToInterrupt: 'ਰੋਕਣ ਲਈ ਟੈਪ ਕਰੋ',
+      tapToCancel: 'ਰੱਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ',
       listening: 'ਸੁਣ ਰਿਹਾ ਹਾਂ',
       analyzing: 'ਵਿਸ਼ਲੇਸ਼ਣ ਕਰ ਰਿਹਾ ਹਾਂ',
       speaking: 'ਬੋਲ ਰਿਹਾ ਹਾਂ',
@@ -1033,6 +1066,9 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     ui: {
       startConsultation: 'ଆଇନଗତ ପରାମର୍ଶ ଆରମ୍ଭ କରନ୍ତୁ',
       tapToSpeak: 'କହିବାକୁ ଟ୍ୟାପ୍ କରନ୍ତୁ',
+      tapToStop: 'ବନ୍ଦ କରିବାକୁ ଟ୍ୟାପ୍ କରନ୍ତୁ',
+      tapToInterrupt: 'ବାଧା ଦେବାକୁ ଟ୍ୟାପ୍ କରନ୍ତୁ',
+      tapToCancel: 'ବାତିଲ କରିବାକୁ ଟ୍ୟାପ୍ କରନ୍ତୁ',
       listening: 'ଶୁଣୁଛି',
       analyzing: 'ବିଶ୍ଲେଷଣ କରୁଛି',
       speaking: 'କହୁଛି',
@@ -1125,6 +1161,9 @@ export const LANGUAGES: Record<LanguageCode, LanguageConfig> = {
     ui: {
       startConsultation: 'قانونی مشاورت شروع کریں',
       tapToSpeak: 'بولنے کے لیے ٹیپ کریں',
+      tapToStop: 'روکنے کے لیے ٹیپ کریں',
+      tapToInterrupt: 'مداخلت کے لیے ٹیپ کریں',
+      tapToCancel: 'منسوخ کرنے کے لیے ٹیپ کریں',
       listening: 'سن رہا ہوں',
       analyzing: 'تجزیہ کر رہا ہوں',
       speaking: 'بول رہا ہوں',

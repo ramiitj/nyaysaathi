@@ -1,6 +1,5 @@
 import React from 'react';
-import { Mic, Loader2, Volume2, Square, AudioLines, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Mic, Loader2, Volume2, Square, AudioLines } from 'lucide-react';
 import type { VoiceFlowStatus } from '@/hooks/useVoiceFlow';
 import type { LanguageConfig } from '@/config/languages';
 
@@ -12,34 +11,36 @@ interface VoiceButtonProps {
 
 const VoiceButton: React.FC<VoiceButtonProps> = ({ status, onClick, config }) => {
   const getButtonClasses = () => {
-    const base = 'w-[150px] h-[150px] rounded-full flex items-center justify-center shadow-2xl voice-button-transition';
+    const baseClasses = 'voice-button-transition w-[150px] h-[150px] rounded-full flex items-center justify-center shadow-lg cursor-pointer';
     
     switch (status) {
       case 'listening':
-        return cn(base, 'bg-[#F97316] text-white scale-110 shadow-[0_0_60px_rgba(249,115,22,0.5)] cursor-pointer');
+        return `${baseClasses} bg-orange-500 hover:bg-orange-600 animate-pulse shadow-orange-500/50`;
       case 'processing':
-        return cn(base, 'bg-amber-500 text-white shadow-[0_0_40px_rgba(245,158,11,0.5)] cursor-pointer');
+        return `${baseClasses} bg-amber-500 hover:bg-amber-600 shadow-amber-500/30`;
       case 'thinking':
-        return cn(base, 'bg-primary text-primary-foreground shadow-[0_0_40px_rgba(37,99,235,0.4)] cursor-pointer');
+        return `${baseClasses} bg-primary hover:bg-primary/90 shadow-primary/30`;
       case 'speaking':
-        return cn(base, 'bg-success text-success-foreground shadow-[0_0_40px_rgba(16,185,129,0.4)] cursor-pointer hover:scale-105');
+        return `${baseClasses} bg-success hover:bg-success/90 shadow-success/30 animate-pulse`;
       default:
-        return cn(base, 'bg-primary text-primary-foreground hover:scale-105 hover:shadow-[0_0_40px_rgba(37,99,235,0.4)] active:scale-95 cursor-pointer');
+        return `${baseClasses} bg-primary hover:bg-primary/90 shadow-primary/30`;
     }
   };
 
   const renderIcon = () => {
+    const iconClasses = 'w-16 h-16 text-white';
+    
     switch (status) {
       case 'listening':
         return <Waveform />;
       case 'processing':
-        return <AudioLines className="w-12 h-12 animate-pulse" />;
+        return <AudioLines className={`${iconClasses} animate-pulse`} />;
       case 'thinking':
-        return <Loader2 className="w-12 h-12 animate-spin" />;
+        return <Loader2 className={`${iconClasses} animate-spin`} />;
       case 'speaking':
-        return <Volume2 className="w-12 h-12 animate-pulse" />;
+        return <Volume2 className={iconClasses} />;
       default:
-        return <Mic className="w-12 h-12" />;
+        return <Mic className={iconClasses} />;
     }
   };
 
@@ -48,7 +49,7 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({ status, onClick, config }) =>
       case 'listening':
         return config.ui.listening;
       case 'processing':
-        return config.ui.transcribing;
+        return config.ui.processing;
       case 'thinking':
         return config.ui.thinking;
       case 'speaking':
@@ -61,27 +62,28 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({ status, onClick, config }) =>
   const getStateBadgeClasses = () => {
     switch (status) {
       case 'listening':
-        return 'bg-[#F97316] text-white';
+        return 'bg-orange-500/20 text-orange-600 border-orange-500/30';
       case 'processing':
-        return 'bg-amber-500 text-white';
+        return 'bg-amber-500/20 text-amber-600 border-amber-500/30';
       case 'thinking':
-        return 'bg-primary text-primary-foreground';
+        return 'bg-primary/20 text-primary border-primary/30';
       case 'speaking':
-        return 'bg-success text-success-foreground';
+        return 'bg-success/20 text-success border-success/30';
       default:
         return '';
     }
   };
 
+  // Localized interaction hints
   const getInteractionHint = () => {
     switch (status) {
       case 'listening':
-        return 'Tap to stop';
+        return config.ui.tapToStop || 'Tap to stop';
       case 'speaking':
-        return 'Tap to interrupt';
+        return config.ui.tapToInterrupt || 'Tap to interrupt';
       case 'processing':
       case 'thinking':
-        return 'Tap to cancel';
+        return config.ui.tapToCancel || 'Tap to cancel';
       default:
         return null;
     }
@@ -95,60 +97,55 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({ status, onClick, config }) =>
       <button
         onClick={onClick}
         className={getButtonClasses()}
-        aria-label={`Voice input - ${status}. ${interactionHint || 'Tap to speak'}`}
+        aria-label={status === 'idle' ? config.ui.tapToSpeak : stateLabel || ''}
       >
         {renderIcon()}
       </button>
       
-      {/* State Badge */}
+      {/* State badge */}
       {stateLabel && (
-        <div className={cn(
-          'px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 animate-fade-in voice-badge-transition',
-          config.fontClass,
-          getStateBadgeClasses()
-        )}>
+        <div className={`voice-badge-transition px-4 py-1.5 rounded-full text-sm font-medium border ${getStateBadgeClasses()} ${config.fontClass}`}>
           {status === 'listening' && (
-            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+            <span className="inline-block w-2 h-2 rounded-full bg-orange-500 animate-pulse mr-2" />
           )}
           {status === 'processing' && (
-            <Loader2 className="w-3 h-3 animate-spin" />
+            <Loader2 className="inline-block w-3 h-3 animate-spin mr-2" />
           )}
           {status === 'thinking' && (
-            <Loader2 className="w-3 h-3 animate-spin" />
+            <Loader2 className="inline-block w-3 h-3 animate-spin mr-2" />
           )}
           {status === 'speaking' && (
-            <Volume2 className="w-3 h-3" />
+            <Volume2 className="inline-block w-3 h-3 mr-2" />
           )}
           {stateLabel}
         </div>
       )}
-
-      {/* Interaction Hint - subtle text below badge */}
+      
+      {/* Interaction hint */}
       {interactionHint && (
-        <span className="text-xs text-muted-foreground/70 animate-fade-in">
+        <p className={`text-xs text-muted-foreground animate-fade-in ${config.fontClass}`}>
           {interactionHint}
-        </span>
+        </p>
       )}
     </div>
   );
 };
 
-// Enhanced Waveform animation component
-const Waveform: React.FC = () => {
-  return (
-    <div className="flex items-center justify-center gap-1.5 h-12">
-      {[...Array(5)].map((_, i) => (
-        <div
-          key={i}
-          className="w-1.5 rounded-full bg-white animate-waveform"
-          style={{
-            animationDelay: `${i * 0.1}s`,
-            height: '100%'
-          }}
-        />
-      ))}
-    </div>
-  );
-};
+// Animated waveform for listening state
+const Waveform = () => (
+  <div className="flex items-center justify-center gap-1 h-16">
+    {[...Array(5)].map((_, i) => (
+      <div
+        key={i}
+        className="w-2 bg-white rounded-full animate-pulse"
+        style={{
+          height: `${20 + Math.random() * 30}px`,
+          animationDelay: `${i * 0.1}s`,
+          animationDuration: '0.6s',
+        }}
+      />
+    ))}
+  </div>
+);
 
 export default VoiceButton;
