@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useVoiceFlow, type VoiceFlowStatus } from '@/hooks/useVoiceFlow';
+import { useVoiceFlow } from '@/hooks/useVoiceFlow';
 import { useToast } from '@/hooks/use-toast';
 import type { Message, InputMode } from '@/pages/Chat';
 import type { UploadedFile } from '@/hooks/useFileUpload';
@@ -17,7 +17,6 @@ interface CenterPanelProps {
   messages: Message[];
   onSendMessage: (content: string) => Promise<void>;
   isLoading?: boolean;
-  // File upload props
   uploadedFiles?: UploadedFile[];
   storageUsed?: number;
   maxStorage?: number;
@@ -42,12 +41,11 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
   const { toast } = useToast();
   const [inputValue, setInputValue] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
-  const lastMessageIdRef = useRef<string | null>(null);
+  const lastProcessedMessageRef = useRef<string | null>(null);
 
   // Unified voice flow hook
   const {
     status,
-    setStatus,
     pendingText,
     handleVoiceAction,
     setThinking,
@@ -58,7 +56,6 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
   } = useVoiceFlow({
     language: config.code,
     onTranscription: async (text) => {
-      setThinking();
       await onSendMessage(text);
     },
     onError: (error) => {
@@ -70,9 +67,9 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
     }
   });
 
-  // Sync thinking state with isLoading
+  // Sync isLoading → thinking (only when loading starts and we're not already in a voice flow state)
   useEffect(() => {
-    if (isLoading && status !== 'thinking') {
+    if (isLoading && status === 'idle') {
       setThinking();
     }
   }, [isLoading, status, setThinking]);
@@ -84,22 +81,21 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
     }
   }, [messages]);
 
-  // Auto-speak new assistant messages when voice was used
+  // Auto-speak new assistant messages (with duplicate prevention via message ID)
   useEffect(() => {
-    if (messages.length === 0) return;
+    if (messages.length === 0 || isLoading) return;
     
     const lastMessage = messages[messages.length - 1];
     
     if (
       lastMessage.role === 'assistant' &&
-      lastMessage.id !== lastMessageIdRef.current &&
-      !isLoading
+      lastMessage.id !== lastProcessedMessageRef.current
     ) {
-      lastMessageIdRef.current = lastMessage.id;
-      // speakResponse checks if last input was voice
-      speakResponse(lastMessage.content);
+      lastProcessedMessageRef.current = lastMessage.id;
+      // speakResponse now handles duplicate prevention internally
+      speakResponse(lastMessage.id, lastMessage.content);
     }
-  }, [messages, speakResponse, isLoading]);
+  }, [messages, isLoading, speakResponse]);
 
   // Handle manual listen button
   const handleListen = (text: string) => {
@@ -117,7 +113,6 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
       const message = inputValue.trim();
       setInputValue('');
       await onSendMessage(message);
-      setStatus('idle');
     }
   };
 
