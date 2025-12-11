@@ -80,20 +80,118 @@ function validateInput(body: any): { valid: boolean; text?: string; language?: s
   return { valid: true, text: sanitizeString(text, 5000), language: validatedLanguage };
 }
 
-// Map language codes to Google Cloud TTS voice names (Indian voices)
-const VOICE_MAP: Record<string, { languageCode: string; name: string }> = {
-  'HI': { languageCode: 'hi-IN', name: 'hi-IN-Neural2-A' },
-  'EN': { languageCode: 'en-IN', name: 'en-IN-Neural2-A' },
-  'BN': { languageCode: 'bn-IN', name: 'bn-IN-Wavenet-A' },
-  'TA': { languageCode: 'ta-IN', name: 'ta-IN-Wavenet-A' },
-  'TE': { languageCode: 'te-IN', name: 'te-IN-Standard-A' },
-  'MR': { languageCode: 'mr-IN', name: 'mr-IN-Wavenet-A' },
-  'GU': { languageCode: 'gu-IN', name: 'gu-IN-Wavenet-A' },
-  'KN': { languageCode: 'kn-IN', name: 'kn-IN-Wavenet-A' },
-  'ML': { languageCode: 'ml-IN', name: 'ml-IN-Wavenet-A' },
-  'PA': { languageCode: 'pa-IN', name: 'pa-IN-Wavenet-A' },
-  'OR': { languageCode: 'or-IN', name: 'or-IN-Standard-A' },
-  'UR': { languageCode: 'ur-IN', name: 'ur-IN-Wavenet-A' },
+// ============ CHIRP 3: HD VOICE CONFIGURATION ============
+// Using Chirp 3: HD voices for natural Indian tonalities
+// Each language has a primary voice selected for clarity and warmth
+interface VoiceConfig {
+  languageCode: string;
+  name: string;
+  // Language-specific audio tuning for natural Indian speech patterns
+  speakingRate: number;
+  pitch: number;
+}
+
+const VOICE_MAP: Record<string, VoiceConfig> = {
+  // Hindi - Warm, conversational female voice
+  'HI': { 
+    languageCode: 'hi-IN', 
+    name: 'hi-IN-Chirp3-HD-Aoede',
+    speakingRate: 0.92,
+    pitch: 0.5
+  },
+  // English (Indian) - Clear, professional female voice
+  'EN': { 
+    languageCode: 'en-IN', 
+    name: 'en-IN-Chirp3-HD-Aoede',
+    speakingRate: 0.95,
+    pitch: 0
+  },
+  // Bengali - Soft, melodic female voice
+  'BN': { 
+    languageCode: 'bn-IN', 
+    name: 'bn-IN-Chirp3-HD-Aoede',
+    speakingRate: 0.90,
+    pitch: 0.5
+  },
+  // Tamil - Clear, expressive female voice
+  'TA': { 
+    languageCode: 'ta-IN', 
+    name: 'ta-IN-Chirp3-HD-Aoede',
+    speakingRate: 0.88,
+    pitch: 0
+  },
+  // Telugu - Warm, friendly female voice
+  'TE': { 
+    languageCode: 'te-IN', 
+    name: 'te-IN-Chirp3-HD-Aoede',
+    speakingRate: 0.90,
+    pitch: 0.5
+  },
+  // Marathi - Warm, conversational female voice
+  'MR': { 
+    languageCode: 'mr-IN', 
+    name: 'mr-IN-Chirp3-HD-Aoede',
+    speakingRate: 0.90,
+    pitch: 0
+  },
+  // Gujarati - Clear, friendly female voice
+  'GU': { 
+    languageCode: 'gu-IN', 
+    name: 'gu-IN-Chirp3-HD-Aoede',
+    speakingRate: 0.92,
+    pitch: 0.5
+  },
+  // Kannada - Soft, expressive female voice
+  'KN': { 
+    languageCode: 'kn-IN', 
+    name: 'kn-IN-Chirp3-HD-Aoede',
+    speakingRate: 0.88,
+    pitch: 0
+  },
+  // Malayalam - Clear, melodic female voice
+  'ML': { 
+    languageCode: 'ml-IN', 
+    name: 'ml-IN-Chirp3-HD-Aoede',
+    speakingRate: 0.85,
+    pitch: 0
+  },
+  // Punjabi - Warm, energetic female voice
+  'PA': { 
+    languageCode: 'pa-IN', 
+    name: 'pa-IN-Chirp3-HD-Aoede',
+    speakingRate: 0.92,
+    pitch: 0.5
+  },
+  // Odia - Fallback to Neural2 (Chirp 3 HD not yet available)
+  'OR': { 
+    languageCode: 'or-IN', 
+    name: 'or-IN-Standard-A',
+    speakingRate: 0.88,
+    pitch: 0
+  },
+  // Urdu - Warm, expressive female voice
+  'UR': { 
+    languageCode: 'ur-IN', 
+    name: 'ur-IN-Chirp3-HD-Aoede',
+    speakingRate: 0.90,
+    pitch: 0
+  },
+};
+
+// Fallback voices if Chirp 3: HD is not available
+const FALLBACK_VOICES: Record<string, { name: string }> = {
+  'HI': { name: 'hi-IN-Neural2-A' },
+  'EN': { name: 'en-IN-Neural2-A' },
+  'BN': { name: 'bn-IN-Wavenet-A' },
+  'TA': { name: 'ta-IN-Wavenet-A' },
+  'TE': { name: 'te-IN-Standard-A' },
+  'MR': { name: 'mr-IN-Wavenet-A' },
+  'GU': { name: 'gu-IN-Wavenet-A' },
+  'KN': { name: 'kn-IN-Wavenet-A' },
+  'ML': { name: 'ml-IN-Wavenet-A' },
+  'PA': { name: 'pa-IN-Wavenet-A' },
+  'OR': { name: 'or-IN-Standard-A' },
+  'UR': { name: 'ur-IN-Wavenet-A' },
 };
 
 // Generate OAuth2 access token from service account credentials
@@ -153,6 +251,52 @@ async function getAccessToken(): Promise<string> {
 
   const tokenData = await tokenResponse.json();
   return tokenData.access_token;
+}
+
+// Synthesize speech with automatic fallback
+async function synthesizeSpeech(
+  accessToken: string, 
+  text: string, 
+  voiceConfig: VoiceConfig,
+  useFallback = false
+): Promise<{ audioContent: string; voiceUsed: string }> {
+  const voiceName = useFallback 
+    ? FALLBACK_VOICES[voiceConfig.languageCode.split('-')[0].toUpperCase()]?.name || voiceConfig.name
+    : voiceConfig.name;
+
+  const response = await fetch(
+    'https://texttospeech.googleapis.com/v1/text:synthesize',
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        input: { text },
+        voice: {
+          languageCode: voiceConfig.languageCode,
+          name: voiceName,
+        },
+        audioConfig: {
+          audioEncoding: 'MP3',
+          speakingRate: voiceConfig.speakingRate,
+          pitch: voiceConfig.pitch,
+          volumeGainDb: 2,
+          // Enhanced audio profile for natural speech
+          effectsProfileId: ['headphone-class-device'],
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw { status: response.status, error: errorData };
+  }
+
+  const result = await response.json();
+  return { audioContent: result.audioContent, voiceUsed: voiceName };
 }
 
 serve(async (req) => {
@@ -217,47 +361,35 @@ serve(async (req) => {
       .replace(/\s+/g, ' ')
       .trim();
 
-    console.log(`Generating TTS for language: ${language}, voice: ${voiceConfig.name}`);
+    console.log(`Generating TTS for language: ${language}, voice: ${voiceConfig.name} (Chirp 3: HD)`);
 
     const accessToken = await getAccessToken();
 
-    const response = await fetch(
-      'https://texttospeech.googleapis.com/v1/text:synthesize',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          input: { text: cleanText },
-          voice: {
-            languageCode: voiceConfig.languageCode,
-            name: voiceConfig.name,
-          },
-          audioConfig: {
-            audioEncoding: 'MP3',
-            speakingRate: 0.80,
-            pitch: 0,
-            volumeGainDb: 2,
-          },
-        }),
+    let result: { audioContent: string; voiceUsed: string };
+    
+    try {
+      // Try Chirp 3: HD voice first
+      result = await synthesizeSpeech(accessToken, cleanText, voiceConfig, false);
+      console.log(`TTS generated successfully with Chirp 3: HD voice: ${result.voiceUsed}`);
+    } catch (error: any) {
+      // If Chirp 3: HD fails (e.g., voice not available), fallback to Neural2/Wavenet
+      if (error.status === 400 || error.status === 404) {
+        console.warn(`Chirp 3: HD voice not available for ${language}, falling back to Neural2/Wavenet`);
+        result = await synthesizeSpeech(accessToken, cleanText, voiceConfig, true);
+        console.log(`TTS generated with fallback voice: ${result.voiceUsed}`);
+      } else {
+        throw error;
       }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Google TTS API error:', errorData);
-      throw new Error(errorData.error?.message || 'Failed to generate speech');
     }
-
-    const result = await response.json();
-    console.log('TTS generated successfully');
 
     return new Response(
       JSON.stringify({ 
         audioContent: result.audioContent,
-        voiceConfig,
+        voiceConfig: {
+          languageCode: voiceConfig.languageCode,
+          name: result.voiceUsed,
+          isChirp3HD: result.voiceUsed.includes('Chirp3-HD'),
+        },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
