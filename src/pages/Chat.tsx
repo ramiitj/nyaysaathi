@@ -13,7 +13,6 @@ import { useUserFingerprint } from '@/hooks/useUserFingerprint';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { useToast } from '@/hooks/use-toast';
 
-export type VoiceState = 'idle' | 'recording' | 'transcribing' | 'processing' | 'responding';
 export type InputMode = 'voice' | 'text';
 
 export interface Message {
@@ -30,10 +29,8 @@ const Chat: React.FC = () => {
   const { hasConsented, resetConsent } = useConsent();
   const { toast } = useToast();
 
-  // State
-  const [voiceState, setVoiceState] = useState<VoiceState>('idle');
+  // State - simplified, voice state is now managed in CenterPanel
   const [inputMode, setInputMode] = useState<InputMode>('voice');
-  const [transcription, setTranscription] = useState('');
   const [isConnected] = useState(true);
   
   // Modal states
@@ -52,7 +49,7 @@ const Chat: React.FC = () => {
   // Use conversation hook for real API integration
   const { messages, isLoading, error, sendMessage, clearConversation, conversationId } = useConversation({
     language: config.code,
-    locationState: undefined // Could be enhanced with geolocation
+    locationState: undefined
   });
 
   // File upload hook
@@ -99,21 +96,13 @@ const Chat: React.FC = () => {
   const handleStartFresh = () => {
     clearConversation();
     clearAllFiles();
-    setTranscription('');
-    setVoiceState('idle');
-    resetConsent(); // Reset consent to show full flow
-    navigate('/'); // Navigate back to language selection
+    resetConsent();
+    navigate('/');
   };
 
   const handleSendMessage = async (content: string) => {
-    setVoiceState('processing');
-    
-    // Get file context if any files are uploaded
     const fileContext = getFileContext();
-    const response = await sendMessage(content, fileContext);
-    
-    // Immediate state transition - no artificial delay
-    setVoiceState('idle');
+    await sendMessage(content, fileContext);
   };
 
   const handleFilesSelected = async (files: File[]) => {
@@ -136,11 +125,7 @@ const Chat: React.FC = () => {
 
       <div className="flex-1 overflow-hidden">
         <CenterPanel
-          voiceState={voiceState}
-          setVoiceState={setVoiceState}
           inputMode={inputMode}
-          transcription={transcription}
-          setTranscription={setTranscription}
           messages={messages}
           onSendMessage={handleSendMessage}
           isLoading={isLoading}

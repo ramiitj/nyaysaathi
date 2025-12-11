@@ -7,20 +7,15 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useVoiceRecording } from '@/hooks/useVoiceRecording';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { useVoiceFlow, type VoiceFlowStatus } from '@/hooks/useVoiceFlow';
 import { useToast } from '@/hooks/use-toast';
-import type { VoiceState, Message, InputMode } from '@/pages/Chat';
+import type { Message, InputMode } from '@/pages/Chat';
 import type { UploadedFile } from '@/hooks/useFileUpload';
 
 interface CenterPanelProps {
-  voiceState: VoiceState;
-  setVoiceState: (state: VoiceState) => void;
   inputMode: InputMode;
-  transcription: string;
-  setTranscription: (text: string) => void;
   messages: Message[];
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string) => Promise<void>;
   isLoading?: boolean;
   // File upload props
   uploadedFiles?: UploadedFile[];
@@ -32,11 +27,7 @@ interface CenterPanelProps {
 }
 
 const CenterPanel: React.FC<CenterPanelProps> = ({
-  voiceState,
-  setVoiceState,
   inputMode,
-  transcription,
-  setTranscription,
   messages,
   onSendMessage,
   isLoading = false,
@@ -52,15 +43,23 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
   const [inputValue, setInputValue] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastMessageIdRef = useRef<string | null>(null);
-  const lastInputMethodRef = useRef<'voice' | 'text'>('text');
 
-  // Voice recording hook
-  const { isRecording, isProcessing, toggleRecording } = useVoiceRecording({
+  // Unified voice flow hook
+  const {
+    status,
+    setStatus,
+    pendingText,
+    handleVoiceAction,
+    setThinking,
+    speakResponse,
+    stopSpeaking,
+    manualSpeak,
+    markTextInput,
+  } = useVoiceFlow({
     language: config.code,
-    onTranscription: (text) => {
-      lastInputMethodRef.current = 'voice';
-      setTranscription(text);
-      onSendMessage(text);
+    onTranscription: async (text) => {
+      setThinking();
+      await onSendMessage(text);
     },
     onError: (error) => {
       toast({
@@ -68,31 +67,15 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
         description: error,
         variant: 'destructive'
       });
-      setVoiceState('idle');
     }
   });
 
-  // Text to speech hook
-  const { speak, stop, isSpeaking, isLoading: ttsLoading } = useTextToSpeech({
-    language: config.code
-  });
-
-  // Sync voice state with recording state - clearer state transitions
+  // Sync thinking state with isLoading
   useEffect(() => {
-    if (isRecording) {
-      setVoiceState('recording');
-    } else if (isProcessing) {
-      // Transcribing state - converting speech to text
-      setVoiceState('transcribing');
-    } else if (isLoading) {
-      // Processing state - AI is thinking
-      setVoiceState('processing');
-    } else if (isSpeaking) {
-      setVoiceState('responding');
-    } else if (voiceState !== 'idle') {
-      setVoiceState('idle');
+    if (isLoading && status !== 'thinking') {
+      setThinking();
     }
-  }, [isRecording, isProcessing, isSpeaking, isLoading, setVoiceState, voiceState]);
+  }, [isLoading, status, setThinking]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -101,57 +84,40 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
     }
   }, [messages]);
 
-  // Auto-speak new assistant messages ONLY when user's last input was voice
+  // Auto-speak new assistant messages when voice was used
   useEffect(() => {
     if (messages.length === 0) return;
     
     const lastMessage = messages[messages.length - 1];
     
-    // Only auto-speak if:
-    // 1. It's an assistant message
-    // 2. User's last input was via VOICE (not text)
-    // 3. It's a new message (not already spoken)
     if (
       lastMessage.role === 'assistant' &&
-      lastInputMethodRef.current === 'voice' &&
-      lastMessage.id !== lastMessageIdRef.current
+      lastMessage.id !== lastMessageIdRef.current &&
+      !isLoading
     ) {
       lastMessageIdRef.current = lastMessage.id;
-      // Start speaking immediately (concurrent with text display)
-      speak(lastMessage.content);
+      // speakResponse checks if last input was voice
+      speakResponse(lastMessage.content);
     }
-  }, [messages, speak]);
+  }, [messages, speakResponse, isLoading]);
 
-  const handleVoiceClick = () => {
-    // ALWAYS stop TTS first when user wants to speak (voice interruption)
-    if (isSpeaking || ttsLoading) {
-      stop();
-    }
-    
-    if (voiceState === 'recording') {
-      // Stop recording
-      toggleRecording();
-    } else if (voiceState === 'idle' || voiceState === 'responding') {
-      // Start recording (TTS already stopped above if it was playing)
-      setTranscription('');
-      toggleRecording();
+  // Handle manual listen button
+  const handleListen = (text: string) => {
+    if (status === 'speaking') {
+      stopSpeaking();
+    } else {
+      manualSpeak(text);
     }
   };
 
-  const handleTextSubmit = (e: React.FormEvent) => {
+  const handleTextSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (inputValue.trim() && !isLoading) {
-      lastInputMethodRef.current = 'text';
-      onSendMessage(inputValue.trim());
+      markTextInput();
+      const message = inputValue.trim();
       setInputValue('');
-    }
-  };
-
-  const handleListen = (text: string) => {
-    if (isSpeaking) {
-      stop();
-    } else {
-      speak(text);
+      await onSendMessage(message);
+      setStatus('idle');
     }
   };
 
@@ -159,8 +125,11 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Get the last user message for "YOU SAID" card
+  // Get the last user message for context display
   const lastUserMessage = messages.filter(m => m.role === 'user').pop();
+
+  // Show pending text or last user message in voice mode
+  const displayedUserText = pendingText || lastUserMessage?.content;
 
   return (
     <div className="h-full flex flex-col">
@@ -187,8 +156,8 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
                   className={`gap-1 text-xs text-muted-foreground listen-button ${config.fontClass}`}
                   onClick={() => handleListen(config.ui.welcomeMessage)}
                 >
-                  {isSpeaking ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
-                  {isSpeaking ? config.ui.stop : config.ui.listen}
+                  {status === 'speaking' ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+                  {status === 'speaking' ? config.ui.stop : config.ui.listen}
                 </Button>
               </div>
             </div>
@@ -198,7 +167,7 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
             >
               <div
                 className={`max-w-[85%] rounded-2xl p-4 ${
@@ -221,9 +190,8 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
                       size="sm" 
                       className={`gap-1 text-xs text-muted-foreground h-6 px-2 listen-button ${config.fontClass}`}
                       onClick={() => handleListen(message.content)}
-                      disabled={ttsLoading}
                     >
-                      {isSpeaking ? (
+                      {status === 'speaking' ? (
                         <>
                           <Square className="w-3 h-3 fill-current" />
                           {config.ui.stop}
@@ -264,61 +232,51 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
             </div>
           ))}
 
-          {/* Loading indicator */}
-          {isLoading && (
-            <div className="flex justify-start">
+          {/* Thinking indicator - only show in chat area when AI is processing */}
+          {status === 'thinking' && (
+            <div className="flex justify-start animate-fade-in">
               <div className="bg-card rounded-2xl p-4 shadow-sm border border-border/50">
                 <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-success" />
+                  <span className="text-xs font-medium text-success uppercase tracking-wide">
+                    Nyay Saathi
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
                   <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                  <span className={`text-sm text-muted-foreground ${config.fontClass}`}>{config.ui.thinking}</span>
+                  <span className={`text-sm text-muted-foreground ${config.fontClass}`}>
+                    {config.ui.thinking}
+                  </span>
                 </div>
               </div>
             </div>
           )}
-
-          {/* Transcription Card - Shows during transcribing state */}
-          {voiceState === 'transcribing' && (
-            <div className="bg-card rounded-2xl p-4 border border-amber-500/30 shadow-sm animate-fade-in">
-              <div className="flex items-center gap-2 mb-2">
-                <Loader2 className="w-3 h-3 text-amber-500 animate-spin" />
-                <span className={`text-xs font-medium text-amber-500 uppercase tracking-wide ${config.fontClass}`}>
-                  {config.ui.transcribing}
-                </span>
-              </div>
-              <div className="flex gap-1">
-                {[...Array(3)].map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="w-2 h-2 rounded-full bg-amber-500 animate-bounce"
-                    style={{ animationDelay: `${i * 0.15}s` }}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
         </div>
       </ScrollArea>
 
       {/* Voice Mode Input */}
       {inputMode === 'voice' && (
-        <div className="flex flex-col items-center py-8 px-4">
-          <VoiceButton state={voiceState} onClick={handleVoiceClick} config={config} />
-          <p className={`text-sm text-muted-foreground mt-4 text-center ${config.fontClass}`}>
-            {voiceState === 'idle' && config.ui.tapToSpeak}
-          </p>
+        <div className="flex flex-col items-center py-6 px-4">
+          <VoiceButton status={status} onClick={handleVoiceAction} config={config} />
           
-          {/* YOU SAID Card - Always Below Voice Button */}
-          {(transcription || lastUserMessage) && (
-            <div className="bg-card rounded-2xl p-4 border shadow-sm max-w-md mt-6 w-full animate-fade-in">
+          {/* Tap to speak hint - only when idle */}
+          {status === 'idle' && (
+            <p className={`text-sm text-muted-foreground mt-3 text-center ${config.fontClass}`}>
+              {config.ui.tapToSpeak}
+            </p>
+          )}
+          
+          {/* Your Message Card - shows transcribed text or pending text */}
+          {displayedUserText && status !== 'listening' && (
+            <div className="bg-card rounded-2xl p-4 border shadow-sm max-w-md mt-4 w-full animate-fade-in">
               <div className="flex items-center gap-2 mb-2">
-                <span className="w-2 h-2 rounded-full bg-muted-foreground" />
+                <span className="w-2 h-2 rounded-full bg-primary" />
                 <span className={`text-xs font-medium uppercase tracking-wide text-muted-foreground ${config.fontClass}`}>
                   {config.ui.youSaid}
                 </span>
               </div>
               <p className={`text-foreground ${config.fontClass}`}>
-                {transcription || lastUserMessage?.content}
+                {displayedUserText}
               </p>
             </div>
           )}
