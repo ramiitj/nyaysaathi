@@ -1,28 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Volume2, Send, Loader2, VolumeX, Square, Paperclip } from 'lucide-react';
+import { Volume2, Send, Loader2, VolumeX, Square } from 'lucide-react';
 import VoiceButton from './VoiceButton';
-import DocumentUpload from './DocumentUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVoiceFlow } from '@/hooks/useVoiceFlow';
 import { useToast } from '@/hooks/use-toast';
 import type { Message, InputMode } from '@/pages/Chat';
-import type { UploadedFile } from '@/hooks/useFileUpload';
 
 interface CenterPanelProps {
   inputMode: InputMode;
   messages: Message[];
   onSendMessage: (content: string) => Promise<void>;
   isLoading?: boolean;
-  uploadedFiles?: UploadedFile[];
-  storageUsed?: number;
-  maxStorage?: number;
-  isUploading?: boolean;
-  onFilesSelected?: (files: File[]) => void;
-  onRemoveFile?: (fileId: string) => void;
 }
 
 const CenterPanel: React.FC<CenterPanelProps> = ({
@@ -30,12 +21,6 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
   messages,
   onSendMessage,
   isLoading = false,
-  uploadedFiles = [],
-  storageUsed = 0,
-  maxStorage = 5 * 1024 * 1024,
-  isUploading = false,
-  onFilesSelected,
-  onRemoveFile,
 }) => {
   const { config } = useLanguage();
   const { toast } = useToast();
@@ -282,41 +267,6 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
       {inputMode === 'text' && (
         <form onSubmit={handleTextSubmit} className="p-4 border-t border-border/50">
           <div className="max-w-2xl mx-auto flex gap-2">
-            {/* File Upload Button */}
-            {onFilesSelected && (
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="icon" 
-                    className="rounded-full relative"
-                  >
-                    <Paperclip className="w-4 h-4" />
-                    {uploadedFiles.length > 0 && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-                        {uploadedFiles.length}
-                      </span>
-                    )}
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-80">
-                  <SheetHeader>
-                    <SheetTitle className={config.fontClass}>{config.ui.attach}</SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-4">
-                    <DocumentUpload
-                      uploadedFiles={uploadedFiles}
-                      storageUsed={storageUsed}
-                      maxStorage={maxStorage}
-                      isUploading={isUploading}
-                      onFilesSelected={onFilesSelected}
-                      onRemoveFile={onRemoveFile || (() => {})}
-                    />
-                  </div>
-                </SheetContent>
-              </Sheet>
-            )}
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}

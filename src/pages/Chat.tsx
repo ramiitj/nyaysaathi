@@ -129,12 +129,6 @@ const Chat: React.FC = () => {
           messages={messages}
           onSendMessage={handleSendMessage}
           isLoading={isLoading}
-          uploadedFiles={uploadedFiles}
-          storageUsed={storageUsed}
-          maxStorage={maxStorage}
-          isUploading={isUploading}
-          onFilesSelected={handleFilesSelected}
-          onRemoveFile={removeFile}
         />
       </div>
 
@@ -143,6 +137,12 @@ const Chat: React.FC = () => {
         setInputMode={setInputMode}
         isConnected={isConnected}
         config={config}
+        uploadedFiles={uploadedFiles}
+        storageUsed={storageUsed}
+        maxStorage={maxStorage}
+        isUploading={isUploading}
+        onFilesSelected={handleFilesSelected}
+        onRemoveFile={removeFile}
       />
 
       {/* Modals */}
