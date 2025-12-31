@@ -87,7 +87,7 @@ const KnowledgeBase = () => {
     if (!fileList || fileList.length === 0) return;
 
     const files = Array.from(fileList);
-    const maxFiles = 5;
+    const maxFiles = 10;
     const maxSize = 5 * 1024 * 1024; // 5MB
     const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
 
@@ -407,9 +407,9 @@ const KnowledgeBase = () => {
             <p className="text-sm text-muted-foreground mb-2">
               {isUploading 
                 ? `Uploading ${uploadProgress.current} of ${uploadProgress.total} files...` 
-                : 'Drag and drop up to 5 files here, or click to browse'}
+                : 'Drag and drop up to 10 files here, or click to browse'}
             </p>
-            <p className="text-xs text-muted-foreground">Supports PDF, DOCX, TXT (Max 5MB per file, up to 5 files at once)</p>
+            <p className="text-xs text-muted-foreground">Supports PDF, DOCX, TXT (Max 5MB per file, up to 10 files at once)</p>
           </div>
           
           {/* Processing indicator */}

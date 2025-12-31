@@ -18,7 +18,7 @@ export const RATE_LIMITS = {
   'legal-chat': { windowMs: 60000, maxRequests: 30 },
   'speech-to-text': { windowMs: 60000, maxRequests: 30 },
   'text-to-speech': { windowMs: 60000, maxRequests: 20 },
-  'process-document': { windowMs: 60000, maxRequests: 5 },
+  'process-document': { windowMs: 60000, maxRequests: 12 },
   'create-conversation': { windowMs: 60000, maxRequests: 10 },
   'process-user-file': { windowMs: 60000, maxRequests: 5 },
 } as const;
