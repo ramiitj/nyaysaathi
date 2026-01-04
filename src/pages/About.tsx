@@ -80,7 +80,7 @@ const About: React.FC = () => {
                 variant="outline" 
                 size="sm" 
                 className="gap-1 text-xs flex-shrink-0"
-                onClick={() => window.open('https://www.linkedin.com/in/venkat-ram-reddy-ganuthula/', '_blank')}
+                onClick={() => window.open('https://www.linkedin.com/in/ganuthula/', '_blank')}
               >
                 <ExternalLink className="w-3 h-3" />
                 {config.ui.about.profile}
