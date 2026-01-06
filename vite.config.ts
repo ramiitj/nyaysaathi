@@ -97,7 +97,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
       build: {
-            chunkSizeWarningLimit: 1000,
+            chunkSizeWarningLimit: 5000,
             rollupOptions: {
                     output: {
                               manualChunks: {
