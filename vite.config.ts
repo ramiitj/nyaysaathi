@@ -96,5 +96,16 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+      build: {
+            chunkSizeWarningLimit: 1000,
+            rollupOptions: {
+                    output: {
+                              manualChunks: {
+                                          vendor: ['react', 'react-dom'],
+                                          'radix-ui': ['@radix-ui/react-accordion', '@radix-ui/react-alert-dialog', '@radix-ui/react-avatar'],
+                                        }
+                            }
+                  }
+          },
   },
 }));
