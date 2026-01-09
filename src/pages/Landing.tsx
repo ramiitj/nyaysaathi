@@ -1,93 +1,32 @@
-import React, { useContext } from "react";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
-import { LanguageContext } from "@/context/LanguageContext";
-import { ConsentContext } from "@/context/ConsentContext";
-import { languages } from "@/config/languages";
-import { CheckCircle, Flag } from "lucide-react";
 
-const languageIcons: { [key: string]: string } = {
-  en: "us",
-  hi: "in",
-  es: "es",
-  fr: "fr",
-  de: "de",
-  unknown: "unknown",
-};
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../components/landing/LanguageSelector';
 
-const Landing = () => {
-  const router = useRouter();
-  const { toast } = useToast();
-  const { setLanguage } = useContext(LanguageContext);
-  const { consent, setConsent } = useContext(ConsentContext);
-
-  const handleLanguageSelect = (lang: string) => {
-    setLanguage(lang);
-  };
-
-  const handleConsentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setConsent(e.target.checked);
-  };
-
-  const handleSubmit = () => {
-    if (!consent) {
-      toast({
-        title: "Consent Required",
-        description: "Please provide your consent to continue.",
-      });
-      return;
-    }
-
-    router.push("/chat");
-  };
+const Landing: React.FC = () => {
+  const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background">
-      <div className="w-full max-w-md p-6 bg-card rounded-lg shadow-md">
-        <div className="flex justify-center mb-4">
-          <img src="/logo.png" alt="Nyay Saathi Logo" className="h-12" />
-        </div>
-        <h1 className="text-2xl font-semibold text-center text-foreground mb-4">
-          Welcome to Nyay Saathi
-        </h1>
-        <div className="mb-4">
-          <h2 className="text-lg font-medium text-foreground mb-2">
-            Select your language:
-          </h2>
-          <div className="grid grid-cols-2 gap-2">
-            {Object.entries(languages).map(([lang, langConfig]) => {
-              const flagCode = languageIcons[lang] || "unknown";
-              return (
-                <button
-                  key={lang}
-                  className="flex flex-col items-center justify-center px-4 py-2 rounded-md bg-muted hover:bg-accent text-foreground"
-                  onClick={() => handleLanguageSelect(lang)}
-                >
-                  <Flag size={32}/>
-                   {/* <span>{langConfig.nativeName}</span> */}
-                  <audio id={`audio-${lang}`} src={`/audio/${lang}.mp3`} preload="auto"></audio>
-                 </button>
-              );
-            })}
-          </div>
-        </div>
-        <div className="mb-4">
-          <label className="flex items-center space-x-2 text-foreground">
-            <input
-              type="checkbox"
-              className="h-5 w-5 rounded text-primary focus:ring-0 focus:ring-offset-0"
-              checked={consent}
-              onChange={handleConsentChange}
-            />
-            <span>I consent to the terms and conditions</span>
-          </label>
-        </div>
-        <button
-          className="w-full py-3 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-primary/80"
-          onClick={handleSubmit}
-        >
-          Let's Chat
-        </button>
+    <div className="container mx-auto py-8">
+      <LanguageSelector />
+      <div className="text-center">
+        {/* Replace with a culturally relevant image for Indian users */}
+        <img
+          src="/assets/placeholder-indian-hero.jpg" // Placeholder image
+          alt="Hero Image"
+          className="mx-auto rounded-lg shadow-md"
+        />
+        <h1 className="text-4xl font-bold mt-4">{t('Welcome to Nyaysaathi')}</h1>
+        <p className="text-gray-600 mt-2">{t('Your gateway to legal empowerment')}</p>
+      </div>
+
+      {/* Add a section for India-specific content */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-2">India-Specific Content</h2>
+        <p className="text-gray-600">
+          {/* Add content here that is relevant to Indian users */}
+          This section will highlight features and resources that are specifically tailored for our users in India.
+        </p>
       </div>
     </div>
   );
