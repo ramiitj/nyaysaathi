@@ -7,12 +7,15 @@ import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useConsent } from '@/contexts/ConsentContext';
 import { LANGUAGES, LanguageCode } from '@/config/languages';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
   const { language, setLanguage, config } = useLanguage();
   const { hasConsented, setConsent } = useConsent();
   const [step, setStep] = useState<'language' | 'consent'>('language');
+  const [startDate, setStartDate] = useState(new Date());
 
   const handleLanguageSelect = (langCode: LanguageCode) => {
     setLanguage(langCode);
@@ -73,6 +76,9 @@ const Landing: React.FC = () => {
                 );
               })}
             </div>
+
+            {/* DatePicker */}
+            <DatePicker selected={startDate} onChange={(date:Date) => setStartDate(date)} />
 
             {/* Footer */}
             <p className={`text-center text-xs text-muted-foreground ${config.fontClass}`}>
