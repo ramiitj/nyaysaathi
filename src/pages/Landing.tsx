@@ -1,10 +1,12 @@
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/landing/LanguageSelector';
 
 const Landing: React.FC = () => {
   const { t } = useTranslation();
+
+  const currentDate = new Date();
+  const formattedDate = `${(currentDate.getMonth() + 1).toString().padStart(2, '0')}/${currentDate.getDate().toString().padStart(2, '0')}/${currentDate.getFullYear()}`;
 
   return (
     <div className="container mx-auto py-8">
@@ -27,6 +29,9 @@ const Landing: React.FC = () => {
           {/* Add content here that is relevant to Indian users */}
           This section will highlight features and resources that are specifically tailored for our users in India.
         </p>
+      </div>
+      <div className="text-center mt-4">
+        <p>Today's Date: {formattedDate}</p>
       </div>
     </div>
   );
