@@ -14,6 +14,12 @@ const Landing: React.FC = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  const formatTime = (timeInSeconds: number): string => {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
   const currentDate = new Date();
   const formattedDate = `${(currentDate.getMonth() + 1).toString().padStart(2, '0')}/${currentDate.getDate().toString().padStart(2, '0')}/${currentDate.getFullYear()}`;
 
@@ -41,7 +47,7 @@ const Landing: React.FC = () => {
       </div>
       <div className="text-center mt-4">
         <p>Today's Date: {formattedDate}</p>
-        <p>Timer: {timer} seconds</p>
+        <p>Time elapsed: {formatTime(timer)}</p>
       </div>
     </div>
   );
