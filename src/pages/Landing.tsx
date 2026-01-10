@@ -20,9 +20,6 @@ const Landing: React.FC = () => {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
 
-  const currentDate = new Date();
-  const formattedDate = `${(currentDate.getMonth() + 1).toString().padStart(2, '0')}/${currentDate.getDate().toString().padStart(2, '0')}/${currentDate.getFullYear()}`;
-
   return (
     <div className="container mx-auto py-8">
       <LanguageSelector />
@@ -46,7 +43,6 @@ const Landing: React.FC = () => {
         </p>
       </div>
       <div className="text-center mt-4">
-        <p>Today's Date: {formattedDate}</p>
         <p>Time elapsed: {formatTime(timer)}</p>
       </div>
     </div>
