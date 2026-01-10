@@ -1,9 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/landing/LanguageSelector';
 
 const Landing: React.FC = () => {
   const { t } = useTranslation();
+  const [timer, setTimer] = useState(0);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTimer(prevTimer => prevTimer + 1);
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const currentDate = new Date();
   const formattedDate = `${(currentDate.getMonth() + 1).toString().padStart(2, '0')}/${currentDate.getDate().toString().padStart(2, '0')}/${currentDate.getFullYear()}`;
@@ -32,6 +41,7 @@ const Landing: React.FC = () => {
       </div>
       <div className="text-center mt-4">
         <p>Today's Date: {formattedDate}</p>
+        <p>Timer: {timer} seconds</p>
       </div>
     </div>
   );
