@@ -5,16 +5,30 @@ import LanguageSelector from '../components/landing/LanguageSelector';
 const Landing: React.FC = () => {
   const { t } = useTranslation();
   const [timer, setTimer] = useState(0);
+  const [countdown, setCountdown] = useState(300); // 5 minutes in seconds
 
   useEffect(() => {
     const intervalId = setInterval(() => {
       setTimer(prevTimer => prevTimer + 1);
+      setCountdown(prevCountdown => {
+        if (prevCountdown <= 0) {
+          clearInterval(intervalId);
+          return 0;
+        }
+        return prevCountdown - 1;
+      });
     }, 1000);
 
     return () => clearInterval(intervalId);
   }, []);
 
   const formatTime = (timeInSeconds: number): string => {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  const formatCountdown = (timeInSeconds: number): string => {
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = timeInSeconds % 60;
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
@@ -44,6 +58,7 @@ const Landing: React.FC = () => {
       </div>
       <div className="text-center mt-4">
         <p>Time elapsed: {formatTime(timer)}</p>
+        <p>Countdown: {formatCountdown(countdown)}</p>
       </div>
     </div>
   );
