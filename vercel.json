@@ -6,10 +6,6 @@
         {
           "key": "Content-Security-Policy",
           "value": "frame-ancestors https://getholocron.com https://lovable.dev *"
-        },
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
         }
       ]
     }
