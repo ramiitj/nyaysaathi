@@ -5,11 +5,12 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "frame-ancestors *"
+          "value": "frame-ancestors https://lovable.dev https://getholocron.com https://*.getholocron.com 'self'"
         },
         {
           "key": "X-Frame-Options",
-          "value": "ALLOW-FROM https://lovable.dev"        }
+          "value": "SAMEORIGIN"
+        }
       ]
     }
   ]
