@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Scale, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,15 @@ const Landing: React.FC = () => {
   const { hasConsented, setConsent } = useConsent();
   const [step, setStep] = useState<'language' | 'consent'>('language');
   const [startDate, setStartDate] = useState(new Date());
+  const [timer, setTimer] = useState(5); // Initial timer value in seconds
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTimer((prevTimer) => (prevTimer > 0 ? prevTimer - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleLanguageSelect = (langCode: LanguageCode) => {
     setLanguage(langCode);
@@ -79,6 +88,11 @@ const Landing: React.FC = () => {
 
             {/* DatePicker */}
             <DatePicker selected={startDate} onChange={(date:Date) => setStartDate(date)} />
+
+             {/* Timer Display */}
+             <div className="text-center">
+                Time remaining: {timer} seconds
+             </div>
 
             {/* Footer */}
             <p className={`text-center text-xs text-muted-foreground ${config.fontClass}`}>
