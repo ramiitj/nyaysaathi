@@ -28,6 +28,8 @@ interface Document {
 
 const KnowledgeBase = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [totalDocumentCount, setTotalDocumentCount] = useState<number>(0);
+  const [processedDocumentCount, setProcessedDocumentCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
@@ -37,6 +39,7 @@ const KnowledgeBase = () => {
 
   useEffect(() => {
     fetchDocuments();
+    fetchDocumentCounts();
 
     // Set up real-time subscription for document updates
     const channel = supabase
@@ -50,7 +53,8 @@ const KnowledgeBase = () => {
         },
         (payload) => {
           console.log('Document change:', payload);
-          fetchDocuments(); // Refresh data on any change
+          fetchDocuments();
+          fetchDocumentCounts(); // Refresh counts on any change
         }
       )
       .subscribe();
@@ -65,7 +69,8 @@ const KnowledgeBase = () => {
       const { data, error } = await supabase
         .from('documents')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(1000); // Keep paginated for performance
 
       if (error) throw error;
 
@@ -79,6 +84,29 @@ const KnowledgeBase = () => {
       toast.error('Failed to load documents');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchDocumentCounts = async () => {
+    try {
+      // Fetch total document count
+      const { count: totalCount, error: totalError } = await supabase
+        .from('documents')
+        .select('*', { count: 'exact', head: true });
+
+      if (totalError) throw totalError;
+      setTotalDocumentCount(totalCount || 0);
+
+      // Fetch processed document count
+      const { count: processedCount, error: processedError } = await supabase
+        .from('documents')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'processed');
+
+      if (processedError) throw processedError;
+      setProcessedDocumentCount(processedCount || 0);
+    } catch (err) {
+      console.error('Error fetching document counts:', err);
     }
   };
 
@@ -179,6 +207,7 @@ const KnowledgeBase = () => {
     }
 
     fetchDocuments();
+    fetchDocumentCounts();
     setIsUploading(false);
     setUploadProgress({ current: 0, total: 0 });
     
@@ -262,6 +291,7 @@ const KnowledgeBase = () => {
 
       toast.success('Document deleted');
       fetchDocuments();
+      fetchDocumentCounts();
     } catch (err) {
       console.error('Delete error:', err);
       toast.error('Failed to delete document');
@@ -293,7 +323,7 @@ const KnowledgeBase = () => {
   const trainingStats = [
     { label: "Topics Learned", value: allTopics.length.toString(), color: "bg-primary text-primary-foreground" },
     { label: "Behavioral Rules", value: allRules.length.toString(), color: "bg-green-500 text-white" },
-    { label: "Documents Processed", value: processedDocs.length.toString(), color: "bg-rose-500 text-white" },
+    { label: "Documents Processed", value: processedDocumentCount.toString(), color: "bg-rose-500 text-white" },
     { label: "Total Chunks", value: totalChunks.toString(), color: "bg-amber-500 text-white" },
   ];
 
@@ -428,7 +458,7 @@ const KnowledgeBase = () => {
       <Card className="bg-white">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Documents ({documents.length})</CardTitle>
+            <CardTitle>Documents ({totalDocumentCount})</CardTitle>
             <Button variant="outline" size="sm" className="gap-2" onClick={fetchDocuments}>
               <RefreshCw className="h-4 w-4" />
               Refresh
