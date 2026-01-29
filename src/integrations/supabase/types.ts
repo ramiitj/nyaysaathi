@@ -501,6 +501,16 @@ export type Database = {
           similarity: number
         }[]
       }
+      search_documents_semantic: {
+        Args: { match_count?: number; query_embedding: string }
+        Returns: {
+          content: string
+          document_id: string
+          id: string
+          metadata: Json
+          similarity: number
+        }[]
+      }
       update_visitor_by_fingerprint: {
         Args: {
           fingerprint: string
