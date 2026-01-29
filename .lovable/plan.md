@@ -1,56 +1,102 @@
 
 
-## Plan: Fix Document Processing in Knowledge Base
+## Plan: Fix Document Counter Beyond 1000 Limit
 
-### Problem Identified
+### Problem
+Supabase has a **default limit of 1,000 rows** per query. The Knowledge Base UI fetches documents without specifying a range, so it only gets the first 1,000 documents and displays that count.
 
-The `process-document` edge function is failing with 404 errors because it's using the deprecated `gemini-2.0-flash-exp` model (same issue we fixed in `legal-chat`).
-
-**Error from logs:**
-```
-"models/gemini-2.0-flash-exp is not found for API version v1beta"
-```
-
-**Location:** `supabase/functions/process-document/index.ts` - Line 112
+**Actual documents in database:** 1,035
+**Documents shown in UI:** 1,000 (capped by default limit)
 
 ---
 
 ### Solution
 
-Update the Gemini model from `gemini-2.0-flash-exp` to `gemini-2.5-flash` in the process-document edge function.
+Use a **separate count query** for the document total instead of relying on the fetched array length. Keep the document list paginated (for performance) but show the accurate total count.
 
-**File:** `supabase/functions/process-document/index.ts`
+**File:** `src/components/admin/KnowledgeBase.tsx`
 
-| Line | Current | New |
-|------|---------|-----|
-| 112 | `gemini-2.0-flash-exp` | `gemini-2.5-flash` |
+---
 
-**Before (line 112):**
+### Changes
+
+#### 1. Add a new state for total document count
+
 ```typescript
-const extractResponse = await fetch(
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+// Line ~30, add new state
+const [totalDocumentCount, setTotalDocumentCount] = useState<number>(0);
 ```
 
-**After:**
+#### 2. Create a separate count query function
+
 ```typescript
-const extractResponse = await fetch(
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+const fetchDocumentCount = async () => {
+  try {
+    const { count, error } = await supabase
+      .from('documents')
+      .select('*', { count: 'exact', head: true });
+    
+    if (error) throw error;
+    setTotalDocumentCount(count || 0);
+  } catch (err) {
+    console.error('Error fetching document count:', err);
+  }
+};
+```
+
+#### 3. Update fetchDocuments to also fetch count
+
+Call `fetchDocumentCount()` alongside `fetchDocuments()` in the useEffect and after uploads/deletes.
+
+#### 4. Update the document list header display
+
+```typescript
+// Line ~431, change from:
+<CardTitle>Documents ({documents.length})</CardTitle>
+
+// To:
+<CardTitle>Documents ({totalDocumentCount})</CardTitle>
+```
+
+#### 5. Update training stats to use accurate count
+
+For the "Documents Processed" stat, we also need to fetch the count of processed documents separately:
+
+```typescript
+const fetchProcessedCount = async () => {
+  const { count, error } = await supabase
+    .from('documents')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'processed');
+  
+  if (!error) setProcessedDocumentCount(count || 0);
+};
 ```
 
 ---
 
-### What This Fixes
+### Technical Details
 
-After this change:
-- Document upload and processing will work correctly
-- PDFs will be extracted using Gemini 2.5 Flash
-- Text will be chunked and embeddings will be generated
-- All 908 pending documents can be processed
-- The RAG knowledge base will be populated with legal document content
+| Aspect | Before | After |
+|--------|--------|-------|
+| Count source | `documents.length` (capped at 1000) | `SELECT count(*)` query (no limit) |
+| Supabase method | `select('*')` | `select('*', { count: 'exact', head: true })` |
+| Performance | Fetches all data | Count query returns only number |
 
 ---
 
-### Implementation
+### Files to Modify
 
-Single file change - update the model name on line 112 of the edge function.
+| File | Changes |
+|------|---------|
+| `src/components/admin/KnowledgeBase.tsx` | Add count states, count fetch functions, update displays |
+
+---
+
+### Expected Outcome
+
+- Document counter will show the **accurate total** (1,035+) regardless of how many documents exist
+- The document table will still show paginated results (for performance)
+- Stats like "Documents Processed" will also use accurate counts
+- Real-time updates will refresh both the list and the count
 
