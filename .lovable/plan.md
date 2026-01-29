@@ -1,47 +1,32 @@
 
 
-## Plan: Fix RAG Pipeline, Update Gemini Model, and Remove Date from Landing Page
+## Plan: Fix Vector Schema for Semantic Search
 
-This plan addresses three issues to get the backend fully functional and clean up the UI.
+### Problem
+The `search_documents_semantic` function is failing because:
+- The `embedding` column is of type `extensions.vector`
+- The `<=>` cosine distance operator is defined in the `extensions` schema
+- The function's `search_path` is set to only `public`, so PostgreSQL can't find the operator
 
----
-
-### Issue Summary
-
-| Issue | Current State | Fix |
-|-------|---------------|-----|
-| Gemini Model Error | Using `gemini-2.0-flash-exp` (404 error) | Update to `gemini-2.5-flash` |
-| RAG Search Not Working | `search_documents_semantic` function missing | Create the database function |
-| DatePicker on Landing Page | Shows unnecessary date picker | Remove DatePicker component |
+**Error:** `operator does not exist: extensions.vector <=> extensions.vector`
 
 ---
 
-### Changes Required
+### Solution
 
-#### 1. Update Gemini Model in Edge Function
+Update the database function to include `extensions` in the search path.
 
-**File:** `supabase/functions/legal-chat/index.ts`
+**File:** New migration to update `search_documents_semantic`
 
-| Line | Current | New |
-|------|---------|-----|
-| 422 | `gemini-2.0-flash-exp` | `gemini-2.5-flash` |
+**Change:** Line 14 in the function definition
 
-```typescript
-// Line 422 - Change model name
-const response = await fetch(
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-```
+| Before | After |
+|--------|-------|
+| `SET search_path TO 'public'` | `SET search_path TO 'public', 'extensions'` |
 
----
-
-#### 2. Create `search_documents_semantic` Database Function
-
-**Type:** Database Migration
-
-This function enables vector similarity search using the existing embeddings in `document_embeddings` table.
-
+**Full Migration SQL:**
 ```sql
-CREATE OR REPLACE FUNCTION search_documents_semantic(
+CREATE OR REPLACE FUNCTION public.search_documents_semantic(
   query_embedding vector(768),
   match_count int DEFAULT 5
 )
@@ -53,6 +38,8 @@ RETURNS TABLE (
   similarity float
 )
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public', 'extensions'
 AS $$
 BEGIN
   RETURN QUERY
@@ -61,7 +48,7 @@ BEGIN
     de.document_id,
     de.content,
     de.metadata,
-    1 - (de.embedding <=> query_embedding) as similarity
+    (1 - (de.embedding <=> query_embedding))::float as similarity
   FROM document_embeddings de
   WHERE de.embedding IS NOT NULL
   ORDER BY de.embedding <=> query_embedding
@@ -70,62 +57,22 @@ END;
 $$;
 ```
 
-This function:
-- Takes a 768-dimension vector (matching text-embedding-004 output)
-- Uses cosine distance (`<=>` operator) for similarity search
-- Returns top N matching chunks with similarity scores
-- Works with the existing 5,678 embeddings already in the database
-
 ---
 
-#### 3. Remove DatePicker from Landing Page
+### Why This Works
 
-**File:** `src/pages/Landing.tsx`
-
-| Line(s) | Action |
-|---------|--------|
-| 10-11 | Remove DatePicker import and CSS |
-| 18 | Remove `startDate` state |
-| 80-81 | Remove DatePicker component from JSX |
-
-**Before (lines 10-11):**
-```typescript
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-```
-
-**After:** (removed entirely)
-
-**Before (line 18):**
-```typescript
-const [startDate, setStartDate] = useState(new Date());
-```
-
-**After:** (removed entirely)
-
-**Before (lines 80-81):**
-```tsx
-{/* DatePicker */}
-<DatePicker selected={startDate} onChange={(date:Date) => setStartDate(date)} />
-```
-
-**After:** (removed entirely)
-
----
-
-### Implementation Order
-
-1. Create the `search_documents_semantic` database function (migration)
-2. Update the Gemini model name in `legal-chat` edge function
-3. Remove DatePicker from Landing page
+1. PostgreSQL uses `search_path` to resolve unqualified types and operators
+2. By adding `extensions` to the search path, the `<=>` operator becomes visible
+3. The vector type and operator will now resolve correctly
+4. `SECURITY DEFINER` ensures the function runs with elevated privileges to access the embeddings
 
 ---
 
 ### Expected Outcome
 
-After these changes:
-- Chat will use the valid `gemini-2.5-flash` model (no more 404 errors)
-- User queries will use semantic vector search against 5,678 embeddings
-- RAG context will be properly injected into AI responses
-- Landing page will be cleaner without the unnecessary date picker
+After this migration:
+- Semantic search will use the pgvector `<=>` operator for cosine similarity
+- User queries will match against 5,678 document embeddings
+- No more fallback to text-based search
+- Faster and more accurate RAG retrieval
 
