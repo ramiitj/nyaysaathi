@@ -1,78 +1,56 @@
 
 
-## Plan: Fix Vector Schema for Semantic Search
+## Plan: Fix Document Processing in Knowledge Base
 
-### Problem
-The `search_documents_semantic` function is failing because:
-- The `embedding` column is of type `extensions.vector`
-- The `<=>` cosine distance operator is defined in the `extensions` schema
-- The function's `search_path` is set to only `public`, so PostgreSQL can't find the operator
+### Problem Identified
 
-**Error:** `operator does not exist: extensions.vector <=> extensions.vector`
+The `process-document` edge function is failing with 404 errors because it's using the deprecated `gemini-2.0-flash-exp` model (same issue we fixed in `legal-chat`).
+
+**Error from logs:**
+```
+"models/gemini-2.0-flash-exp is not found for API version v1beta"
+```
+
+**Location:** `supabase/functions/process-document/index.ts` - Line 112
 
 ---
 
 ### Solution
 
-Update the database function to include `extensions` in the search path.
+Update the Gemini model from `gemini-2.0-flash-exp` to `gemini-2.5-flash` in the process-document edge function.
 
-**File:** New migration to update `search_documents_semantic`
+**File:** `supabase/functions/process-document/index.ts`
 
-**Change:** Line 14 in the function definition
+| Line | Current | New |
+|------|---------|-----|
+| 112 | `gemini-2.0-flash-exp` | `gemini-2.5-flash` |
 
-| Before | After |
-|--------|-------|
-| `SET search_path TO 'public'` | `SET search_path TO 'public', 'extensions'` |
+**Before (line 112):**
+```typescript
+const extractResponse = await fetch(
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+```
 
-**Full Migration SQL:**
-```sql
-CREATE OR REPLACE FUNCTION public.search_documents_semantic(
-  query_embedding vector(768),
-  match_count int DEFAULT 5
-)
-RETURNS TABLE (
-  id uuid,
-  document_id uuid,
-  content text,
-  metadata jsonb,
-  similarity float
-)
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path TO 'public', 'extensions'
-AS $$
-BEGIN
-  RETURN QUERY
-  SELECT 
-    de.id,
-    de.document_id,
-    de.content,
-    de.metadata,
-    (1 - (de.embedding <=> query_embedding))::float as similarity
-  FROM document_embeddings de
-  WHERE de.embedding IS NOT NULL
-  ORDER BY de.embedding <=> query_embedding
-  LIMIT match_count;
-END;
-$$;
+**After:**
+```typescript
+const extractResponse = await fetch(
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
 ```
 
 ---
 
-### Why This Works
+### What This Fixes
 
-1. PostgreSQL uses `search_path` to resolve unqualified types and operators
-2. By adding `extensions` to the search path, the `<=>` operator becomes visible
-3. The vector type and operator will now resolve correctly
-4. `SECURITY DEFINER` ensures the function runs with elevated privileges to access the embeddings
+After this change:
+- Document upload and processing will work correctly
+- PDFs will be extracted using Gemini 2.5 Flash
+- Text will be chunked and embeddings will be generated
+- All 908 pending documents can be processed
+- The RAG knowledge base will be populated with legal document content
 
 ---
 
-### Expected Outcome
+### Implementation
 
-After this migration:
-- Semantic search will use the pgvector `<=>` operator for cosine similarity
-- User queries will match against 5,678 document embeddings
-- No more fallback to text-based search
-- Faster and more accurate RAG retrieval
+Single file change - update the model name on line 112 of the edge function.
 
