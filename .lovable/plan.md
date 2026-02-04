@@ -1,87 +1,91 @@
 
+## Plan: Fix Document Counter - Use RPC Function for Accurate Count
 
-## Plan: Fix Document Counter Beyond 1000 Limit
+### Problem Identified
 
-### Problem
-Supabase has a **default limit of 1,000 rows** per query. The Knowledge Base UI fetches documents without specifying a range, so it only gets the first 1,000 documents and displays that count.
+The count query using `{ count: 'exact', head: true }` is still subject to Supabase's **PostgREST max-rows limit** (default 1000). Even though `head: true` doesn't return data, the count is still capped.
 
-**Actual documents in database:** 1,035
-**Documents shown in UI:** 1,000 (capped by default limit)
-
----
+**Evidence from screenshots:**
+| Metric | Database Actual | UI Shows |
+|--------|-----------------|----------|
+| Total Documents | 1,044 | 1,000 |
+| Processed Documents | 1,013 | 967 |
 
 ### Solution
 
-Use a **separate count query** for the document total instead of relying on the fetched array length. Keep the document list paginated (for performance) but show the accurate total count.
-
-**File:** `src/components/admin/KnowledgeBase.tsx`
+Create a **database RPC function** that counts documents directly in PostgreSQL, bypassing the API limit.
 
 ---
 
 ### Changes
 
-#### 1. Add a new state for total document count
+#### 1. Create Database Function (Migration)
 
-```typescript
-// Line ~30, add new state
-const [totalDocumentCount, setTotalDocumentCount] = useState<number>(0);
+```sql
+CREATE OR REPLACE FUNCTION public.get_document_counts()
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+DECLARE
+  result JSONB;
+BEGIN
+  SELECT jsonb_build_object(
+    'total', (SELECT COUNT(*) FROM documents),
+    'processed', (SELECT COUNT(*) FROM documents WHERE status = 'processed'),
+    'pending', (SELECT COUNT(*) FROM documents WHERE status = 'pending'),
+    'failed', (SELECT COUNT(*) FROM documents WHERE status = 'failed')
+  ) INTO result;
+  RETURN result;
+END;
+$$;
 ```
 
-#### 2. Create a separate count query function
+#### 2. Update KnowledgeBase.tsx
 
+Replace the current `fetchDocumentCounts` function:
+
+**Before (lines 90-111):**
 ```typescript
-const fetchDocumentCount = async () => {
+const fetchDocumentCounts = async () => {
   try {
-    const { count, error } = await supabase
+    const { count: totalCount, error: totalError } = await supabase
       .from('documents')
       .select('*', { count: 'exact', head: true });
-    
-    if (error) throw error;
-    setTotalDocumentCount(count || 0);
-  } catch (err) {
-    console.error('Error fetching document count:', err);
+    // ... two separate queries
   }
 };
 ```
 
-#### 3. Update fetchDocuments to also fetch count
-
-Call `fetchDocumentCount()` alongside `fetchDocuments()` in the useEffect and after uploads/deletes.
-
-#### 4. Update the document list header display
-
+**After:**
 ```typescript
-// Line ~431, change from:
-<CardTitle>Documents ({documents.length})</CardTitle>
-
-// To:
-<CardTitle>Documents ({totalDocumentCount})</CardTitle>
-```
-
-#### 5. Update training stats to use accurate count
-
-For the "Documents Processed" stat, we also need to fetch the count of processed documents separately:
-
-```typescript
-const fetchProcessedCount = async () => {
-  const { count, error } = await supabase
-    .from('documents')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'processed');
-  
-  if (!error) setProcessedDocumentCount(count || 0);
+const fetchDocumentCounts = async () => {
+  try {
+    const { data, error } = await supabase.rpc('get_document_counts');
+    
+    if (error) throw error;
+    
+    if (data) {
+      setTotalDocumentCount(data.total || 0);
+      setProcessedDocumentCount(data.processed || 0);
+    }
+  } catch (err) {
+    console.error('Error fetching document counts:', err);
+  }
 };
 ```
 
 ---
 
-### Technical Details
+### Why This Works
 
-| Aspect | Before | After |
-|--------|--------|-------|
-| Count source | `documents.length` (capped at 1000) | `SELECT count(*)` query (no limit) |
-| Supabase method | `select('*')` | `select('*', { count: 'exact', head: true })` |
-| Performance | Fetches all data | Count query returns only number |
+| Aspect | Current Approach | New Approach |
+|--------|------------------|--------------|
+| Query type | PostgREST API with `head: true` | Direct PostgreSQL RPC |
+| Subject to max-rows? | Yes (capped at 1000) | No (runs in database) |
+| Number of API calls | 2 (total + processed) | 1 (single RPC) |
+| Performance | Slower (2 round trips) | Faster (1 round trip) |
 
 ---
 
@@ -89,14 +93,15 @@ const fetchProcessedCount = async () => {
 
 | File | Changes |
 |------|---------|
-| `src/components/admin/KnowledgeBase.tsx` | Add count states, count fetch functions, update displays |
+| New migration | Add `get_document_counts()` function |
+| `src/components/admin/KnowledgeBase.tsx` | Update `fetchDocumentCounts` to use RPC |
 
 ---
 
 ### Expected Outcome
 
-- Document counter will show the **accurate total** (1,035+) regardless of how many documents exist
-- The document table will still show paginated results (for performance)
-- Stats like "Documents Processed" will also use accurate counts
-- Real-time updates will refresh both the list and the count
-
+After this change:
+- Total document count will show **1,044** (actual count)
+- Processed document count will show **1,013** (actual count)
+- Counts update in real-time when documents are added/processed/deleted
+- Single efficient database call for all counts
