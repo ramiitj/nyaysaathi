@@ -470,6 +470,7 @@ export type Database = {
     Functions: {
       get_analytics_data: { Args: { days_back?: number }; Returns: Json }
       get_dashboard_stats: { Args: never; Returns: Json }
+      get_document_counts: { Args: never; Returns: Json }
       get_visitor_by_fingerprint: {
         Args: { fingerprint: string }
         Returns: {

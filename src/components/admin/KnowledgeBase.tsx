@@ -89,22 +89,16 @@ const KnowledgeBase = () => {
 
   const fetchDocumentCounts = async () => {
     try {
-      // Fetch total document count
-      const { count: totalCount, error: totalError } = await supabase
-        .from('documents')
-        .select('*', { count: 'exact', head: true });
+      // Use RPC function to get accurate counts (bypasses PostgREST row limit)
+      const { data, error } = await supabase.rpc('get_document_counts');
 
-      if (totalError) throw totalError;
-      setTotalDocumentCount(totalCount || 0);
+      if (error) throw error;
 
-      // Fetch processed document count
-      const { count: processedCount, error: processedError } = await supabase
-        .from('documents')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'processed');
-
-      if (processedError) throw processedError;
-      setProcessedDocumentCount(processedCount || 0);
+      if (data && typeof data === 'object' && !Array.isArray(data)) {
+        const counts = data as { total?: number; processed?: number };
+        setTotalDocumentCount(counts.total || 0);
+        setProcessedDocumentCount(counts.processed || 0);
+      }
     } catch (err) {
       console.error('Error fetching document counts:', err);
     }
