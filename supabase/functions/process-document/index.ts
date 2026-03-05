@@ -141,7 +141,7 @@ Return your response in this exact JSON format:
           }],
           generationConfig: {
             temperature: 0.1,
-            maxOutputTokens: 8192,
+            maxOutputTokens: 65536,
           }
         })
       }
@@ -217,44 +217,50 @@ Return your response in this exact JSON format:
       
       logger.progress('Embedding generation', batchEnd, totalChunks);
       
-      // Process batch in parallel
-      const batchPromises = batch.map(async (chunk, batchIndex) => {
-        const globalIndex = batchStart + batchIndex;
-        try {
-          const embeddingResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GEMINI_API_KEY}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                model: 'models/text-embedding-004',
-                content: {
-                  parts: [{ text: chunk }]
-                }
-              })
+    // Process batch in parallel with retry
+      const generateEmbeddingWithRetry = async (chunk: string, globalIndex: number, retries = 1): Promise<{ chunk_index: number; content: string; embedding: number[] } | null> => {
+        for (let attempt = 0; attempt <= retries; attempt++) {
+          try {
+            if (attempt > 0) {
+              logger.info(`Retrying embedding for chunk ${globalIndex} (attempt ${attempt + 1})`);
+              await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
             }
-          );
+            const embeddingResponse = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GEMINI_API_KEY}`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  model: 'models/text-embedding-004',
+                  content: {
+                    parts: [{ text: chunk }]
+                  }
+                })
+              }
+            );
 
-          if (embeddingResponse.ok) {
-            const embeddingData = await embeddingResponse.json();
-            const embedding = embeddingData.embedding?.values;
-            
-            if (embedding) {
-              return {
-                chunk_index: globalIndex,
-                content: chunk,
-                embedding
-              };
+            if (embeddingResponse.ok) {
+              const embeddingData = await embeddingResponse.json();
+              const embedding = embeddingData.embedding?.values;
+              if (embedding) {
+                return { chunk_index: globalIndex, content: chunk, embedding };
+              }
+            } else {
+              const status = embeddingResponse.status;
+              logger.error(`Embedding API error for chunk ${globalIndex}`, { status, attempt });
+              // Don't retry on 4xx errors (except 429 rate limit)
+              if (status >= 400 && status < 500 && status !== 429) break;
             }
-          } else {
-            logger.error(`Embedding API error for chunk ${globalIndex}`, { 
-              status: embeddingResponse.status 
-            });
+          } catch (e) {
+            logger.error(`Failed to generate embedding for chunk ${globalIndex} (attempt ${attempt + 1})`, e);
           }
-        } catch (e) {
-          logger.error(`Failed to generate embedding for chunk ${globalIndex}`, e);
         }
         return null;
+      };
+
+      const batchPromises = batch.map((chunk, batchIndex) => {
+        const globalIndex = batchStart + batchIndex;
+        return generateEmbeddingWithRetry(chunk, globalIndex);
       });
 
       const batchResults = await Promise.all(batchPromises);
@@ -262,9 +268,9 @@ Return your response in this exact JSON format:
         if (result) embeddings.push(result);
       });
 
-      // Small delay between batches to avoid rate limiting
+      // Delay between batches to avoid rate limiting
       if (batchEnd < chunks.length) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
 
@@ -316,11 +322,18 @@ Return your response in this exact JSON format:
       }
     }
 
-    // Update document with extracted info
+    // Update document with extracted info - mark as failed if no chunks created
+    const finalStatus = embeddings.length > 0 ? 'processed' : 'failed';
+    if (finalStatus === 'failed') {
+      logger.error('No embeddings generated - marking document as failed', {
+        chunksAttempted: chunks.length,
+        embeddingsCreated: embeddings.length
+      });
+    }
     await supabase
       .from('documents')
       .update({
-        status: 'processed',
+        status: finalStatus,
         topics_extracted: extractedContent.topics,
         rules_extracted: extractedContent.rules,
         chunk_count: embeddings.length,
