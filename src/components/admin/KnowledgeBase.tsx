@@ -30,8 +30,12 @@ const KnowledgeBase = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [totalDocumentCount, setTotalDocumentCount] = useState<number>(0);
   const [processedDocumentCount, setProcessedDocumentCount] = useState<number>(0);
+  const [totalChunksCount, setTotalChunksCount] = useState<number>(0);
+  const [pendingCount, setPendingCount] = useState<number>(0);
+  const [failedCount, setFailedCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [isReprocessing, setIsReprocessing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
@@ -95,9 +99,12 @@ const KnowledgeBase = () => {
       if (error) throw error;
 
       if (data && typeof data === 'object' && !Array.isArray(data)) {
-        const counts = data as { total?: number; processed?: number };
+        const counts = data as { total?: number; processed?: number; pending?: number; failed?: number; total_chunks?: number };
         setTotalDocumentCount(counts.total || 0);
         setProcessedDocumentCount(counts.processed || 0);
+        setPendingCount(counts.pending || 0);
+        setFailedCount(counts.failed || 0);
+        setTotalChunksCount(counts.total_chunks || 0);
       }
     } catch (err) {
       console.error('Error fetching document counts:', err);
@@ -260,6 +267,49 @@ const KnowledgeBase = () => {
     }
   };
 
+  const reprocessFailed = async () => {
+    // Find documents that are failed or processed with 0 chunks
+    const docsToReprocess = documents.filter(
+      d => d.status === 'failed' || d.status === 'pending' || (d.status === 'processed' && (d.chunk_count === 0 || d.chunk_count === null))
+    );
+
+    if (docsToReprocess.length === 0) {
+      toast.info('No documents need reprocessing');
+      return;
+    }
+
+    setIsReprocessing(true);
+    toast.info(`Reprocessing ${docsToReprocess.length} document(s) sequentially...`);
+
+    let successCount = 0;
+    for (const doc of docsToReprocess) {
+      try {
+        // Reset status to pending first
+        await supabase.from('documents').update({ status: 'pending' }).eq('id', doc.id);
+
+        const { error } = await supabase.functions.invoke('process-document', {
+          body: { documentId: doc.id }
+        });
+
+        if (!error) {
+          successCount++;
+        } else {
+          console.error(`Reprocess error for ${doc.name}:`, error);
+        }
+
+        // Delay between documents to avoid rate limits
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      } catch (err) {
+        console.error(`Reprocess error for ${doc.name}:`, err);
+      }
+    }
+
+    toast.success(`Reprocessing started for ${successCount}/${docsToReprocess.length} documents`);
+    setIsReprocessing(false);
+    fetchDocuments();
+    fetchDocumentCounts();
+  };
+
   const deleteDocument = async (doc: Document) => {
     if (!confirm(`Are you sure you want to delete "${doc.name}"?`)) return;
 
@@ -312,13 +362,16 @@ const KnowledgeBase = () => {
   const processedDocs = documents.filter(d => d.status === 'processed');
   const allTopics = [...new Set(processedDocs.flatMap(d => d.topics_extracted || []))];
   const allRules = processedDocs.flatMap(d => d.rules_extracted || []);
-  const totalChunks = processedDocs.reduce((sum, d) => sum + (d.chunk_count || 0), 0);
+
+  const reprocessableCount = documents.filter(
+    d => d.status === 'failed' || d.status === 'pending' || (d.status === 'processed' && (d.chunk_count === 0 || d.chunk_count === null))
+  ).length;
 
   const trainingStats = [
     { label: "Topics Learned", value: allTopics.length.toString(), color: "bg-primary text-primary-foreground" },
     { label: "Behavioral Rules", value: allRules.length.toString(), color: "bg-green-500 text-white" },
     { label: "Documents Processed", value: processedDocumentCount.toString(), color: "bg-rose-500 text-white" },
-    { label: "Total Chunks", value: totalChunks.toString(), color: "bg-amber-500 text-white" },
+    { label: "Total Chunks", value: totalChunksCount.toString(), color: "bg-amber-500 text-white" },
   ];
 
   return (
@@ -452,11 +505,38 @@ const KnowledgeBase = () => {
       <Card className="bg-white">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Documents ({totalDocumentCount})</CardTitle>
-            <Button variant="outline" size="sm" className="gap-2" onClick={fetchDocuments}>
-              <RefreshCw className="h-4 w-4" />
-              Refresh
-            </Button>
+            <div>
+              <CardTitle>Documents ({totalDocumentCount})</CardTitle>
+              {(failedCount > 0 || pendingCount > 0) && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {failedCount > 0 && <span className="text-destructive">{failedCount} failed</span>}
+                  {failedCount > 0 && pendingCount > 0 && ' · '}
+                  {pendingCount > 0 && <span className="text-amber-600">{pendingCount} pending</span>}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {reprocessableCount > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 border-amber-300 text-amber-700 hover:bg-amber-50"
+                  onClick={reprocessFailed}
+                  disabled={isReprocessing}
+                >
+                  {isReprocessing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                  Reprocess Failed ({reprocessableCount})
+                </Button>
+              )}
+              <Button variant="outline" size="sm" className="gap-2" onClick={fetchDocuments}>
+                <RefreshCw className="h-4 w-4" />
+                Refresh
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -513,13 +593,13 @@ const KnowledgeBase = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        {doc.status === 'pending' && !processingIds.has(doc.id) && (
+                        {(doc.status === 'pending' || doc.status === 'failed') && !processingIds.has(doc.id) && (
                           <Button 
                             variant="outline" 
                             size="sm"
                             onClick={() => processDocument(doc.id)}
                           >
-                            Process
+                            {doc.status === 'failed' ? 'Retry' : 'Process'}
                           </Button>
                         )}
                         <Button 
