@@ -1,91 +1,76 @@
 
-## Plan: Fix Document Counter - Use RPC Function for Accurate Count
+
+## Plan: Fix Chunk Creation in RAG Document Processing
 
 ### Problem Identified
 
-The count query using `{ count: 'exact', head: true }` is still subject to Supabase's **PostgREST max-rows limit** (default 1000). Even though `head: true` doesn't return data, the count is still capped.
+After investigating the database, the situation is:
 
-**Evidence from screenshots:**
-| Metric | Database Actual | UI Shows |
-|--------|-----------------|----------|
-| Total Documents | 1,044 | 1,000 |
-| Processed Documents | 1,013 | 967 |
+| Metric | Count |
+|--------|-------|
+| Total processed documents | 1,444 |
+| Processed WITH chunks | 1,423 |
+| Processed with 0 chunks | 21 |
+| Total embeddings stored | 7,706 |
+| Pending documents | 9 |
+| Failed documents | 23 |
+
+The pipeline is **mostly working** -- 98.5% of processed documents have chunks. However, there are two distinct issues:
+
+**Issue 1: 21 documents marked "processed" but have 0 chunks.** These were processed recently (March 5, ~09:56-09:57 UTC) in rapid succession. The likely cause: when many documents are processed simultaneously, Gemini API rate limits cause all embedding requests to fail silently. The function still marks the document as "processed" with `chunk_count: 0` instead of "failed".
+
+**Issue 2: "Total Chunks" stat in the UI is computed from `documents` array (capped at 1,000 rows)**, not from the database total -- same pagination bug we fixed for document counts.
+
+**Issue 3: 9 pending + 23 failed documents are stuck** with no way to batch-reprocess them.
+
+---
 
 ### Solution
 
-Create a **database RPC function** that counts documents directly in PostgreSQL, bypassing the API limit.
+#### 1. Fix the edge function: Don't mark as "processed" if 0 chunks were created
 
----
+**File:** `supabase/functions/process-document/index.ts` (lines 319-329)
 
-### Changes
+Change the final status update to mark documents as "failed" if no embeddings were generated:
 
-#### 1. Create Database Function (Migration)
+```typescript
+// Before: always marks as 'processed'
+await supabase.from('documents').update({
+  status: 'processed',
+  chunk_count: embeddings.length,
+  ...
+});
 
+// After: mark as 'failed' if no chunks
+await supabase.from('documents').update({
+  status: embeddings.length > 0 ? 'processed' : 'failed',
+  chunk_count: embeddings.length,
+  ...
+});
+```
+
+Also increase `maxOutputTokens` from 8192 to 65536 to extract more text from large documents, and add retry logic for embedding API failures.
+
+#### 2. Add "Total Chunks" to the RPC function
+
+Update `get_document_counts()` to also return total chunk count, so it's not limited by the 1,000 row fetch.
+
+**Migration SQL:**
 ```sql
 CREATE OR REPLACE FUNCTION public.get_document_counts()
-RETURNS jsonb
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path TO 'public'
+RETURNS jsonb ...
 AS $$
-DECLARE
-  result JSONB;
-BEGIN
-  SELECT jsonb_build_object(
-    'total', (SELECT COUNT(*) FROM documents),
-    'processed', (SELECT COUNT(*) FROM documents WHERE status = 'processed'),
-    'pending', (SELECT COUNT(*) FROM documents WHERE status = 'pending'),
-    'failed', (SELECT COUNT(*) FROM documents WHERE status = 'failed')
-  ) INTO result;
-  RETURN result;
-END;
+  -- Add: 'total_chunks', (SELECT COALESCE(SUM(chunk_count), 0) FROM documents WHERE status = 'processed')
 $$;
 ```
 
-#### 2. Update KnowledgeBase.tsx
+#### 3. Add a "Reprocess Failed" button in KnowledgeBase UI
 
-Replace the current `fetchDocumentCounts` function:
+Add a button to reprocess all documents with `status = 'failed'` or `chunk_count = 0`, processing them sequentially with a delay to avoid rate limits.
 
-**Before (lines 90-111):**
-```typescript
-const fetchDocumentCounts = async () => {
-  try {
-    const { count: totalCount, error: totalError } = await supabase
-      .from('documents')
-      .select('*', { count: 'exact', head: true });
-    // ... two separate queries
-  }
-};
-```
+#### 4. Fix the totalChunks stat to use RPC data
 
-**After:**
-```typescript
-const fetchDocumentCounts = async () => {
-  try {
-    const { data, error } = await supabase.rpc('get_document_counts');
-    
-    if (error) throw error;
-    
-    if (data) {
-      setTotalDocumentCount(data.total || 0);
-      setProcessedDocumentCount(data.processed || 0);
-    }
-  } catch (err) {
-    console.error('Error fetching document counts:', err);
-  }
-};
-```
-
----
-
-### Why This Works
-
-| Aspect | Current Approach | New Approach |
-|--------|------------------|--------------|
-| Query type | PostgREST API with `head: true` | Direct PostgreSQL RPC |
-| Subject to max-rows? | Yes (capped at 1000) | No (runs in database) |
-| Number of API calls | 2 (total + processed) | 1 (single RPC) |
-| Performance | Slower (2 round trips) | Faster (1 round trip) |
+Replace the client-side `totalChunks` calculation (line 315) with the value from the RPC function.
 
 ---
 
@@ -93,15 +78,16 @@ const fetchDocumentCounts = async () => {
 
 | File | Changes |
 |------|---------|
-| New migration | Add `get_document_counts()` function |
-| `src/components/admin/KnowledgeBase.tsx` | Update `fetchDocumentCounts` to use RPC |
+| `supabase/functions/process-document/index.ts` | Mark 0-chunk docs as failed; increase maxOutputTokens; add embedding retry |
+| New migration | Update `get_document_counts()` to include total_chunks |
+| `src/components/admin/KnowledgeBase.tsx` | Use RPC for totalChunks; add "Reprocess Failed" button |
 
 ---
 
 ### Expected Outcome
 
-After this change:
-- Total document count will show **1,044** (actual count)
-- Processed document count will show **1,013** (actual count)
-- Counts update in real-time when documents are added/processed/deleted
-- Single efficient database call for all counts
+- Documents with 0 chunks will be correctly marked as "failed" instead of "processed"
+- Total Chunks stat will show the accurate database total
+- Admin can reprocess failed/stuck documents with one click
+- Embedding generation will retry once on failure before giving up
+
