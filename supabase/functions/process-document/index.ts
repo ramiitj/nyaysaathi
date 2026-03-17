@@ -237,7 +237,6 @@ Return your response in this exact JSON format:
                   },
                   outputDimensionality: 768,
                   taskType: 'RETRIEVAL_DOCUMENT'
-                  }
                 })
               }
             );
