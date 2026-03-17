@@ -226,15 +226,17 @@ Return your response in this exact JSON format:
               await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
             }
             const embeddingResponse = await fetch(
-              `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GEMINI_API_KEY}`,
+              `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-exp-03-07:embedContent?key=${GEMINI_API_KEY}`,
               {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  model: 'models/text-embedding-004',
+                  model: 'models/gemini-embedding-exp-03-07',
                   content: {
                     parts: [{ text: chunk }]
-                  }
+                  },
+                  outputDimensionality: 768,
+                  taskType: 'RETRIEVAL_DOCUMENT'
                 })
               }
             );
