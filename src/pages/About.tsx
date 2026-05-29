@@ -73,7 +73,7 @@ const About: React.FC = () => {
                 VR
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground text-sm">{config.ui.about.createdBy}</h3>
+                <h2 className="font-semibold text-foreground text-sm">{config.ui.about.createdBy}</h2>
                 <p className="text-xs text-muted-foreground truncate">{config.ui.about.creatorDescription}</p>
               </div>
               <Button 
@@ -100,7 +100,7 @@ const About: React.FC = () => {
                     <feature.icon className={`w-5 h-5 ${feature.color}`} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground text-sm mb-1">{feature.title}</h3>
+                    <h2 className="font-semibold text-foreground text-sm mb-1">{feature.title}</h2>
                     <p className="text-xs text-muted-foreground leading-relaxed">
                       {feature.description}
                     </p>
