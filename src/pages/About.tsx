@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Scale, ArrowLeft, Globe, Lightbulb, Heart, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -35,6 +36,14 @@ const About: React.FC = () => {
 
   return (
     <div className={`h-screen flex flex-col bg-gradient-warm overflow-hidden ${config.fontClass}`}>
+      <Helmet>
+        <title>About Nyay Saathi — Mission & Creator</title>
+        <meta name="description" content="Learn about Nyay Saathi, a free voice-first legal aid platform for India, and its creator VR Ganuthula." />
+        <link rel="canonical" href="https://nyaysaathi.info/about" />
+        <meta property="og:title" content="About Nyay Saathi" />
+        <meta property="og:description" content="Mission and creator behind India's free voice-first legal aid platform." />
+        <meta property="og:url" content="https://nyaysaathi.info/about" />
+      </Helmet>
       {/* Header - fixed */}
       <header className="h-12 bg-card/80 backdrop-blur-sm px-4 flex items-center border-b border-border/50 flex-shrink-0">
         <Button
@@ -52,7 +61,7 @@ const About: React.FC = () => {
 
       {/* Content - scrollable */}
       <ScrollArea className="flex-1">
-        <div className="max-w-2xl mx-auto px-4 py-6">
+        <main className="max-w-2xl mx-auto px-4 py-6">
           {/* Hero */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 rounded-full bg-primary mx-auto flex items-center justify-center mb-4">
@@ -73,7 +82,7 @@ const About: React.FC = () => {
                 VR
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground text-sm">{config.ui.about.createdBy}</h3>
+                <h2 className="font-semibold text-foreground text-sm">{config.ui.about.createdBy}</h2>
                 <p className="text-xs text-muted-foreground truncate">{config.ui.about.creatorDescription}</p>
               </div>
               <Button 
@@ -100,7 +109,7 @@ const About: React.FC = () => {
                     <feature.icon className={`w-5 h-5 ${feature.color}`} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground text-sm mb-1">{feature.title}</h3>
+                    <h2 className="font-semibold text-foreground text-sm mb-1">{feature.title}</h2>
                     <p className="text-xs text-muted-foreground leading-relaxed">
                       {feature.description}
                     </p>
@@ -116,7 +125,7 @@ const About: React.FC = () => {
               {config.ui.about.footer}
             </p>
           </div>
-        </div>
+        </main>
       </ScrollArea>
     </div>
   );

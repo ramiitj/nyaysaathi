@@ -66,6 +66,7 @@ const TopBar: React.FC<TopBarProps> = ({
             variant="ghost"
             size="icon"
             onClick={onInfoClick}
+            aria-label="About Nyay Saathi"
             className="text-muted-foreground hover:text-foreground w-8 h-8 sm:w-9 sm:h-9"
           >
             <Info className="w-4 h-4" />
@@ -85,6 +86,7 @@ const TopBar: React.FC<TopBarProps> = ({
             variant="ghost"
             size="icon"
             onClick={onAdminClick}
+            aria-label="Admin login"
             className="text-muted-foreground hover:text-foreground w-8 h-8 sm:w-9 sm:h-9"
           >
             <Lock className="w-4 h-4" />

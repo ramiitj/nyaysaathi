@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import TopBar from '@/components/chat/TopBar';
 import BottomBar from '@/components/chat/BottomBar';
 import CenterPanel from '@/components/chat/CenterPanel';
@@ -115,6 +116,14 @@ const Chat: React.FC = () => {
 
   return (
     <div className={`h-screen flex flex-col bg-gradient-warm ${config.fontClass}`}>
+      <Helmet>
+        <title>Legal Consultation — Nyay Saathi</title>
+        <meta name="description" content="Ask legal questions by voice or text in your language. Confidential AI guidance on Indian laws, rights and acts." />
+        <link rel="canonical" href="https://nyaysaathi.info/chat" />
+        <meta property="og:title" content="Legal Consultation — Nyay Saathi" />
+        <meta property="og:description" content="Voice-first legal consultation in 12 Indian languages." />
+        <meta property="og:url" content="https://nyaysaathi.info/chat" />
+      </Helmet>
       <TopBar
         onStartFresh={handleStartFresh}
         onInfoClick={() => navigate('/about')}
@@ -123,14 +132,16 @@ const Chat: React.FC = () => {
         config={config}
       />
 
-      <div className="flex-1 overflow-hidden">
+      <h1 className="sr-only">Legal Consultation</h1>
+
+      <main className="flex-1 overflow-hidden">
         <CenterPanel
           inputMode={inputMode}
           messages={messages}
           onSendMessage={handleSendMessage}
           isLoading={isLoading}
         />
-      </div>
+      </main>
 
       <BottomBar
         inputMode={inputMode}

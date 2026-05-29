@@ -277,6 +277,7 @@ const CenterPanel: React.FC<CenterPanelProps> = ({
             <Button 
               type="submit" 
               size="icon" 
+              aria-label="Send message"
               className="rounded-full" 
               disabled={!inputValue.trim() || isLoading}
             >
