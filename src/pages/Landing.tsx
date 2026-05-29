@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Scale, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -7,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useConsent } from '@/contexts/ConsentContext';
 import { LANGUAGES, LanguageCode } from '@/config/languages';
-
 const Landing: React.FC = () => {
   const navigate = useNavigate();
   const { language, setLanguage, config } = useLanguage();
@@ -35,7 +35,15 @@ const Landing: React.FC = () => {
   ];
 
   return (
-    <div className="h-screen bg-gradient-warm flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+    <main className="h-screen bg-gradient-warm flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+      <Helmet>
+        <title>Nyay Saathi — Free Voice Legal Aid in 12 Indian Languages</title>
+        <meta name="description" content="Free, voice-first AI legal assistant for Indian citizens. Get instant guidance on rights, laws and acts in 12 Indian languages." />
+        <link rel="canonical" href="https://nyaysaathi.info/" />
+        <meta property="og:title" content="Nyay Saathi — Free Voice Legal Aid" />
+        <meta property="og:description" content="Voice-first AI legal assistant in 12 Indian languages. Free and confidential." />
+        <meta property="og:url" content="https://nyaysaathi.info/" />
+      </Helmet>
       <div className="w-full max-w-md">
         {/* Language Selection Step */}
         {step === 'language' && (
@@ -160,7 +168,7 @@ const Landing: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 };
 
