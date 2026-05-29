@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Download, Smartphone, Check, Share, MoreVertical } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -175,16 +176,24 @@ const Install = () => {
   const isRTL = language === "UR";
 
   return (
-    <div 
+    <main
       className="h-screen bg-gradient-warm flex items-center justify-center p-4 overflow-hidden"
       dir={isRTL ? "rtl" : "ltr"}
     >
+      <Helmet>
+        <title>Install Nyay Saathi — Free Legal Aid App</title>
+        <meta name="description" content="Install Nyay Saathi as an app on iOS, Android, or desktop for quick legal aid in 12 Indian languages." />
+        <link rel="canonical" href="https://nyaysaathi.info/install" />
+        <meta property="og:title" content="Install Nyay Saathi" />
+        <meta property="og:description" content="Install the free legal aid app for quick access anytime." />
+        <meta property="og:url" content="https://nyaysaathi.info/install" />
+      </Helmet>
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
             <Smartphone className="w-10 h-10 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">{t.title}</CardTitle>
+          <h1 className="text-2xl font-bold leading-none tracking-tight">{t.title}</h1>
           <CardDescription className="text-base">{t.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -231,7 +240,7 @@ const Install = () => {
           </Button>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 };
 
